@@ -1,0 +1,438 @@
+"use client";
+
+// import type { User, Product, WishlistItem, Review } from "@/types/models";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  BookOpen,
+  HelpCircle,
+  FileText,
+  Headphones,
+  Settings,
+  Mail,
+  Phone,
+  MapPin,
+  MessageCircle,
+  Star,
+  Trash2,
+} from "lucide-react";
+import { User, Product, WishlistItem, Review } from "@/types/models";
+
+interface UserDashboardProps {
+  user: User;
+  isOwner: boolean;
+  products: Product[];
+  wishlist: WishlistItem[];
+  reviews: Review[];
+  isLoggedIn?: boolean;
+}
+
+export function UserDashboard({
+  user,
+  isOwner,
+  products,
+  wishlist,
+  reviews,
+  isLoggedIn = false,
+}: UserDashboardProps) {
+  const quickLinks = [
+    { icon: BookOpen, label: "User Guide", href: "/guide" },
+    { icon: HelpCircle, label: "FAQ", href: "/faq" },
+    { icon: FileText, label: "Terms & Conditions", href: "/terms" },
+    { icon: Headphones, label: "Support", href: "/support" },
+  ];
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const renderStars = (rating: number) => {
+    return (
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`h-4 w-4 ${
+              star <= rating
+                ? "fill-yellow-400 text-yellow-400"
+                : "text-gray-300"
+            }`}
+          />
+        ))}
+      </div>
+    );
+  };
+
+  if (isOwner) {
+    // Private View
+    return (
+      <div className="min-h-screen bg-background p-6">
+        <div className="mx-auto max-w-7xl space-y-8">
+          {/* Profile Header */}
+          <Card className="rounded-xl shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
+                <Avatar className="h-24 w-24">
+                  <AvatarImage
+                    src={user.profilePicture || "/placeholder.svg"}
+                    alt={user.fullName}
+                  />
+                  <AvatarFallback className="text-xl">
+                    {getInitials(user.fullName)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 space-y-2">
+                  <h1 className="text-xl font-bold text-foreground">
+                    {user.fullName}
+                  </h1>
+                  <div className="space-y-1 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-4 w-4" />
+                      <span>{user.email}</span>
+                    </div>
+                    {user.phoneNumber && (
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4" />
+                        <span>{user.phoneNumber}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <Button className="rounded-lg bg-primary px-4 py-2 text-white hover:bg-secondary hover:text-secondary-foreground">
+                  Edit Profile
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Quick Links */}
+          <div>
+            <h2 className="mb-4 text-lg font-bold text-foreground">
+              Quick Links
+            </h2>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              {quickLinks.map((link) => (
+                <Card
+                  key={link.label}
+                  className="cursor-pointer rounded-xl shadow-sm transition-shadow hover:shadow-md"
+                >
+                  <CardContent className="flex flex-col items-center justify-center gap-3 p-6">
+                    <link.icon className="h-8 w-8 text-primary" />
+                    <span className="text-center text-sm font-medium text-foreground">
+                      {link.label}
+                    </span>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Wishlist */}
+          <div>
+            <h2 className="mb-4 text-lg font-bold text-foreground">
+              My Wishlist
+            </h2>
+            {wishlist.length === 0 ? (
+              <Card className="rounded-xl shadow-sm">
+                <CardContent className="p-6 text-center text-muted-foreground">
+                  Your wishlist is empty
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+                {wishlist.map((item) => (
+                  <Card key={item.id} className="rounded-xl shadow-sm">
+                    <CardContent className="p-4">
+                      <div className="relative mb-3 aspect-square overflow-hidden rounded-lg bg-muted">
+                        {item.product.image ? (
+                          <img
+                            src={item.product.image || "/placeholder.svg"}
+                            alt={item.product.name}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-muted-foreground">
+                            No image
+                          </div>
+                        )}
+                      </div>
+                      <h3 className="mb-2 text-sm font-medium text-foreground">
+                        {item.product.name}
+                      </h3>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-bold text-primary">
+                          ${item.product.price.toFixed(2)}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Vendor Products */}
+          {user.role === "vendor" && (
+            <div>
+              <h2 className="mb-4 text-lg font-bold text-foreground">
+                My Products
+              </h2>
+              {products.length === 0 ? (
+                <Card className="rounded-xl shadow-sm">
+                  <CardContent className="p-6 text-center text-muted-foreground">
+                    You haven't listed any products yet
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+                  {products.map((product) => (
+                    <Card key={product.id} className="rounded-xl shadow-sm">
+                      <CardContent className="p-4">
+                        <div className="relative mb-3 aspect-square overflow-hidden rounded-lg bg-muted">
+                          {product.image ? (
+                            <img
+                              src={product.image || "/placeholder.svg"}
+                              alt={product.name}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-full items-center justify-center text-muted-foreground">
+                              No image
+                            </div>
+                          )}
+                          {product.status && (
+                            <Badge
+                              className="absolute right-2 top-2"
+                              variant={
+                                product.status === "active"
+                                  ? "default"
+                                  : product.status === "inactive"
+                                  ? "secondary"
+                                  : "outline"
+                              }
+                            >
+                              {product.status}
+                            </Badge>
+                          )}
+                        </div>
+                        <h3 className="mb-2 text-sm font-medium text-foreground">
+                          {product.name}
+                        </h3>
+                        <span className="text-sm font-bold text-primary">
+                          ${product.price.toFixed(2)}
+                        </span>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Settings Button */}
+          <div className="flex justify-center">
+            <Button
+              variant="outline"
+              className="rounded-lg px-6 py-2 bg-transparent"
+              size="lg"
+            >
+              <Settings className="mr-2 h-4 w-4" />
+              Settings
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Public View (Vendor Profile)
+  const isVendor = user.role === "vendor";
+  const displayName = isVendor
+    ? user.vendorProfile?.businessName || user.fullName
+    : user.fullName;
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Cover Image */}
+      {isVendor && user.vendorProfile?.coverImage && (
+        <div className="relative h-48 w-full overflow-hidden bg-muted md:h-64">
+          <img
+            src={user.vendorProfile.coverImage || "/placeholder.svg"}
+            alt="Cover"
+            className="h-full w-full object-cover"
+          />
+        </div>
+      )}
+
+      <div className="mx-auto max-w-7xl space-y-8 p-6">
+        {/* Vendor Profile Header */}
+        <Card className="rounded-xl shadow-sm">
+          <CardContent className="p-6">
+            <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
+              <Avatar className="h-24 w-24">
+                <AvatarImage
+                  src={user.profilePicture || "/placeholder.svg"}
+                  alt={displayName}
+                />
+                <AvatarFallback className="text-xl">
+                  {getInitials(displayName)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 space-y-3">
+                <h1 className="text-xl font-bold text-foreground">
+                  {displayName}
+                </h1>
+                {isVendor && user.vendorProfile?.description && (
+                  <p className="text-sm text-muted-foreground">
+                    {user.vendorProfile.description}
+                  </p>
+                )}
+
+                {/* Contact Info */}
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold text-foreground">
+                    Contact Information
+                  </h3>
+                  {isLoggedIn ? (
+                    <div className="space-y-2 text-sm text-muted-foreground">
+                      {user.phoneNumber && (
+                        <div className="flex items-center gap-2">
+                          <MessageCircle className="h-4 w-4 text-green-600" />
+                          <a
+                            href={`https://wa.me/${user.phoneNumber.replace(
+                              /\D/g,
+                              ""
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:underline"
+                          >
+                            WhatsApp
+                          </a>
+                        </div>
+                      )}
+                      {user.phoneNumber && (
+                        <div className="flex items-center gap-2">
+                          <Phone className="h-4 w-4" />
+                          <span>{user.phoneNumber}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2">
+                        <Mail className="h-4 w-4" />
+                        <span>{user.email}</span>
+                      </div>
+                      {isVendor && user.vendorProfile?.address && (
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4" />
+                          <span>{user.vendorProfile.address}</span>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <Button className="rounded-lg bg-primary px-4 py-2 text-white hover:bg-secondary hover:text-secondary-foreground">
+                      Login to view contact info
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Products Section */}
+        <div>
+          <h2 className="mb-4 text-lg font-bold text-foreground">Products</h2>
+          {products.length === 0 ? (
+            <Card className="rounded-xl shadow-sm">
+              <CardContent className="p-6 text-center text-muted-foreground">
+                No products available
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+              {products.map((product) => (
+                <Card
+                  key={product.id}
+                  className="cursor-pointer rounded-xl shadow-sm transition-shadow hover:shadow-md"
+                >
+                  <CardContent className="p-4">
+                    <div className="relative mb-3 aspect-square overflow-hidden rounded-lg bg-muted">
+                      {product.image ? (
+                        <img
+                          src={product.image || "/placeholder.svg"}
+                          alt={product.name}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-muted-foreground">
+                          No image
+                        </div>
+                      )}
+                    </div>
+                    <h3 className="mb-2 text-sm font-medium text-foreground">
+                      {product.name}
+                    </h3>
+                    <span className="text-sm font-bold text-primary">
+                      ${product.price.toFixed(2)}
+                    </span>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Reviews Section */}
+        {isVendor && (
+          <div>
+            <h2 className="mb-4 text-lg font-bold text-foreground">Reviews</h2>
+            {reviews.length === 0 ? (
+              <Card className="rounded-xl shadow-sm">
+                <CardContent className="p-6 text-center text-muted-foreground">
+                  No reviews yet
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {reviews.map((review) => (
+                  <Card key={review.id} className="rounded-xl shadow-sm">
+                    <CardContent className="p-6">
+                      <div className="mb-3 flex items-start justify-between">
+                        <div>
+                          <p className="font-medium text-foreground">
+                            {review.reviewerName}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(review.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        {renderStars(review.rating)}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {review.comment}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
