@@ -18,27 +18,31 @@ export interface User {
 }
 
 export interface Product {
-  id: string;
+  id: string; // UUID
+  vendorId: string; // FK -> VendorProfile.id
   name: string;
-  price: number;
-  image?: string;
-  status?: "active" | "inactive" | "pending";
-  vendorId: string;
+  description: string;
+  price: number; // for display only (not transactions)
+  images: string[]; // URLs to Google Storage
+  categoryId?: string; // FK -> Category.id
+  tags?: Tag[];
+  status: "active" | "inactive" | "deleted";
+  createdAt: Date;
+  updatedAt: Date;
+  metadata: {}; // to contain more description of the item
 }
 
 export interface WishlistItem {
   id: string;
   userId: string;
   productId: string;
-  product: Product;
+  product?: Product;
   createdAt: Date;
 }
 
-export interface Review {
-  id: string;
-  rating: number;
-  comment: string;
-  reviewerName: string;
+export interface Tag {
+  id: string; // UUID
+  name: string;
   createdAt: Date;
-  vendorId: string;
+  updatedAt: Date;
 }
