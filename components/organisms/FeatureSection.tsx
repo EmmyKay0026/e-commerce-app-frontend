@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 const FeatureSection = () => {
   return (   
-    <section className="grid grid-cols-1 md:grid-cols-4 gap-6 py-12 px-5 md:px-10 lg:px-20 bg-gray text-white">
+    <section className="grid grid-cols-1 md:grid-cols-4 gap-6 py-12 px-5 md:px-10 lg:px-20 bg-primary text-white">
       {[
         {
           title: "Millions of business offerings",
@@ -26,15 +26,15 @@ const FeatureSection = () => {
           desc: "Get curated benefits, discounts, and extra support to grow your business.",
         },
       ].map((item, idx) => (
-        <Card key={idx} className="bg-white text-gray-900 border-none shadow-none">
+        <Card key={idx} className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-sm text-gray-900 border-none">
           <div className="w-12 h-12 flex items-center justify-center ml-5 rounded-full border border-grayCustom">
-            <span className="text-2xl text-primary">📦</span>
+            <span className="text-2xl text-white">📦</span>
           </div>
           <CardHeader>
-            <CardTitle className="text-lg">{item.title}</CardTitle>
+            <CardTitle className="text-lg text-white">{item.title}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-gray-700">{item.desc}</p>
+            <p className="text-sm text-white">{item.desc}</p>
           </CardContent>
         </Card>
       ))}

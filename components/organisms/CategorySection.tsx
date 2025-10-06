@@ -3,9 +3,9 @@ import React from 'react'
 const CategorySection = () => {
   return (
     <section className="">
-      <div className="text-center bg-primary py-15 items-center justify-center px-5 md:px-10 lg:px-60">
-        <h3 className="font-bold text-white text-3xl md:text-4xl text-5xl">Our Product Categories</h3>
-        <p className="text-lg mt-5 text-white">At INDUSTRIAL MART NIGERIA NIG LTD, we offer a comprehensive selection of high-quality industrial equpiment and tools. From cutting-edge Machinery to essential maintenance tools, our products are tailored to meet the demands of the oil & gas, manufacturing, and industrial sectors. Explore our categories to find the right solutions for your business</p>
+      <div className="text-center bg-white py-15 items-center justify-center px-5 md:px-10 lg:px-60">
+        <h3 className="font-bold text-gray-900 text-3xl md:text-4xl lg:text-5xl">Our Product Categories</h3>
+        <p className="text-lg mt-5 gray-700">At INDUSTRIAL MART NIGERIA NIG LTD, we offer a comprehensive selection of high-quality industrial equpiment and tools. From cutting-edge Machinery to essential maintenance tools, our products are tailored to meet the demands of the oil & gas, manufacturing, and industrial sectors. Explore our categories to find the right solutions for your business</p>
       </div>
       <div className="grid grid-cols-3 my-15 px-5 md:px-10 lg:px-20 sm:grid-cols-6 md:grid-cols-8 gap-2 md:gap-4 lg:gap-6 text-center">
         {[
