@@ -5,15 +5,17 @@ import Testimonial from "@/components/organisms/Testimonial";
 import CtaSection from "@/components/organisms/CtaSection";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import BusinessOpportunities from "../components/organisms/BusinessOpp";
 
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center m-0 p-0">
       <HomeHeroSection/>
-      <FeatureSection/>
+      <BusinessOpportunities/>      
       <CategorySection/>
+      <FeatureSection/>
       <CtaSection/>
-      <Testimonial/>
+      {/* <Testimonial/> */}
     </main>
   );
 }

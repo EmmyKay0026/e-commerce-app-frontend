@@ -1,9 +1,11 @@
 "use client"; // 👈 make this a client component
 
-import React from "react";
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
+import { List } from "lucide-react";
+import CategoriesModal from "../molecules/CategoriesModal";
 // import { CameraIcon } from "lucide-react";
 
 const products = [
@@ -13,23 +15,26 @@ const products = [
 ];
 
 const HomeHeroSection = () => {
+  const [showCategories, setShowCategories] = useState(false);
+
   return (
     <section className="relative w-full h-[100dvh] flex items-center px-5 md:px-10 lg:px-20 text-center">
       <Image
         src="/oilandgas.jpeg"
         alt="Industrial Background"
         fill
-        className="object-cover brightness-45"
+        className="object-cover brightness-35"
       />
       <div className="relative z-10 lg:text-left w-full lg:max-w-4xl text-white">
+        
         <h2 className="font-bold text-3xl md:text-4xl lg:text-5xl">
-          The Leading Marketer of Industrial Equipment & Tools in Nigeria.
+          Your No.1 Marketplace For Quality Industrial Equipments
         </h2>
         <p className="mt-3 text-lg text-gray-100">
-          Explore our range of Equipment and Tools for the oil & gas industries and other industrial sectors.
+          A platform for easy buying and selling of industrial equipment across the oil & gas industrial sectors
         </p>
 
-        <div className="mt-6 flex items-center gap-2 bg-white max-w-3xl text-lg rounded-3xl overflow-hidden">
+        <div id="hero-search" className="mt-6 flex items-center gap-2 bg-white max-w-3xl text-lg rounded-3xl overflow-hidden">
           <Input
             placeholder="Search products..."
             className="flex-1 border-none rounded-2xl focus:ring-0 focus:outline-none shadow-none focus:border-none text-black"
@@ -39,7 +44,15 @@ const HomeHeroSection = () => {
             Search
           </Button>
         </div>
+        <Button 
+          id="hero-search" 
+          onClick={() => setShowCategories(true)}
+          className="cursor-pointer mt-5 gap-1 hover:bg-white bg-transparent rounded-full hover:text-black text-white "
+        >
+          <List/>Categories
+        </Button>
       </div>
+      <CategoriesModal isOpen={showCategories} onClose={() => setShowCategories(false)} />
     </section>
   );
 };
