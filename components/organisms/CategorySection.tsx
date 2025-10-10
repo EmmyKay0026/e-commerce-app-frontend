@@ -1,6 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface Product {
   name: string;
@@ -59,13 +61,18 @@ const sampleProducts: Partial<Record<CategoryName, Product[]>> = {
 const CategorySection = () => {
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryName>("Industrial Machinery");
+  const [showCategories, setShowCategories] = useState(false);
 
   const products = sampleProducts[selectedCategory] ?? [];
 
+  // Slugify function to create SEO-friendly URLs
+  const slugify = (str: string) =>
+    str.toLowerCase().replace(/&/g, "and").replace(/\s+/g, "-");
+
   return (
     <section className="bg-gray-50 w-full py-16">
-      {/* Section Header */}
-      <div className="text-center mb-12 px-5 md:px-10">
+      {/* Header */}
+      <div className="text-center mb-10 px-5 md:px-10">
         <h3 className="font-bold text-gray-900 text-3xl md:text-4xl">
           Our Product Categories
         </h3>
@@ -75,11 +82,22 @@ const CategorySection = () => {
         </p>
       </div>
 
-      {/* Main Layout */}
-      <div className="w-full mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 px-5 md:pr-10 lg:pr-20">
-        {/* Sidebar */}
-        <aside className="bg-white shadow-md rounded-2xl p-4 md:sticky md:top-20 h-fit border border-gray-100">
-          <h4 className="font-semibold text-lg mb-4 text-gray-800">Categories</h4>
+      <div className="w-full mx-auto grid grid-cols-1 lg:grid-cols-4 gap-8 px-5 md:px-10 lg:px-20">
+        {/* Sidebar (desktop) */}
+        <aside
+          className="
+            hidden lg:block
+            bg-white shadow-md rounded-2xl
+            sticky top-20
+            p-4 border border-gray-100
+            max-h-[calc(100vh-5rem)]
+            overflow-y-auto
+            scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent
+          "
+        >
+          <h4 className="font-semibold text-lg mb-4 text-gray-800">
+            Categories
+          </h4>
           <ul className="space-y-2">
             {categories.map((cat) => (
               <li
@@ -97,19 +115,65 @@ const CategorySection = () => {
           </ul>
         </aside>
 
-        {/* Products Grid */}
+        {/* Mobile Dropdown for Categories */}
+        <div className="block lg:hidden w-full">
+          <button
+            onClick={() => setShowCategories(!showCategories)}
+            className="w-full flex items-center justify-between bg-white border border-gray-200 rounded-xl p-3 font-medium text-gray-800 shadow-sm"
+          >
+            <span>{selectedCategory}</span>
+            {showCategories ? (
+              <ChevronUp className="w-5 h-5" />
+            ) : (
+              <ChevronDown className="w-5 h-5" />
+            )}
+          </button>
+
+          {showCategories && (
+            <ul className="mt-3 bg-white border border-gray-200 rounded-xl absolute py-3 z-10 px-5 shadow-md max-h-[300px] overflow-y-auto">
+              {categories.map((cat) => (
+                <li
+                  key={cat}
+                  onClick={() => {
+                    setSelectedCategory(cat);
+                    setShowCategories(false);
+                  }}
+                  className={`cursor-pointer px-4 py-3 text-sm font-medium transition-all ${
+                    selectedCategory === cat
+                      ? "bg-blue-100 rounded-full text-blue-700"
+                      : "hover:bg-gray-100 text-gray-700"
+                  }`}
+                >
+                  {cat}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Product Grid */}
         <div className="md:col-span-3">
-          <h4 className="text-xl font-bold text-gray-900 mb-6">
-            {selectedCategory}
-          </h4>
+          {/* Category title with "See more" link */}
+          <div className="flex justify-between items-center mb-6">
+            <h4 className="text-xl font-bold text-gray-900">
+              {selectedCategory}
+            </h4>
+            <Link
+              href={`/category/${slugify(selectedCategory)}`}
+              className="text-sm text-blue-600 hover:underline font-medium"
+            >
+              See more →
+            </Link>
+          </div>
+
           {products.length > 0 ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product: Product, index: number) => (
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              {products.map((product, index) => (
                 <div
                   key={index}
                   className="bg-white shadow-sm border border-gray-100 rounded-2xl overflow-hidden hover:shadow-lg transition-all"
                 >
-                  <div className="relative w-full h-40">
+                  <div className="relative w-full h-36 sm:h-40">
                     <Image
                       src={product.img}
                       alt={product.name}
@@ -117,11 +181,11 @@ const CategorySection = () => {
                       className="object-cover"
                     />
                   </div>
-                  <div className="p-4">
+                  <div className="p-3 sm:p-4">
                     <h5 className="font-semibold text-gray-900 text-sm">
                       {product.name}
                     </h5>
-                    <p className="text-blue-600 text-sm font-medium mt-2">
+                    <p className="text-blue-600 text-sm font-medium mt-1 sm:mt-2">
                       {product.price}
                     </p>
                   </div>
@@ -129,7 +193,7 @@ const CategorySection = () => {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500">
+            <p className="text-gray-500 text-sm">
               No products found for this category.
             </p>
           )}
