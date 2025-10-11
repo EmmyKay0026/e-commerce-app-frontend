@@ -9,6 +9,7 @@ export const mockUser: User = {
   profilePicture: "/user-profile-illustration.png",
   role: "vendor",
   vendorProfile: {
+    vendorId: "1",
     businessName: "John's Electronics",
     coverImage: "/electronics-store-cover.jpg",
     address: "123 Main St, City, State 12345",
@@ -23,6 +24,7 @@ export const mockUser2: User = {
   profilePicture: "/jane_doe_profile.jpg",
   role: "user",
   vendorProfile: {
+    vendorId: "2",
     businessName: "Jane's Electronics",
     coverImage: "/jane_doe_cover.jpg",
     address: "123 Main St, City, State 12345",
@@ -37,6 +39,7 @@ export const mockUser3: User = {
   profilePicture: "/joke.jpg",
   role: "vendor",
   vendorProfile: {
+    vendorId: "3",
     businessName: "Joke's Electronics",
     coverImage: "/joke_doe_cover.jpg",
     address: "123 Main St, City, State 12345",
@@ -46,44 +49,44 @@ export const mockUser3: User = {
 
 export const userDB: User[] = [mockUser, mockUser2, mockUser3];
 
-const mockProducts: Product[] = [
-  {
-    id: "1",
-    name: "Wireless Headphones",
-    price: 99.99,
-    images: ["/wireless-headphones.png"],
-    status: "active",
-    vendorId: "1",
-    description: "",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    metadata: {},
-  },
-  {
-    id: "2",
-    name: "Smart Watch",
-    price: 199.99,
-    images: ["/smartwatch-lifestyle.png"],
-    status: "active",
-    vendorId: "1",
-    description: "",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    metadata: {},
-  },
-  {
-    id: "3",
-    name: "Bluetooth Speaker",
-    price: 79.99,
-    images: ["/bluetooth-speaker.jpg"],
-    status: "inactive",
-    vendorId: "1",
-    description: "",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    metadata: {},
-  },
-];
+// const mockProducts: Product[] = [
+//   {
+//     id: "1",
+//     name: "Wireless Headphones",
+//     price: "99.99",
+//     images: ["/wireless-headphones.png"],
+//     status: "active",
+//     vendorId: "1",
+//     description: "",
+//     createdAt: "",
+//     updatedAt: "",
+//     metadata: {},
+//   },
+//   {
+//     id: "2",
+//     name: "Smart Watch",
+//     price: "199.99",
+//     images: ["/smartwatch-lifestyle.png"],
+//     status: "active",
+//     vendorId: "1",
+//     description: "",
+//     createdAt: "new Date()",
+//     updatedAt: "new Date()",
+//     metadata: {},
+//   },
+//   {
+//     id: "3",
+//     name: "Bluetooth Speaker",
+//     price: "79.99",
+//     images: ["/bluetooth-speaker.jpg"],
+//     status: "inactive",
+//     vendorId: "1",
+//     description: "",
+//     createdAt: "new Date()",
+//     updatedAt: "new Date()",
+//     metadata: {},
+//   },
+// ];
 
 export const mockWishlist: WishlistItem[] = [
   {
@@ -93,16 +96,16 @@ export const mockWishlist: WishlistItem[] = [
     product: {
       id: "4",
       name: "Laptop Stand",
-      price: 49.99,
+      price: "49.99",
       images: ["/laptop-stand.png", "/laptop-stand-2.png"],
       vendorId: "2",
       description: "",
       status: "active",
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: "new Date()",
+      updatedAt: "new Date()",
       metadata: {},
     },
-    createdAt: new Date(),
+    createdAt: "new Date()",
   },
   {
     id: "2",
@@ -111,16 +114,16 @@ export const mockWishlist: WishlistItem[] = [
     product: {
       id: "5",
       name: "USB-C Cable",
-      price: 19.99,
+      price: "19.99",
       images: ["/usb-c-cable.jpg"],
       vendorId: "2",
       description: "",
       status: "active",
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: "new Date()",
+      updatedAt: "new Date()",
       metadata: {},
     },
-    createdAt: new Date(),
+    createdAt: "new Date()",
   },
 ];
 

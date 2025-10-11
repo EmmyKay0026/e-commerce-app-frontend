@@ -5,6 +5,7 @@ export interface VendorProfile {
   coverImage?: string;
   address?: string;
   description?: string;
+  vendorId?: string;
 }
 
 export interface User {
@@ -22,14 +23,24 @@ export interface Product {
   vendorId: string; // FK -> VendorProfile.id
   name: string;
   description: string;
-  price: number; // for display only (not transactions)
+  price: string; // for display only (not transactions)
   images: string[]; // URLs to Google Storage
   categoryId?: string; // FK -> Category.id
   tags?: Tag[];
   status: "active" | "inactive" | "deleted";
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
   metadata: {}; // to contain more description of the item
+}
+
+export interface Category {
+  id: string; // UUID
+  name: string;
+  slug: string; // URL-friendly identifier
+  parentCategory: string[] | null; // FK -> Category.id (self-referential)
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface WishlistItem {
@@ -37,12 +48,12 @@ export interface WishlistItem {
   userId: string;
   productId: string;
   product?: Product;
-  createdAt: Date;
+  createdAt: string;
 }
 
 export interface Tag {
   id: string; // UUID
   name: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }

@@ -1,44 +1,83 @@
 // import { Product, Tag } from "./product";
 
-import { Product, Tag, WishlistItem } from "@/types/models";
+import { Category, Product, Tag, WishlistItem } from "@/types/models";
 
 // Demo tags
 const tagNew: Tag = {
   id: "tag-1",
   name: "New Arrival",
-  createdAt: new Date("2024-06-01T10:00:00Z"),
-  updatedAt: new Date("2024-06-01T10:00:00Z"),
+  createdAt: "2024-06-01T10:00:00Z",
+  updatedAt: "2024-06-01T10:00:00Z",
 };
 
 const tagSale: Tag = {
   id: "tag-2",
   name: "On Sale",
-  createdAt: new Date("2024-06-02T10:00:00Z"),
-  updatedAt: new Date("2024-06-02T10:00:00Z"),
+  createdAt: "2024-06-02T10:00:00Z",
+  updatedAt: "2024-06-02T10:00:00Z",
 };
 
 const tagPopular: Tag = {
   id: "tag-3",
   name: "Popular",
-  createdAt: new Date("2024-06-03T10:00:00Z"),
-  updatedAt: new Date("2024-06-03T10:00:00Z"),
+  createdAt: "2024-06-03T10:00:00Z",
+  updatedAt: "2024-06-03T10:00:00Z",
 };
+
+export const demoCategories: Category[] = [
+  {
+    id: "cat-electronics",
+    name: "Electronics",
+    slug: "electronics",
+    parentCategory: null,
+    description: "Latest gadgets and electronic devices.",
+    createdAt: "2024-06-01T09:00:00Z",
+    updatedAt: "2024-06-01T09:00:00Z",
+  },
+  {
+    id: "cat-home",
+    name: "Home & Kitchen",
+    slug: "home-kitchen",
+    parentCategory: ["cat-electronics"],
+    description: "Essentials and accessories for your home.",
+    createdAt: "2024-06-01T09:10:00Z",
+    updatedAt: "2024-06-01T09:10:00Z",
+  },
+  {
+    id: "cat-sports",
+    name: "Sports & Outdoors",
+    slug: "sports-outdoors",
+    parentCategory: ["cat-electronics", "cat-home"],
+    description: "Gear and equipment for sports and outdoor activities.",
+    createdAt: "2024-06-01T09:20:00Z",
+    updatedAt: "2024-06-01T09:20:00Z",
+  },
+  {
+    id: "cat-fashion",
+    name: "Fashion",
+    slug: "fashion",
+    parentCategory: ["cat-electronics", "cat-home", "cat-sports"],
+    description: "Trendy clothing and accessories.",
+    createdAt: "2024-06-01T09:30:00Z",
+    updatedAt: "2024-06-01T09:30:00Z",
+  },
+];
 
 // Demo products
 // export const demoProducts = [];
 export const demoProducts: Product[] = [
   {
     id: "prod-1",
-    vendorId: "vendor-1",
+    vendorId: "1",
     name: "Wireless Headphones",
     description: "High-quality wireless headphones with noise cancellation.",
-    price: 99.99,
+    price: "99.99",
     images: ["/wireless-headphones.png", "/usb-c-cable.png"],
     categoryId: "cat-electronics",
     tags: [tagNew, tagPopular],
     status: "active",
-    createdAt: new Date("2024-06-01T12:00:00Z"),
-    updatedAt: new Date("2024-06-01T12:00:00Z"),
+    createdAt: "2024-06-01T12:00:00Z",
+    updatedAt: "2024-06-01T12:00:00Z",
     metadata: {
       color: "Black",
       batteryLife: "20 hours",
@@ -47,16 +86,26 @@ export const demoProducts: Product[] = [
   },
   {
     id: "prod-2",
-    vendorId: "vendor-2",
+    vendorId: "1",
     name: "Eco-Friendly Water Bottle",
     description: "Reusable water bottle made from sustainable materials.",
-    price: 19.99,
-    images: ["/smartwatch-lifestyle.png", "/laptop-stand.png"],
+    price: "19.99",
+    images: [
+      "/smartwatch-lifestyle.png",
+      "/laptop-stand.png",
+      "/bluetooth-speaker.jpg",
+      "/laptop-stand.png",
+      "/wireless-headphones.png",
+      "/laptop-stand.png",
+      "/bluetooth-speaker.jpg",
+      "/laptop-stand.png",
+      "/wireless-headphones.png",
+    ],
     categoryId: "cat-home",
     tags: [tagSale],
     status: "active",
-    createdAt: new Date("2024-06-02T09:30:00Z"),
-    updatedAt: new Date("2024-06-02T09:30:00Z"),
+    createdAt: "2024-06-02T09:30:00Z",
+    updatedAt: "2024-06-02T09:30:00Z",
     metadata: {
       material: "Stainless Steel",
       capacity: "750ml",
@@ -65,20 +114,132 @@ export const demoProducts: Product[] = [
   },
   {
     id: "prod-3",
-    vendorId: "vendor-3",
+    vendorId: "2",
     name: "Yoga Mat",
     description: "Non-slip yoga mat for all types of exercises.",
-    price: 29.99,
+    price: "29.99",
     images: ["/bluetooth-speaker.jpg", "/laptop-stand.png"],
     categoryId: "cat-sports",
     tags: [tagPopular],
     status: "active",
-    createdAt: new Date("2024-06-03T08:15:00Z"),
-    updatedAt: new Date("2024-06-03T08:15:00Z"),
+    createdAt: "2024-06-03T08:15:00Z",
+    updatedAt: "2024-06-03T08:15:00Z",
     metadata: {
       thickness: "6mm",
       color: "Purple",
       ecoFriendly: true,
+    },
+  },
+  {
+    id: "prod-4",
+    vendorId: "2",
+    name: "Smart LED Desk Lamp",
+    description:
+      "Adjustable LED desk lamp with touch controls and USB charging port.",
+    price: "39.99",
+    images: [
+      "https://industrialmartnigeria.com/wp-content/uploads/2024/09/thermal_arc_175se_1-600x600.jpg",
+      "https://industrialmartnigeria.com/wp-content/uploads/2024/09/12570_A_Conk-600x600.jpg",
+      "https://industrialmartnigeria.com/wp-content/uploads/2024/09/hoist10500kg-1-600x600.webp",
+    ],
+    categoryId: "cat-home",
+    tags: [tagNew],
+    status: "active",
+    createdAt: "2024-06-04T11:00:00Z",
+    updatedAt: "2024-06-04T11:00:00Z",
+    metadata: {
+      color: "White",
+      brightnessLevels: 5,
+      power: "10W",
+    },
+  },
+  {
+    id: "prod-5",
+    vendorId: "3",
+    name: "Bluetooth Fitness Tracker",
+    description:
+      "Track your steps, heart rate, and sleep with this stylish fitness tracker.",
+    price: "49.99",
+    images: [
+      "https://industrialmartnigeria.com/wp-content/uploads/2024/09/shackles-01.jpg",
+      "https://industrialmartnigeria.com/wp-content/uploads/2024/09/Tagline_grande.webp",
+      "https://industrialmartnigeria.com/wp-content/uploads/2024/09/enerpac-h700-series-high-pressure-hydraulic-hoses-600x600.jpg",
+    ],
+    categoryId: "cat-sports",
+    tags: [tagSale, tagPopular],
+    status: "active",
+    createdAt: "2024-06-05T09:00:00Z",
+    updatedAt: "2024-06-05T09:00:00Z",
+    metadata: {
+      batteryLife: "7 days",
+      waterproof: true,
+      color: "Blue",
+    },
+  },
+  {
+    id: "prod-6",
+    vendorId: "3",
+    name: "Minimalist Analog Watch",
+    description:
+      "Elegant analog watch with a minimalist design and leather strap.",
+    price: "79.99",
+    images: [
+      "https://industrialmartnigeria.com/wp-content/uploads/2024/09/bosch-twist-drill-bits-co14b-64_1000-600x600.webp",
+    ],
+    categoryId: "cat-fashion",
+    tags: [tagPopular],
+    status: "active",
+    createdAt: "2024-06-06T10:30:00Z",
+    updatedAt: "2024-06-06T10:30:00Z",
+    metadata: {
+      strapMaterial: "Leather",
+      waterResistant: true,
+      color: "Brown",
+    },
+  },
+  {
+    id: "prod-7",
+    vendorId: "4",
+    name: "Portable Bluetooth Speaker",
+    description: "Compact speaker with powerful sound and long battery life.",
+    price: "59.99",
+    images: [
+      "https://industrialmartnigeria.com/wp-content/uploads/2024/09/aodd-pump-1-2-bsp-15mm--300x300.jpg",
+      "https://industrialmartnigeria.com/wp-content/uploads/2024/09/ofite-machined-metal-mud-balance-500x500-1.jpg",
+    ],
+    categoryId: "cat-electronics",
+    tags: [tagSale],
+    status: "active",
+    createdAt: "2024-06-07T14:00:00Z",
+    updatedAt: "2024-06-07T14:00:00Z",
+    metadata: {
+      batteryLife: "12 hours",
+      waterproof: false,
+      color: "Red",
+    },
+  },
+  {
+    id: "prod-8",
+    vendorId: "4",
+    name: "Classic Canvas Backpack",
+    description: "Durable canvas backpack perfect for school, work, or travel.",
+    price: "34.99",
+    images: [
+      "https://industrialmartnigeria.com/wp-content/uploads/2024/09/01_780c24cf-7695-4542-9877-fbab77c5d2d6_1024x-fotor-2024090401048.png",
+      "https://industrialmartnigeria.com/wp-content/uploads/2024/09/main-qimg-aa51dc1a730d035fc7e3fb3e5311bab0-lq-fotor-202409040919.png",
+      "https://industrialmartnigeria.com/wp-content/uploads/2024/09/MD-0623-p6_fig1-fotor-202409040211.png",
+      "https://industrialmartnigeria.com/wp-content/uploads/2024/09/electrical-lights-1499158560-3102793-fotor-202409040737.png",
+      "https://industrialmartnigeria.com/wp-content/uploads/2024/09/1-fotor-202409040615.png",
+    ],
+    categoryId: "cat-fashion",
+    tags: [tagNew],
+    status: "active",
+    createdAt: "2024-06-08T08:45:00Z",
+    updatedAt: "2024-06-08T08:45:00Z",
+    metadata: {
+      capacity: "20L",
+      color: "Green",
+      waterproof: false,
     },
   },
 ];
@@ -89,12 +250,12 @@ export const demoWishlist: WishlistItem[] = [
     userId: "user-1",
     productId: "prod-1",
 
-    createdAt: new Date("2024-06-04T10:00:00Z"),
+    createdAt: "2024-06-04T10:00:00Z",
   },
   {
     id: "wishlist-2",
     userId: "user-1",
     productId: "prod-3",
-    createdAt: new Date("2024-06-04T10:05:00Z"),
+    createdAt: "2024-06-04T10:05:00Z",
   },
 ];

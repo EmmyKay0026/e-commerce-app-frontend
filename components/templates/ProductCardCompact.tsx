@@ -1,18 +1,17 @@
 "use client";
-import * as React from "react";
+
 import Image from "next/image";
-import { Heart, Camera, Bookmark } from "lucide-react";
+import { Heart, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 
-interface ProductCardGridProps {
+interface ProductCardCompactProps {
   id: string;
   image: string;
-  name: string;
-  description: string;
-  price: string;
+  title: string;
+  price: number;
   currency?: string;
   estimatedDelivery: string;
   minOrder: number;
@@ -28,11 +27,10 @@ interface ProductCardGridProps {
   onToggleFavorite?: (id: string, isFavorite: boolean) => void;
 }
 
-export function ProductCardGrid({
+export function ProductCardCompact({
   id,
   image,
-  name,
-  description,
+  title,
   price,
   currency = "₦",
   estimatedDelivery,
@@ -42,7 +40,7 @@ export function ProductCardGrid({
   onAddToCart,
   onChatNow,
   onToggleFavorite,
-}: ProductCardGridProps) {
+}: ProductCardCompactProps) {
   const [isFavorite, setIsFavorite] = useState(false);
 
   const handleToggleFavorite = () => {
@@ -52,12 +50,12 @@ export function ProductCardGrid({
   };
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg pt-0 pb-5 transition-shadow duration-300 max-w-lg">
+    <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 max-w-sm">
       {/* Product Image */}
       <div className="relative aspect-square bg-muted group">
         <Image
           src={image || "/placeholder.svg"}
-          alt={image || "description of the image"}
+          alt={title}
           fill
           className="object-cover"
         />
@@ -74,28 +72,25 @@ export function ProductCardGrid({
         <button
           onClick={handleToggleFavorite}
           className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-md hover:bg-white transition-all"
-          aria-label={
-            isFavorite ? "Remove from saved items" : "Add to saved items"
-          }
+          aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
         >
-          <Bookmark
+          <Heart
             className={`w-5 h-5 transition-colors ${
-              isFavorite ? "fill-secondary text-secondary" : "text-gray-600"
+              isFavorite ? "fill-red-500 text-red-500" : "text-gray-600"
             }`}
           />
         </button>
       </div>
 
       {/* Product Details */}
-      <div className="p-4 pt-0 space-y-3 ">
-        {/* name */}
-        <h3 className="font-medium text-lg leading-snug line-clamp-2 text-foreground">
-          {name}
+      <div className="p-4 space-y-3">
+        {/* Title */}
+        <h3 className="font-medium text-sm leading-snug line-clamp-2 text-foreground">
+          {title}
         </h3>
-        <p className="line-clamp-4 text-sm">{description}</p>
 
         {/* Delivery Info */}
-        {/* <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <svg
             className="w-3.5 h-3.5"
             fill="none"
@@ -110,23 +105,26 @@ export function ProductCardGrid({
             />
           </svg>
           <span>Est. delivery by {estimatedDelivery}</span>
-        </div> */}
+        </div>
 
         {/* Price */}
         <div className="text-2xl font-bold text-foreground">
           {currency}
-          {price}
+          {price.toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}
         </div>
 
         {/* Order Info */}
-        {/* <div className="text-xs text-muted-foreground">
+        <div className="text-xs text-muted-foreground">
           Min. order:{" "}
           <span className="font-medium text-foreground">{minOrder} pieces</span>{" "}
           <span className="text-muted-foreground">{soldCount} sold</span>
-        </div> */}
+        </div>
 
         {/* Supplier Info */}
-        {/* <div className="space-y-2">
+        <div className="space-y-2">
           <p className="text-xs text-muted-foreground truncate">
             {supplier.name}
           </p>
@@ -142,27 +140,26 @@ export function ProductCardGrid({
               {supplier.country}
             </Badge>
           </div>
-        </div> */}
+        </div>
 
         {/* Action Buttons */}
         <div className="flex gap-2 pt-2">
           <Button
-            variant="default"
-            className="flex-1 font-medium "
+            variant="outline"
+            className="flex-1 font-medium bg-transparent"
             onClick={() => onAddToCart?.(id)}
           >
-            View product
+            Add to cart
           </Button>
-          {/* <Button
+          <Button
             variant="outline"
             className="flex-1 font-medium bg-transparent"
             onClick={() => onChatNow?.(id)}
           >
             Chat now
-          </Button> */}
+          </Button>
         </div>
       </div>
     </Card>
   );
 }
-// components/ui/card.tsx

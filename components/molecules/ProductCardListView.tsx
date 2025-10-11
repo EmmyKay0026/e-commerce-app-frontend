@@ -10,7 +10,7 @@ export interface ProductCardListProps {
   id: string;
   name: string;
   description: string;
-  price: number;
+  price: string;
   currency?: string;
   image: string;
   minOrder?: number;
@@ -85,22 +85,13 @@ export function ProductCardList({
               <p className="line-clamp-3">
                 {description ?? "No description available for this product."}
               </p>
-              {estimatedDelivery && (
-                <p className="text-sm text-muted-foreground flex items-center gap-1">
-                  <span className="text-foreground">⏱</span> Est. delivery by{" "}
-                  {estimatedDelivery}
-                </p>
-              )}
             </div>
 
             {/* Price and Order Info */}
             <div>
               <p className="text-2xl font-bold text-foreground mb-1">
                 {currency}
-                {price?.toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
+                {price}
               </p>
               {/* <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 {minOrder && <span>Min. order: {minOrder} pieces</span>}
@@ -131,7 +122,7 @@ export function ProductCardList({
                 </div>
               </div>
             )} */}
-            <div className="flex md:flex-col gap-2 md:w-40 flex-shrink-0">
+            {/* <div className="flex md:flex-col gap-2 md:w-40 flex-shrink-0">
               <Button
                 onClick={onAddToCart}
                 className="flex-1 md:flex-none"
@@ -139,7 +130,7 @@ export function ProductCardList({
               >
                 View Details
               </Button>
-            </div>
+            </div> */}
           </div>
 
           {/* Action Buttons */}
