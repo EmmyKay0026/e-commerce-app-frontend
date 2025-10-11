@@ -1,20 +1,21 @@
+import CategorySection from "@/components/organisms/CategorySection";
+import FeatureSection from "@/components/organisms/FeatureSection";
+import HomeHeroSection from "@/components/organisms/HomeHeroSection";
+import Testimonial from "@/components/organisms/Testimonial";
+import CtaSection from "@/components/organisms/CtaSection";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import BusinessOpportunities from "../components/organisms/BusinessOpp";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <h1 className="text-4xl font-bold">Welcome to Next.js!</h1>
-      <Button variant="default" size="lg">
-        Click Me
-      </Button>
-      <Image
-        src="/next.svg"
-        alt="Next.js Logo"
-        width={180}
-        height={37}
-        priority
-      />
+    <main className="flex min-h-screen flex-col items-center justify-center m-0 p-0">
+      <HomeHeroSection/>
+      <BusinessOpportunities/>      
+      <CategorySection/>
+      <FeatureSection/>
+      <CtaSection/>
+      {/* <Testimonial/> */}
     </main>
   );
 }
