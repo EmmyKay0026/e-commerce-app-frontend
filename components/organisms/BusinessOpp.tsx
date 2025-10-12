@@ -3,6 +3,7 @@
 import TopRanking from "./TopRanking";
 import NewArrivals from "./NewArrivals";
 import TopDeals from "./TopDeals";
+import Link from "next/link";
 
 export default function BusinessOpportunities() {
   return (
@@ -16,7 +17,12 @@ export default function BusinessOpportunities() {
           <div>
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-medium">Top ranking</h3>
-              <a className="text-sm text-muted-foreground">View more</a>
+              <Link
+                href={`/category/top-ranking`}
+                className="text-sm text-muted-foreground cursor-pointer"
+              >
+                View more
+              </Link>
             </div>
             <TopRanking />
           </div>
@@ -24,7 +30,12 @@ export default function BusinessOpportunities() {
           <div>
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-medium">New arrivals</h3>
-              <a className="text-sm text-muted-foreground">View more</a>
+              <Link
+                href={`/category/new-arrivals`}
+                className="text-sm text-muted-foreground"
+              >
+                View more
+              </Link>
             </div>
             <NewArrivals />
           </div>
@@ -32,7 +43,12 @@ export default function BusinessOpportunities() {
           <div>
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-medium">Top deals</h3>
-              <a className="text-sm text-muted-foreground">View more</a>
+              <Link
+                href={`/category/top-deals`}
+                className="text-sm text-muted-foreground"
+              >
+                View more
+              </Link>
             </div>
             <TopDeals />
           </div>

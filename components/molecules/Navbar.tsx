@@ -2,12 +2,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, User, List, Menu } from "lucide-react";
+import { Search, User, List, Menu, X } from "lucide-react";
 import SignInModal from "./SignModal";
 import CategoriesModal from "./CategoriesModal";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useIsMobile } from "@/hooks/use-mobile";
+import Link from "next/link";
 
 export default function Navbar() {
   const [showSearch, setShowSearch] = useState(false);
@@ -58,14 +59,11 @@ export default function Navbar() {
   }, [showSearch, isMobile]);
 
   return (
-    <nav className="fixed top-0 left-0 w-full md:bg-white border-b border-gray-200 z-50 shadow-sm transition-colors">
+    <nav className="sticky top-0 left-0 w-full md:bg-white border-b border-gray-200 z-50 shadow-sm transition-colors">
       <div className="md:max-w-7xl md:mx-auto flex justify-between items-center md:px-6 md:py-2">
-        
-
         {/* ===== DESKTOP NAVBAR ===== */}
         {!isMobile && (
           <>
-
             {/* Logo */}
             <div className="relative w-32 h-10 cursor-pointer">
               <Image
@@ -96,13 +94,13 @@ export default function Navbar() {
                   }}
                   exit={{ opacity: 0, y: -5 }}
                   transition={{ duration: 0.3, ease: "easeOut" }}
-                  className="hidden md:flex items-center bg-white rounded-full overflow-hidden shadow-sm border border-gray-200 pr-3 w-[400px]"
+                  className="hidden md:flex items-center bg-white rounded-full overflow-hidden shadow-sm border border-gray-200 pl-2 pr-0 w-[300px]"
                 >
-                  <Search className="text-gray-900 bg-secondary mr-2 h-9 p-2 w-10 rounded-full" />
                   <Input
                     placeholder="Search industrial products..."
                     className="border-none outline-none shadow-none focus:ring-0 focus-visible:ring-0"
                   />
+                  <Search className="text-white bg-secondary ml-2 h-9 p-2 w-10 rounded-full" />
                 </motion.div>
               )}
             </div>
@@ -113,7 +111,7 @@ export default function Navbar() {
                   ABOUT US
                 </li>
                 <li className="hover:text-secondary transition-colors cursor-pointer">
-                  PRODUCTS
+                  <Link href="/market-place">MARKET PLACE</Link>
                 </li>
                 <li className="hover:text-secondary transition-colors cursor-pointer">
                   CONTACT US
@@ -121,10 +119,7 @@ export default function Navbar() {
               </ul>
 
               {/* Sign-in button and dropdown */}
-              <div
-                onMouseEnter={() => setShowList(true)}
-                className="relative"
-              >
+              <div onMouseEnter={() => setShowList(true)} className="relative">
                 <Button className="bg-white hover:bg-gray-200 cursor-pointer text-black px-5 rounded-full transition-all flex items-center gap-2">
                   <User /> Sign in/Register
                 </Button>
@@ -178,7 +173,6 @@ export default function Navbar() {
             </div>
           </div>
         )}
-
       </div>
 
       {/* Sign In Dropdown */}
@@ -195,10 +189,13 @@ export default function Navbar() {
             <Button
               variant="ghost"
               onClick={() => setShowList(false)}
-              className="text-gray-700 w-full text-xl font-bold"
+              className=" flex items-end justify-end text-gray-700 w-full text-xl text-right  font-bold"
             >
               ✕
             </Button>
+            {/* <X
+              className="text-gray-700 w-full text-xl text-right  font-bold my-2 pr-4 cursor-pointer"
+            /> */}
             <div className="flex items-center px-4 pt-4">
               <User className="text-gray-900 bg-gray-300 h-10 p-2 mr-2 w-10 rounded-full" />
               <Button
@@ -210,7 +207,9 @@ export default function Navbar() {
             </div>
             <div className="flex flex-col text-sm text-gray-800 p-4 space-y-3">
               <p className="hover:text-secondary cursor-pointer">My Orders</p>
-              <p className="hover:text-secondary cursor-pointer">Notifications</p>
+              <p className="hover:text-secondary cursor-pointer">
+                Notifications
+              </p>
               <p className="hover:text-secondary cursor-pointer">Saved</p>
               <p className="hover:text-secondary cursor-pointer">Wish List</p>
             </div>
@@ -274,7 +273,10 @@ export default function Navbar() {
 
       {/* ===== MODALS ===== */}
       <SignInModal isOpen={showSignIn} onClose={() => setShowSignIn(false)} />
-      <CategoriesModal isOpen={showCategories} onClose={() => setShowCategories(false)} />
+      <CategoriesModal
+        isOpen={showCategories}
+        onClose={() => setShowCategories(false)}
+      />
     </nav>
   );
 }

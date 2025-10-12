@@ -3,28 +3,14 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { CategoryName } from "@/types/models";
+import { slugify } from "@/lib/utils";
 
 interface Product {
   name: string;
   price: string;
   img: string;
 }
-
-type CategoryName =
-  | "Environment"
-  | "Consumer Electronics"
-  | "Home & Garden"
-  | "Commercial Equipment"
-  | "Beauty"
-  | "Jewelry"
-  | "Industrial Machinery"
-  | "Business Services"
-  | "Apparel & Accessories"
-  | "Sports"
-  | "Vehicle Parts"
-  | "Packaging"
-  | "Tools & Hardware"
-  | "Toys";
 
 const categories: CategoryName[] = [
   "Environment",
@@ -45,29 +31,50 @@ const categories: CategoryName[] = [
 
 const sampleProducts: Partial<Record<CategoryName, Product[]>> = {
   Environment: [
-    { name: "Solar Panel Kit", price: "$300", img: "/products/solar.jpg" },
-    { name: "Air Purifier", price: "$150", img: "/products/airpurifier.jpg" },
+    {
+      name: "Solar Panel Kit",
+      price: "$300",
+      img: "https://industrialmartnigeria.com/wp-content/uploads/2024/09/hoist10500kg-1-600x600.webp",
+    },
+    {
+      name: "Air Purifier",
+      price: "$150",
+      img: "https://industrialmartnigeria.com/wp-content/uploads/2024/09/bosch-twist-drill-bits-co14b-64_1000-600x600.webp",
+    },
   ],
   "Consumer Electronics": [
-    { name: "Industrial Drone", price: "$1,200", img: "/products/drone.jpg" },
-    { name: "Smart Controller", price: "$250", img: "/products/controller.jpg" },
+    {
+      name: "Industrial Drone",
+      price: "$1,200",
+      img: "https://industrialmartnigeria.com/wp-content/uploads/2024/09/ofite-machined-metal-mud-balance-500x500-1.jpg",
+    },
+    {
+      name: "Smart Controller",
+      price: "$250",
+      img: "https://industrialmartnigeria.com/wp-content/uploads/2024/09/1-fotor-202409040615.png",
+    },
   ],
   "Industrial Machinery": [
-    { name: "Hydraulic Press", price: "$2,500", img: "/products/press.jpg" },
-    { name: "Lathe Machine", price: "$1,800", img: "/products/lathe.jpg" },
+    {
+      name: "Hydraulic Press",
+      price: "$2,500",
+      img: "https://industrialmartnigeria.com/wp-content/uploads/2024/09/main-qimg-aa51dc1a730d035fc7e3fb3e5311bab0-lq-fotor-202409040919.png",
+    },
+    {
+      name: "Lathe Machine",
+      price: "$1,800",
+      img: "https://industrialmartnigeria.com/wp-content/uploads/2024/09/aodd-pump-1-2-bsp-15mm--300x300.jpg",
+    },
   ],
 };
 
 const CategorySection = () => {
-  const [selectedCategory, setSelectedCategory] =
-    useState<CategoryName>("Industrial Machinery");
+  const [selectedCategory, setSelectedCategory] = useState<CategoryName>(
+    "Industrial Machinery"
+  );
   const [showCategories, setShowCategories] = useState(false);
 
   const products = sampleProducts[selectedCategory] ?? [];
-
-  // Slugify function to create SEO-friendly URLs
-  const slugify = (str: string) =>
-    str.toLowerCase().replace(/&/g, "and").replace(/\s+/g, "-");
 
   return (
     <section className="bg-gray-50 w-full py-16">
@@ -169,7 +176,8 @@ const CategorySection = () => {
           {products.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {products.map((product, index) => (
-                <div
+                <Link
+                  href={"/product/prod-5"}
                   key={index}
                   className="bg-white shadow-sm border border-gray-100 rounded-2xl overflow-hidden hover:shadow-lg transition-all"
                 >
@@ -189,7 +197,7 @@ const CategorySection = () => {
                       {product.price}
                     </p>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           ) : (

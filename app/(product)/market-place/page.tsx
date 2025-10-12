@@ -8,20 +8,24 @@ const MarketPlace = () => {
   return (
     <>
       <CategoryCards
+        categoryTitle="Safety & Security"
+        categoryProduct={demoProducts}
+        categoryLink="/category/safety-security"
+      />
+      <div className="h-4" />
+      <CategoryCards
         categoryTitle="Lighting and Electricals"
         categoryProduct={demoProducts}
+        categoryLink="/category/lighting-electricals"
       />
       <div className="h-4" />
       <CategoryCards
         categoryTitle="Measurement tools and equipment's"
         categoryProduct={demoProducts}
+        categoryLink="/category/measurement-tools-equipment"
       />
       <div className="h-4" />
-      <CategoryCards
-        categoryTitle="Safety & Security"
-        categoryProduct={demoProducts}
-      />
-      <div className="h-4" />
+
       {/* <ProductList product={demoProducts[3]} /> */}
     </>
   );

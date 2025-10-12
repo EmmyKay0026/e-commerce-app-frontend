@@ -1,6 +1,8 @@
 "use client";
 import { ImageGallery } from "@/components/molecules/ImageGallery";
 import { ProductInfo } from "@/components/molecules/ProductInfo";
+import { ProductDetailSkeleton } from "@/components/molecules/ProductPageSkeleton";
+import CategoryCards from "@/components/organisms/CategoryCards";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -83,9 +85,9 @@ export default function ProductDetailPage() {
       parentCategories: categoryNamesSlugs,
     });
   }, [id]);
-
+  // Todo handle loading and not found state separately
   if (!productDetails) {
-    return <div className="">Loading...</div>;
+    return <ProductDetailSkeleton />;
   }
 
   return (
@@ -104,7 +106,9 @@ export default function ProductDetailPage() {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/products">Products</BreadcrumbLink>
+                  <BreadcrumbLink href="/market-place">
+                    Market place
+                  </BreadcrumbLink>
                 </BreadcrumbItem>
                 {productDetails.parentCategories &&
                   productDetails.parentCategories.length > 0 &&
@@ -187,6 +191,13 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
+      <div className="border-t my-8" />
+      <CategoryCards
+        clasName="container mx-auto px-8 py-8"
+        categoryTitle="Related Products"
+        categoryProduct={demoProducts}
+        categoryLink="/category/safety-security"
+      />
     </div>
   );
 }

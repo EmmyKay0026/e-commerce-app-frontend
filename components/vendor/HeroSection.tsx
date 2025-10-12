@@ -7,6 +7,7 @@ import { useUserStore } from "@/store/useUserStore";
 import { User } from "@/types/models";
 import { get } from "http";
 import { getInitials } from "@/services/user";
+import { FaWhatsapp } from "react-icons/fa";
 
 export function HeroSection({ vendor }: { vendor: User }) {
   return (
@@ -54,9 +55,9 @@ export function HeroSection({ vendor }: { vendor: User }) {
                     <h1 className="text-3xl md:text-4xl font-bold text-foreground">
                       {vendor?.vendorProfile?.businessName ?? vendor.fullName}
                     </h1>
-                    <Badge variant="secondary" className="text-xs">
+                    {/* <Badge variant="secondary" className="text-xs">
                       Verified Vendor
-                    </Badge>
+                    </Badge> */}
                   </div>
                   <p className="text-muted-foreground text-balance max-w-2xl line-clamp-4">
                     {vendor?.vendorProfile?.description}
@@ -71,13 +72,13 @@ export function HeroSection({ vendor }: { vendor: User }) {
                     </span>
                   </p>
                   <div className="flex items-center gap-4 flex-wrap text-sm">
-                    <div className="flex items-center gap-1">
+                    {/* <div className="flex items-center gap-1">
                       <Star className="h-4 w-4 fill-secondary text-secondary" />
                       <span className="font-semibold">4.8</span>
                       <span className="text-muted-foreground">
                         (2,450 reviews)
                       </span>
-                    </div>
+                    </div> */}
                     <div className="flex items-center gap-1 text-muted-foreground">
                       <MapPin className="h-4 w-4" />
                       <span>Lagos, Nigeria</span>
@@ -93,9 +94,10 @@ export function HeroSection({ vendor }: { vendor: User }) {
                   <Button
                     variant="outline"
                     size="lg"
-                    className="w-full md:w-auto bg-transparent"
+                    className="w-full md:w-auto bg-transparent text-green-500"
                   >
-                    <Mail className="h-4 w-4 mr-2" />
+                    <FaWhatsapp className="h-4 w-4 mr-2" />
+                    {/* <Mail className="h-4 w-4 mr-2" /> */}
                     Send Message
                   </Button>
                 </div>

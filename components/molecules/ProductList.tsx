@@ -27,7 +27,7 @@ const ProductList = ({ product }: { product: Product }) => {
           </span>
         </div>
         <div>
-          <h3 className="text-xl font-krub font-[500] ">{product.name}</h3>
+          <h3 className="text-lg font-krub font-[500] ">{product.name}</h3>
           <p className="text-[15px] text-muted-foreground line-clamp-3">
             {product.description}
           </p>

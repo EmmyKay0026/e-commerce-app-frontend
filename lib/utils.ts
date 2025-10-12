@@ -5,6 +5,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// Slugify function to create SEO-friendly URLs
+export const slugify = (str: string) => {
+  str.toLowerCase().replace(/&/g, "and").replace(/\s+/g, "-");
+};
+
 export const convertToCustomFormat = (dateString: string | any) => {
   const date = new Date(dateString);
   const day = String(date.getDate()).padStart(2, "0");
@@ -44,4 +49,30 @@ export const convertToCustomFormat = (dateString: string | any) => {
     monthOfYear,
     dayWithSuffix,
   };
+};
+
+export const timeSincePost = (postDate: Date): string => {
+  // currentDate: Date,
+  const currentDate = new Date();
+  const diffMs = currentDate.getTime() - postDate.getTime(); // difference in milliseconds
+  const diffSeconds = diffMs / 1000;
+  const diffMinutes = diffSeconds / 60;
+  const diffHours = diffMinutes / 60;
+  const diffDays = diffHours / 24;
+
+  if (diffSeconds < 60) {
+    return "Just now";
+  } else if (diffMinutes < 60) {
+    const minutes = Math.floor(diffMinutes);
+    return `${minutes} minute${minutes !== 1 ? "s" : ""} ago`;
+  } else if (diffHours < 24) {
+    const hours = Math.floor(diffHours);
+    return `${hours} hour${hours !== 1 ? "s" : ""} ago`;
+  } else if (diffDays <= 5) {
+    const days = Math.floor(diffDays);
+    return `${days} day${days !== 1 ? "s" : ""} ago`;
+  } else {
+    // Format as YYYY-MM-DD
+    return postDate.toISOString().split("T")[0];
+  }
 };

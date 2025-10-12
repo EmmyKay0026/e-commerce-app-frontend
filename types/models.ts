@@ -57,3 +57,19 @@ export interface Tag {
   createdAt: string;
   updatedAt: string;
 }
+
+export type CategoryName =
+  | "Environment"
+  | "Consumer Electronics"
+  | "Home & Garden"
+  | "Commercial Equipment"
+  | "Beauty"
+  | "Jewelry"
+  | "Industrial Machinery"
+  | "Business Services"
+  | "Apparel & Accessories"
+  | "Sports"
+  | "Vehicle Parts"
+  | "Packaging"
+  | "Tools & Hardware"
+  | "Toys";

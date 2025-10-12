@@ -14,7 +14,7 @@ import Link from "next/link";
 const ProductCards = ({ product }: { product: Product }) => {
   const convertedDate = convertToCustomFormat(product.createdAt);
   return (
-    <div className="space-y-1 " style={{ marginBottom: "2rem" }}>
+    <div className="space-y-2 " style={{ marginBottom: "2rem" }}>
       <ImageCarousel allowLightbox images={product.images} />
       <Link
         href={`/product/${product.id}`}
@@ -26,10 +26,10 @@ const ProductCards = ({ product }: { product: Product }) => {
         </span>
 
         <p className="font-bold text-xl">₦{product.price}</p>
-        <h3 className="text-lg font-krub font-[500] ">{product.name}</h3>
+        <h3 className="text-base font-krub font-[500] ">{product.name}</h3>
 
         <div className="flex gap-1 items-center ">
-          <MapPin className="w-4 h-4 text-muted-foreground" />
+          <MapPin className="w-3 h-3 text-muted-foreground" />
           <span className="text-[13px] text-muted-foreground">
             Lagos, Nigeria
           </span>

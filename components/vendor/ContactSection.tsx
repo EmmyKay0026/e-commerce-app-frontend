@@ -90,7 +90,7 @@ export function ContactSection({ vendor }: { vendor: User }) {
         <Card className="max-w-2xl mx-auto">
           <CardContent className="p-8">
             <div className="text-center mb-6">
-              <MessageCircle className="h-12 w-12 text-muted-foreground blur-sm mx-auto mb-4" />
+              <MessageCircle className="h-12 w-12 text-muted-foreground  mx-auto mb-4" />
               <h3 className="text-2xl font-bold text-foreground mb-2">
                 Start a Conversation
               </h3>
@@ -101,16 +101,16 @@ export function ContactSection({ vendor }: { vendor: User }) {
             <div className="flex flex-col sm:flex-row gap-3">
               <Button size="lg" className="flex-1">
                 <Phone className="h-4 w-4 mr-2" />
-                Call Now
+                Show contact
               </Button>
-              <Button
+              {/* <Button
                 size="lg"
                 variant="outline"
                 className="flex-1 bg-transparent"
               >
                 <MessageCircle className="h-4 w-4 mr-2" />
                 Send Message
-              </Button>
+              </Button> */}
             </div>
           </CardContent>
         </Card>
