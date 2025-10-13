@@ -1,4 +1,5 @@
 import { AppSidebar } from "@/components/app-sidebar";
+import LeftBar from "@/components/templates/LeftSideBar";
 import {
   SidebarInset,
   SidebarProvider,
@@ -10,15 +11,11 @@ import { ReactNode } from "react";
 
 const UserDashboardLayout = ({ children }: { children: ReactNode }) => {
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <SidebarTrigger className="-ml-1" />
-        <Separator orientation="vertical" />
+    <main className="flex items-start justify-between gap-3">
+      <LeftBar />
 
-        {children}
-      </SidebarInset>
-    </SidebarProvider>
+      {children}
+    </main>
   );
 };
 

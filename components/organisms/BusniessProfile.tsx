@@ -225,7 +225,7 @@ export function BusinessDashboard({
                       </h3>
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-bold text-primary">
-                          ${item?.product?.price.toFixed(2)}
+                          ${item?.product?.price}
                         </span>
                         <Button
                           variant="ghost"
@@ -290,7 +290,7 @@ export function BusinessDashboard({
                           {product.name}
                         </h3>
                         <span className="text-sm font-bold text-primary">
-                          ${product.price.toFixed(2)}
+                          ${product.price}
                         </span>
                       </CardContent>
                     </Card>
@@ -444,7 +444,7 @@ export function BusinessDashboard({
                       {product.name}
                     </h3>
                     <span className="text-sm font-bold text-primary">
-                      ${product.price.toFixed(2)}
+                      ${product.price}
                     </span>
                   </CardContent>
                 </Card>
