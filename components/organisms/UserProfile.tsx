@@ -101,10 +101,10 @@ export function UserDashboard({
 
     // Private View
     return (
-      <div className="min-h-screen bg-background py-6">
+      <div className="min-h-screen bg-background py-6 my-6">
         <div className="mx-auto  space-y-8">
           {/* Profile Header */}
-          <Card
+          {/* <Card
             className="rounded-none w-full shadow-none"
             style={{
               background: `linear-gradient(8deg,rgba(0, 0, 0, 0.47) 0%, rgba(0, 0, 0, 0) 100%), url('${user.vendorProfile?.coverImage}')`,
@@ -143,12 +143,10 @@ export function UserDashboard({
                   </div>
                 </div>
                 <EditProfile />
-                {/* <Button className="rounded-lg bg-primary px-4 py-2 text-white hover:bg-secondary hover:text-secondary-foreground">
-                  Edit Profile
-                </Button> */}
+                
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
 
           {/* Quick Links */}
           <div className="px-6">

@@ -11,7 +11,7 @@ const ProductList = ({ product }: { product: Product }) => {
   const convertedDate = convertToCustomFormat(product.createdAt);
 
   return (
-    <article className="relative flex flex-col justify-between shadow rounded py-[15px] px-6 gap-6 mx-3 md:mx-5 lg:mx-6 lg:flex-row">
+    <article className="relative flex flex-col justify-between bg-white shadow rounded py-[15px] px-6 gap-6 mx-3  lg:flex-row">
       <ImageCarousel
         // className={"w-[60%]"}
         allowLightbox

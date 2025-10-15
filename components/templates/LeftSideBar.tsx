@@ -10,6 +10,9 @@ import { usePathname } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { getInitials } from "@/services/user";
 import { mockUser } from "@/constants/userData";
+import UserProfileCard from "../molecules/UserProfileCard";
+import UserProfileCompletion from "../molecules/UserProfileCompletion";
+import UserSideBarMenu from "../molecules/UserSideBarMenu";
 // import Brand from "../molecules/Brand";
 // import { Link, useLocation } from "react-router-dom";
 // import { sideMenu } from "../../constants/sideMenu";
@@ -58,17 +61,17 @@ const LeftBar = () => {
     (location.pathname.startsWith(link) && link.startsWith(location.pathname));
 
   return (
-    <section
+    <aside
       id="leftbar"
       className={cn(
-        "flex flex-col gap-2 py-[16px] z-[999] absolute h-screen md:static md:h-[initial] transition-all duration-500",
-        hambugerShowState ? "w-full md:w-[22%] lg:w-[20%]" : "w-[0%]"
+        "flex flex-col gap-2 py-[16px]  absolute h-screen md:sticky md:h-[initial] transition-all duration-500",
+        hambugerShowState ? "w-full md:w-[22%] lg:w-[25%]" : "w-[0%]"
       )}
-      style={{
-        background: "rgba(198, 131, 17, 0.19)",
-        // background:
-        //   "linear-gradient(158deg,rgba(198, 131, 17, 0.42) 0%, rgba(134, 135, 135, 0.37) 57%, rgba(198, 131, 17, 0.36) 100%)",
-      }}
+      // style={{
+      //   background: "rgba(198, 131, 17, 0.19)",
+      //   // background:
+      //   //   "linear-gradient(158deg,rgba(198, 131, 17, 0.42) 0%, rgba(134, 135, 135, 0.37) 57%, rgba(198, 131, 17, 0.36) 100%)",
+      // }}
     >
       <button
         onClick={() => updateHambugerShowState(hambugerShowState)}
@@ -81,7 +84,11 @@ const LeftBar = () => {
         <X />
       </button>
 
-      <div className="flex justify-center sticky items-center">
+      <UserProfileCard />
+      <UserSideBarMenu />
+      <UserProfileCompletion />
+
+      {/* <div className="flex justify-center sticky items-center">
         <Avatar className="h-15 w-15">
           <AvatarImage
             src={mockUser.profilePicture || "/placeholder.svg"}
@@ -91,9 +98,9 @@ const LeftBar = () => {
             {getInitials(mockUser.fullName)}
           </AvatarFallback>
         </Avatar>
-      </div>
+      </div> */}
 
-      <nav
+      {/* <nav
         className={cn(
           "flex-col sticky justify-between items-stretch w-full h-full max-h-[450px]",
           hambugerShowState ? "flex" : "hidden w-[0%]"
@@ -132,8 +139,8 @@ const LeftBar = () => {
             </li>
           ))}
         </ul>
-      </nav>
-    </section>
+      </nav> */}
+    </aside>
   );
 };
 

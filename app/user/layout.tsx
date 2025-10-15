@@ -11,7 +11,7 @@ import { ReactNode } from "react";
 
 const UserDashboardLayout = ({ children }: { children: ReactNode }) => {
   return (
-    <main className="flex items-start justify-between gap-3">
+    <main className="flex items-start gap-4  bg-gray-200/70 px-6">
       <LeftBar />
 
       {children}

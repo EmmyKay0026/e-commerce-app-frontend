@@ -11,7 +11,7 @@ export default function DashboardPage() {
   const isLoggedIn = true;
 
   return (
-    <main className="flex">
+    <main className="flex ">
       <UserDashboard
         user={mockUser}
         isOwner={isOwner}
