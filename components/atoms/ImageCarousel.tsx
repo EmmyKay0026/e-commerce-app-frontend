@@ -95,7 +95,7 @@ function ImageCarousel({
 
   return (
     <div
-      className={`relative select-none  ${className}`}
+      className={`relative select-none overflow-hidden  ${className}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onTouchStart={onTouchStart}
@@ -103,13 +103,13 @@ function ImageCarousel({
       aria-roledescription="carousel"
     >
       {/* Image area */}
-      <div className="flex w-[200px] overflow-clip">
+      <div className="flex w-full max-w-[200px] overflow-clip">
         {images.map((src, i) => (
           <div
             key={i}
-            className="relative aspect-square min-w-50 w-50 rounded overflow-hidden bg-muted "
+            className="relative aspect-square min-w-full w-full rounded overflow-hidden bg-muted "
             style={{
-              transform: `translateX(-${index * 200}px)`,
+              transform: `translateX(-${index * 100}%)`,
               transition: "transform 0.3s ease",
             }}
             onClick={
@@ -126,6 +126,7 @@ function ImageCarousel({
           </div>
         ))}
       </div>
+
 
       <div className="absolute top-1 bg-amber-50/70 left-2 w-6 h-6 rounded-full flex items-center justify-center   inset-0  px-2">
         <p className=" text-[12px] text-muted-foreground font-medium">

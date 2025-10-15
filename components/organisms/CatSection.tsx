@@ -1,7 +1,11 @@
-// components/organisms/CatSection.tsx
-import Link from "next/link";
+"use client";
 
-export interface Product {
+import Link from "next/link";
+import ProductCards from "@/components/molecules/ProductCard";
+import type { Product as ModelProduct } from "@/types/models";
+import type { Product as DataProduct } from "@/data/products";
+
+interface SimpleProduct {
   id: string;
   image: string;
   name: string;
@@ -12,7 +16,7 @@ export interface Product {
 export interface CategorySectionProps {
   title: string;
   categorySlug?: string;
-  products: Product[];
+  products: SimpleProduct[];
 }
 
 export default function CategorySection({
@@ -20,8 +24,22 @@ export default function CategorySection({
   categorySlug = "",
   products,
 }: CategorySectionProps) {
+  // Normalize simple products into the Product type expected by ProductCard
+  const normalizedProducts: DataProduct[] = products.map((p) => ({
+    id: p.id,
+    title: p.name, // ✅ required field in data/products Product type
+    name: p.name,
+    price: Number(p.price?.replace(/[₦,]/g, "")) || 0,
+    category: categorySlug || "general",
+    images: [p.image],
+    description: p.minOrder ? `Minimum order: ${p.minOrder}` : "",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  }));
+
   return (
     <section className="mb-10">
+      {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold">{title}</h2>
         {categorySlug && (
@@ -34,18 +52,11 @@ export default function CategorySection({
         )}
       </div>
 
-      {/* Products Grid */}
+      {/* Product Grid */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        {products.slice(0, 5).map((product) => (
-          <div key={product.id} className="p-3 border rounded-md">
-            <img src={product.image} alt={product.name} className="rounded-md" />
-            <p className="mt-2 text-sm font-semibold">{product.name}</p>
-            {product.price && (
-              <p className="text-sm text-gray-600">{product.price}</p>
-            )}
-            {product.minOrder && (
-              <p className="text-xs text-gray-500">Min: {product.minOrder}</p>
-            )}
+        {normalizedProducts.slice(0, 5).map((product) => (
+          <div key={product.id} className="p-2">
+            <ProductCards product={product} />
           </div>
         ))}
       </div>

@@ -31,6 +31,10 @@ export interface Product {
   createdAt: string;
   updatedAt: string;
   metadata: {}; // to contain more description of the item
+  title?: string;
+  category?: string;
+  brand?: string;
+  location?: string;
 }
 
 export interface Category {

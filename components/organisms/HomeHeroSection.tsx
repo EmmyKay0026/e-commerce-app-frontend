@@ -1,4 +1,4 @@
-"use client"; // 👈 make this a client component
+"use client";
 
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { List } from "lucide-react";
 import CategoriesModal from "../molecules/CategoriesModal";
-// import { CameraIcon } from "lucide-react";
 
 const products = [
   {
@@ -36,13 +35,16 @@ const HomeHeroSection = () => {
   const [showCategories, setShowCategories] = useState(false);
 
   return (
-    <section className="relative w-full h-[100dvh] flex items-center px-5 md:px-10 lg:px-20 text-center">
+    <section className="relative w-full h-auto py-20 lg:py-0 lg:h-[100dvh] flex items-center px-5 md:px-10 lg:px-20 text-center">
+      {/* Background */}
       <Image
         src="/oilandgas.jpeg"
         alt="Industrial Background"
         fill
         className="object-cover brightness-35"
       />
+
+      {/* Content */}
       <div className="relative z-10 lg:text-left w-full lg:max-w-4xl text-white">
         <h2 className="font-bold text-3xl md:text-4xl lg:text-5xl">
           Your No.1 Marketplace For Quality Industrial Equipments
@@ -52,6 +54,7 @@ const HomeHeroSection = () => {
           the oil & gas industrial sectors
         </p>
 
+        {/* Search bar */}
         <div
           id="hero-search"
           className="mt-6 flex items-center gap-2 bg-white max-w-3xl text-lg rounded-3xl overflow-hidden"
@@ -60,13 +63,13 @@ const HomeHeroSection = () => {
             placeholder="Search products..."
             className="flex-1 border-none rounded-2xl focus:ring-0 focus:outline-none shadow-none focus:border-none text-black px-6"
           />
-          {/* <CameraIcon className="color-black bg-white"/> */}
           <Button className="bg-secondary rounded-3xl hover:bg-primary m-1 text-white px-6 py-5">
             Search
           </Button>
         </div>
+
+        {/* Categories button (desktop centered, mobile bottom-left) */}
         <Button
-          id="hero-search"
           onClick={() => setShowCategories(true)}
           className="cursor-pointer mt-5 gap-1 hover:bg-white bg-transparent rounded-full hover:text-black text-white "
         >
@@ -74,6 +77,7 @@ const HomeHeroSection = () => {
           Categories
         </Button>
       </div>
+
       <CategoriesModal
         isOpen={showCategories}
         onClose={() => setShowCategories(false)}

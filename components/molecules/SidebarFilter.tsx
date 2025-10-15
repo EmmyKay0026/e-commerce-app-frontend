@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import type { Product } from "@/data/products";
+import type { Product } from "@/types/models"; // ✅ consistent import with CategoryPage
 
 type FilterState = {
   brands: string[];
@@ -19,8 +19,11 @@ type Props = {
   onFiltersChangeAction: (filters: FilterState) => void;
 };
 
-export default function SidebarFilter({ products, onFiltersChangeAction }: Props) {
-  // ✅ State
+export default function SidebarFilter({
+  products,
+  activeCategory,
+  onFiltersChangeAction,
+}: Props) {
   const [minPrice, setMinPrice] = useState<number | "">("");
   const [maxPrice, setMaxPrice] = useState<number | "">("");
   const [location, setLocation] = useState<string>("");
@@ -29,20 +32,21 @@ export default function SidebarFilter({ products, onFiltersChangeAction }: Props
   const [powerSource, setPowerSource] = useState<string>("");
   const [sort, setSort] = useState<string>("recommended");
 
-  // ✅ Derived brand & location lists
+  // ✅ Extract unique brands
   const brands = useMemo(() => {
     const b = new Set<string>();
     products.forEach((p) => p.brand && b.add(p.brand));
     return Array.from(b);
   }, [products]);
 
+  // ✅ Extract unique locations
   const locations = useMemo(() => {
     const s = new Set<string>();
     products.forEach((p) => p.location && s.add(p.location));
     return Array.from(s);
   }, [products]);
 
-  // ✅ Stable callback to prevent re-renders
+  // ✅ Handle filters change
   const handleFiltersChange = useCallback(() => {
     onFiltersChangeAction({
       brands: selectedBrands,
@@ -53,17 +57,28 @@ export default function SidebarFilter({ products, onFiltersChangeAction }: Props
       powerSource: powerSource || undefined,
       sort,
     });
-  }, [selectedBrands, minPrice, maxPrice, location, condition, powerSource, sort, onFiltersChangeAction]);
+  }, [
+    selectedBrands,
+    minPrice,
+    maxPrice,
+    location,
+    condition,
+    powerSource,
+    sort,
+    onFiltersChangeAction,
+  ]);
 
-  // ✅ Trigger only when values change
+  // ✅ Run every time filters change
   useEffect(() => {
     handleFiltersChange();
   }, [handleFiltersChange]);
 
-  // ✅ Helpers
-  function toggleBrand(b: string) {
-    setSelectedBrands((prev) => (prev.includes(b) ? prev.filter((x) => x !== b) : [...prev, b]));
-  }
+  // ✅ Toggle brand selection
+  const toggleBrand = (b: string) => {
+    setSelectedBrands((prev) =>
+      prev.includes(b) ? prev.filter((x) => x !== b) : [...prev, b]
+    );
+  };
 
   return (
     <aside className="bg-white rounded-2xl shadow p-4 border border-gray-100 max-h-[calc(100vh-6rem)] overflow-y-auto sticky top-20">
@@ -108,14 +123,18 @@ export default function SidebarFilter({ products, onFiltersChangeAction }: Props
             type="number"
             placeholder="min"
             value={minPrice}
-            onChange={(e) => setMinPrice(e.target.value === "" ? "" : Number(e.target.value))}
+            onChange={(e) =>
+              setMinPrice(e.target.value === "" ? "" : Number(e.target.value))
+            }
             className="w-1/2 border rounded px-2 py-1 text-sm"
           />
           <input
             type="number"
             placeholder="max"
             value={maxPrice}
-            onChange={(e) => setMaxPrice(e.target.value === "" ? "" : Number(e.target.value))}
+            onChange={(e) =>
+              setMaxPrice(e.target.value === "" ? "" : Number(e.target.value))
+            }
             className="w-1/2 border rounded px-2 py-1 text-sm"
           />
         </div>
@@ -140,7 +159,9 @@ export default function SidebarFilter({ products, onFiltersChangeAction }: Props
 
       {/* Brand */}
       <div className="mb-5">
-        <label className="block text-sm text-gray-600 mb-2">Manufacturer / Brand</label>
+        <label className="block text-sm text-gray-600 mb-2">
+          Manufacturer / Brand
+        </label>
         <div className="space-y-2">
           {brands.length === 0 ? (
             <div className="text-sm text-gray-500">No brands listed</div>

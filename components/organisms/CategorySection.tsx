@@ -1,91 +1,36 @@
 "use client";
 import React, { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { CategoryName } from "@/types/models";
 import { slugify } from "@/lib/utils";
-
-interface Product {
-  name: string;
-  price: string;
-  img: string;
-}
-
-const categories: CategoryName[] = [
-  "Environment",
-  "Consumer Electronics",
-  "Home & Garden",
-  "Commercial Equipment",
-  "Beauty",
-  "Jewelry",
-  "Industrial Machinery",
-  "Business Services",
-  "Apparel & Accessories",
-  "Sports",
-  "Vehicle Parts",
-  "Packaging",
-  "Tools & Hardware",
-  "Toys",
-];
-
-const sampleProducts: Partial<Record<CategoryName, Product[]>> = {
-  Environment: [
-    {
-      name: "Solar Panel Kit",
-      price: "$300",
-      img: "https://industrialmartnigeria.com/wp-content/uploads/2024/09/hoist10500kg-1-600x600.webp",
-    },
-    {
-      name: "Air Purifier",
-      price: "$150",
-      img: "https://industrialmartnigeria.com/wp-content/uploads/2024/09/bosch-twist-drill-bits-co14b-64_1000-600x600.webp",
-    },
-  ],
-  "Consumer Electronics": [
-    {
-      name: "Industrial Drone",
-      price: "$1,200",
-      img: "https://industrialmartnigeria.com/wp-content/uploads/2024/09/ofite-machined-metal-mud-balance-500x500-1.jpg",
-    },
-    {
-      name: "Smart Controller",
-      price: "$250",
-      img: "https://industrialmartnigeria.com/wp-content/uploads/2024/09/1-fotor-202409040615.png",
-    },
-  ],
-  "Industrial Machinery": [
-    {
-      name: "Hydraulic Press",
-      price: "$2,500",
-      img: "https://industrialmartnigeria.com/wp-content/uploads/2024/09/main-qimg-aa51dc1a730d035fc7e3fb3e5311bab0-lq-fotor-202409040919.png",
-    },
-    {
-      name: "Lathe Machine",
-      price: "$1,800",
-      img: "https://industrialmartnigeria.com/wp-content/uploads/2024/09/aodd-pump-1-2-bsp-15mm--300x300.jpg",
-    },
-  ],
-};
+import { demoCategories, demoProducts } from "@/constants/product";
+import ProductCards from "../molecules/ProductCards";
 
 const CategorySection = () => {
-  const [selectedCategory, setSelectedCategory] = useState<CategoryName>(
-    "Industrial Machinery"
+  // Default to the first category
+  const [selectedCategory, setSelectedCategory] = useState(
+    demoCategories[0].name
   );
   const [showCategories, setShowCategories] = useState(false);
 
-  const products = sampleProducts[selectedCategory] ?? [];
+  // Get the currently selected category and its products
+  const currentCategory = demoCategories.find(
+    (cat) => cat.name === selectedCategory
+  );
+  const products = demoProducts.filter(
+    (p) => p.categoryId === currentCategory?.id
+  );
 
   return (
-    <section className="bg-gray-50 w-full py-16">
+    <section className="bg-gray-50 w-full max-w-[100dvw] py-16">
       {/* Header */}
       <div className="text-center mb-10 px-5 md:px-10">
         <h3 className="font-bold text-gray-900 text-3xl md:text-4xl">
           Our Product Categories
         </h3>
         <p className="text-gray-600 mt-4 max-w-2xl mx-auto">
-          Explore our wide range of high-quality industrial equipment and tools,
-          designed to meet the needs of various sectors.
+          Explore our range of high-quality products, designed to meet your
+          needs across various categories.
         </p>
       </div>
 
@@ -106,23 +51,23 @@ const CategorySection = () => {
             Categories
           </h4>
           <ul className="space-y-2">
-            {categories.map((cat) => (
+            {demoCategories.map((cat) => (
               <li
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.name)}
                 className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  selectedCategory === cat
+                  selectedCategory === cat.name
                     ? "bg-blue-100 text-blue-700"
                     : "hover:bg-gray-100 text-gray-700"
                 }`}
               >
-                {cat}
+                {cat.name}
               </li>
             ))}
           </ul>
         </aside>
 
-        {/* Mobile Dropdown for Categories */}
+        {/* Mobile Dropdown */}
         <div className="block lg:hidden w-full">
           <button
             onClick={() => setShowCategories(!showCategories)}
@@ -138,20 +83,20 @@ const CategorySection = () => {
 
           {showCategories && (
             <ul className="mt-3 bg-white border border-gray-200 rounded-xl absolute py-3 z-10 px-5 shadow-md max-h-[300px] overflow-y-auto">
-              {categories.map((cat) => (
+              {demoCategories.map((cat) => (
                 <li
-                  key={cat}
+                  key={cat.id}
                   onClick={() => {
-                    setSelectedCategory(cat);
+                    setSelectedCategory(cat.name);
                     setShowCategories(false);
                   }}
                   className={`cursor-pointer px-4 py-3 text-sm font-medium transition-all ${
-                    selectedCategory === cat
+                    selectedCategory === cat.name
                       ? "bg-blue-100 rounded-full text-blue-700"
                       : "hover:bg-gray-100 text-gray-700"
                   }`}
                 >
-                  {cat}
+                  {cat.name}
                 </li>
               ))}
             </ul>
@@ -160,44 +105,24 @@ const CategorySection = () => {
 
         {/* Product Grid */}
         <div className="md:col-span-3">
-          {/* Category title with "See more" link */}
           <div className="flex justify-between items-center mb-6">
             <h4 className="text-xl font-bold text-gray-900">
               {selectedCategory}
             </h4>
-            <Link
-              href={`/category/${slugify(selectedCategory)}`}
-              className="text-sm text-blue-600 hover:underline font-medium"
-            >
-              See more →
-            </Link>
+            {currentCategory && (
+              <Link
+                href={`/category/${slugify(currentCategory.name)}`}
+                className="text-sm text-blue-600 hover:underline font-medium"
+              >
+                See more →
+              </Link>
+            )}
           </div>
 
           {products.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              {products.map((product, index) => (
-                <Link
-                  href={"/product/prod-5"}
-                  key={index}
-                  className="bg-white shadow-sm border border-gray-100 rounded-2xl overflow-hidden hover:shadow-lg transition-all"
-                >
-                  <div className="relative w-full h-36 sm:h-40">
-                    <Image
-                      src={product.img}
-                      alt={product.name}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="p-3 sm:p-4">
-                    <h5 className="font-semibold text-gray-900 text-sm">
-                      {product.name}
-                    </h5>
-                    <p className="text-blue-600 text-sm font-medium mt-1 sm:mt-2">
-                      {product.price}
-                    </p>
-                  </div>
-                </Link>
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {products.map((product) => (
+                <ProductCards key={product.id} product={product} />
               ))}
             </div>
           ) : (
