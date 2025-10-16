@@ -20,8 +20,8 @@ export default function MobileBottomNav() {
         <div className="relative">
           {/* Floating Center Button */}
           <div className="absolute left-1/2 -translate-x-1/2 -top-4 z-20">
-            <button className="w-16 h-16 rounded-full bg-primary hover:bg-white-500 shadow-xl flex items-center justify-center transition-all duration-300 active:scale-95">
-              <DollarSign className="w-8 h-8 text-white" strokeWidth={2.5} />
+            <button className="w-14 h-14 rounded-full bg-primary hover:bg-white-500 shadow-xl flex items-center justify-center transition-all duration-300 active:scale-95">
+              <DollarSign className="w-7 h-7 text-white" strokeWidth={2.5} />
             </button>
           </div>
 

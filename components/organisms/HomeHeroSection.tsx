@@ -68,14 +68,37 @@ const HomeHeroSection = () => {
           </Button>
         </div>
 
-        {/* Categories button (desktop centered, mobile bottom-left) */}
-        <Button
-          onClick={() => setShowCategories(true)}
-          className="cursor-pointer mt-5 gap-1 hover:bg-white bg-transparent rounded-full hover:text-black text-white "
-        >
-          <List />
-          Categories
-        </Button>
+        {/* Categories button - left on mobile, centered on desktop */}
+        <div className="mt-5 text-left">
+          <Button
+            onClick={() => setShowCategories(true)}
+            className="cursor-pointer gap-1 hover:bg-white bg-transparent rounded-full hover:text-black text-white"
+          >
+            <List />
+            Categories
+          </Button>
+          <Button
+            onClick={() => setShowCategories(true)}
+            className="cursor-pointer gap-1 hover:bg-white bg-transparent rounded-full hover:text-black text-white"
+          >
+            <List />
+            Categories
+          </Button>
+          <Button
+            onClick={() => setShowCategories(true)}
+            className="cursor-pointer gap-1 hover:bg-white bg-transparent rounded-full hover:text-black text-white"
+          >
+            <List />
+            Categories
+          </Button>
+          <Button
+            onClick={() => setShowCategories(true)}
+            className="cursor-pointer gap-1 hover:bg-white bg-transparent rounded-full hover:text-black text-white"
+          >
+            <List />
+            Categories
+          </Button>
+        </div>
       </div>
 
       <CategoriesModal
