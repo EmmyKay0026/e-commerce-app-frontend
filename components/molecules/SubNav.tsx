@@ -1,5 +1,5 @@
 "use client";
-
+import React from "react";
 import { Home, List, MessageCircle, User, DollarSign, Plus } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -10,6 +10,7 @@ export default function MobileBottomNav() {
   const navItems = [
     { name: "Home", href: "/", icon: Home },
     { name: "Categories", href: "#", icon: List },
+    // Spacer will be inserted manually between index 1 and 2
     { name: "Support", href: "/contact-us", icon: MessageCircle },
     { name: "Account", href: "#", icon: User },
   ];
@@ -21,7 +22,7 @@ export default function MobileBottomNav() {
           {/* Floating Center Button */}
           <div className="absolute left-1/2 -translate-x-1/2 -top-4 z-20">
             <button className="w-14 h-14 rounded-full bg-primary hover:bg-white-500 shadow-xl flex items-center justify-center transition-all duration-300 active:scale-95">
-              <DollarSign className="w-7 h-7 text-white" strokeWidth={2.5} />
+              <Plus className="w-7 h-7 text-white" strokeWidth={2.5} />
             </button>
           </div>
 
@@ -55,36 +56,42 @@ export default function MobileBottomNav() {
               />
             </svg>
 
-
-
             {/* Navigation Buttons Overlay */}
             <div className="absolute inset-0 flex items-center justify-around">
-              {/* Home Button */}
-              <button className="flex flex-col items-center justify-center w-16 py-2 rounded-xl active:bg-gray-100 transition-colors">
-                <Home className="w-6 h-6 text-gray-600" />
-                <span className="text-xs mt-1 text-gray-600">Home</span>
-              </button>
+              {navItems.map((item, index) => {
+                const Icon = item.icon;
 
-              {/* Categories Button */}
-              <button className="flex flex-col items-center justify-center w-16 py-2 rounded-xl active:bg-gray-100 transition-colors">
-                <List className="w-6 h-6 text-gray-600" />
-                <span className="text-xs mt-1 text-gray-600">Categories</span>
-              </button>
+                // Add a spacer div in the middle
+                if (index === 2) {
+                  return (
+                    <React.Fragment key={item.name}>
+                      <div className="w-16"></div>
+                      <Link
+                        href={item.href}
+                        className={`flex flex-col items-center justify-center w-16 py-2 rounded-xl transition-colors ${
+                          pathname === item.href ? "text-primary" : "text-gray-600"
+                        }`}
+                      >
+                        <Icon className="w-6 h-6" />
+                        <span className="text-xs mt-1">{item.name}</span>
+                      </Link>
+                    </React.Fragment>
+                  );
+                }
 
-              {/* Center Spacer */}
-              <div className="w-16"></div>
-
-              {/* Support Button */}
-              <button className="flex flex-col items-center justify-center w-16 py-2 rounded-xl active:bg-gray-100 transition-colors">
-                <MessageCircle className="w-6 h-6 text-gray-600" />
-                <span className="text-xs mt-1 text-gray-600">Support</span>
-              </button>
-
-              {/* Profile Button */}
-              <button className="flex flex-col items-center justify-center w-16 py-2 rounded-xl active:bg-gray-100 transition-colors">
-                <User className="w-6 h-6 text-gray-600" />
-                <span className="text-xs mt-1 text-gray-600">Profile</span>
-              </button>
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`flex flex-col items-center justify-center w-16 py-2 rounded-xl transition-colors ${
+                      pathname === item.href ? "text-primary" : "text-gray-600"
+                    }`}
+                  >
+                    <Icon className="w-6 h-6" />
+                    <span className="text-xs mt-1">{item.name}</span>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </div>

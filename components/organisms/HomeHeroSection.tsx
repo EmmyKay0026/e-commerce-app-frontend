@@ -3,46 +3,21 @@
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import { List } from "lucide-react";
 import CategoriesModal from "../molecules/CategoriesModal";
-
-const products = [
-  {
-    id: "1",
-    name: "Nike Air Max",
-    price: "$120",
-    image: "/shoes1.jpg",
-    href: "/products/1",
-  },
-  {
-    id: "2",
-    name: "Adidas Ultraboost",
-    price: "$150",
-    image: "/shoes2.jpg",
-    href: "/products/2",
-  },
-  {
-    id: "3",
-    name: "Puma Running Shoes",
-    price: "$90",
-    image: "/shoes3.jpg",
-    href: "/products/3",
-  },
-];
 
 const HomeHeroSection = () => {
   const [showCategories, setShowCategories] = useState(false);
 
   return (
-    <section className="relative w-full h-auto py-20 lg:py-0 lg:h-[100dvh] flex items-center px-5 md:px-10 lg:px-20 text-center">
-      {/* Background */}
-      <Image
-        src="/oilandgas.jpeg"
-        alt="Industrial Background"
-        fill
-        className="object-cover brightness-35"
-      />
+    <section
+      className="relative w-full h-auto py-20 lg:py-0 lg:h-[100dvh] flex items-center px-5 md:px-10 lg:px-20 text-center bg-fixed bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage: `url('/oilandgas.jpeg')`,
+      }}
+    >
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/60" />
 
       {/* Content */}
       <div className="relative z-10 lg:text-left w-full lg:max-w-4xl text-white">
@@ -68,36 +43,20 @@ const HomeHeroSection = () => {
           </Button>
         </div>
 
-        {/* Categories button - left on mobile, centered on desktop */}
-        <div className="mt-5 text-left">
-          <Button
-            onClick={() => setShowCategories(true)}
-            className="cursor-pointer gap-1 hover:bg-white bg-transparent rounded-full hover:text-black text-white"
-          >
-            <List />
-            Categories
-          </Button>
-          <Button
-            onClick={() => setShowCategories(true)}
-            className="cursor-pointer gap-1 hover:bg-white bg-transparent rounded-full hover:text-black text-white"
-          >
-            <List />
-            Categories
-          </Button>
-          <Button
-            onClick={() => setShowCategories(true)}
-            className="cursor-pointer gap-1 hover:bg-white bg-transparent rounded-full hover:text-black text-white"
-          >
-            <List />
-            Categories
-          </Button>
-          <Button
-            onClick={() => setShowCategories(true)}
-            className="cursor-pointer gap-1 hover:bg-white bg-transparent rounded-full hover:text-black text-white"
-          >
-            <List />
-            Categories
-          </Button>
+        {/* Categories buttons */}
+        <div className="mt-5 text-left flex flex-wrap gap-3">
+          {Array(4)
+            .fill(0)
+            .map((_, i) => (
+              <Button
+                key={i}
+                onClick={() => setShowCategories(true)}
+                className="cursor-pointer gap-1 hover:bg-white bg-transparent rounded-full hover:text-black text-white"
+              >
+                <List />
+                Categories
+              </Button>
+            ))}
         </div>
       </div>
 
