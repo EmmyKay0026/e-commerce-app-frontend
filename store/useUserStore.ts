@@ -14,7 +14,7 @@ interface UserStore {
 }
 
 export const useUserStore = create<UserStore>((set, get) => ({
-  user: userDB[1],
+  user: userDB[0],
   isOwner: "unknown",
   isLoading: false,
   error: null,
@@ -32,45 +32,46 @@ export const useUserStore = create<UserStore>((set, get) => ({
     return owner;
   },
 
-  // getMe: try backend first (/api/users/:id or /api/auth/me), fall back to mock userDB
+  // getMe: try backend first (/users/:id or /users/me), fall back to mock userDB
   getMe: async (id?: string) => {
     set({ isLoading: true, error: null });
 
+    const API = process.env.NEXT_PUBLIC_API_BASE || "/api";
     const fallback = ((): User | null => {
       if (id) return userDB.find((u) => u.id === id) ?? null;
       return userDB[0] ?? null;
     })();
 
     try {
-      // choose endpoint
-      const endpoint = id ? `/api/users/${id}` : `/api/auth/me`;
-      const res = await fetch(endpoint, { method: "GET" });
+      const endpoint = id ? `${API}/users/${id}` : `${API}/users/me`;
+      const token =
+        typeof window !== "undefined"
+          ? localStorage.getItem("token")
+          : null;
+      const res = await fetch(endpoint, {
+        method: "GET",
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
 
       if (!res.ok) {
-        // backend didn't return OK — use mock fallback
-        // set({
-        //   user: fallback,
-        //   isLoading: false,
-        //   error: `Fetch failed: ${res.status}`,
-        // });
+        const message = `Fetch failed: ${res.status}`;
+        set({ user: fallback, isLoading: false, error: message });
         return fallback;
       }
 
-      // attempt to parse body (API might return { user } or user)
       const data = await res.json().catch(() => null);
-      const fetched: User | undefined =
-        (data && (data.user ?? data)) || undefined;
-
+      // API might return user directly or wrapped: { user }
+      const fetched: User | undefined = (data && (data.user ?? data)) || undefined;
       const finalUser = fetched ?? fallback ?? null;
-      // set({ user: finalUser, isLoading: false, error: null });
+
+      set({ user: finalUser, isLoading: false, error: null });
       return finalUser;
     } catch (err: any) {
-      // network or other error — fall back to mock DB
-      // set({
-      //   user: fallback,
-      //   isLoading: false,
-      //   error: err?.message ?? "Network error",
-      // });
+      set({
+        user: fallback,
+        isLoading: false,
+        error: err?.message ?? "Network error",
+      });
       return fallback;
     }
   },

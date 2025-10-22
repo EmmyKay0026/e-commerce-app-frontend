@@ -17,7 +17,7 @@ const CategoryCards = ({
   categoryLink: string;
 }) => {
   return (
-    <section className={cn("my-8 px-3 md:px-5 lg:px-6", clasName)}>
+    <section className={cn("my-8 px-3 md:px-5 w-full lg:px-18", clasName)}>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-3xl font-bold ">{categoryTitle}</h2>
         <Link href={categoryLink ? categoryLink : "/categories"}>

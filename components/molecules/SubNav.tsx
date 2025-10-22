@@ -9,10 +9,10 @@ export default function MobileBottomNav() {
 
   const navItems = [
     { name: "Home", href: "/", icon: Home },
-    { name: "Categories", href: "#", icon: List },
+    { name: "Categories", href: "/category", icon: List },
     // Spacer will be inserted manually between index 1 and 2
     { name: "Support", href: "/contact-us", icon: MessageCircle },
-    { name: "Account", href: "#", icon: User },
+    { name: "Account", href: "/user/1/profile", icon: User },
   ];
 
   return (
@@ -20,9 +20,9 @@ export default function MobileBottomNav() {
       <div className="fixed bottom-0 left-0 right-0 w-full">
         <div className="relative">
           {/* Floating Center Button */}
-          <div className="absolute left-1/2 -translate-x-1/2 -top-4 z-20">
-            <button className="w-14 h-14 rounded-full bg-primary hover:bg-white-500 shadow-xl flex items-center justify-center transition-all duration-300 active:scale-95">
-              <Plus className="w-7 h-7 text-white" strokeWidth={2.5} />
+          <div className="absolute left-1/2 -translate-x-1/2 -top-3 z-20">
+            <button className="w-12 h-12 rounded-full bg-primary hover:bg-white-500 shadow-xl flex items-center justify-center transition-all duration-300 active:scale-95">
+              <Plus className="w-6 h-6 text-white" strokeWidth={2.5} />
             </button>
           </div>
 

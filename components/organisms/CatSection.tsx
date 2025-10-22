@@ -24,10 +24,9 @@ export default function CategorySection({
   categorySlug = "",
   products,
 }: CategorySectionProps) {
-  // Normalize simple products into the Product type expected by ProductCard
   const normalizedProducts: DataProduct[] = products.map((p) => ({
     id: p.id,
-    title: p.name, // ✅ required field in data/products Product type
+    title: p.name,
     name: p.name,
     price: Number(p.price?.replace(/[₦,]/g, "")) || 0,
     category: categorySlug || "general",

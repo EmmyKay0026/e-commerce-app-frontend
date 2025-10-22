@@ -7,8 +7,8 @@ import Link from "next/link";
 
 export default function BusinessOpportunities() {
   return (
-    <section className="bg-gray-50 py-10 px-4 md:px-8 lg:px-18">
-      <div className="max-w-screen-xl mx-auto">
+    <section className="bg-gray-50 py-10 px-4 md:px-8 lg:px-20">
+      <div className="mx-auto">
         <h2 className="text-2xl md:text-3xl font-semibold mb-6">
           Discover your next business opportunity
         </h2>

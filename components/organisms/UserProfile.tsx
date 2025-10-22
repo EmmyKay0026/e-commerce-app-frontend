@@ -45,7 +45,7 @@ import { EditProfile } from "./EditUserProfile";
 
 interface UserDashboardProps {
   user: User;
-  isOwner: boolean;
+  currentUser?: User;
   products: Product[];
   wishlist: WishlistItem[];
   isLoggedIn?: boolean;
@@ -53,11 +53,65 @@ interface UserDashboardProps {
 
 export function UserDashboard({
   user,
-  isOwner,
+  currentUser,
   products,
   wishlist,
   isLoggedIn = false,
 }: UserDashboardProps) {
+  const [remoteProducts, setRemoteProducts] = useState<Product[]>(products ?? []);
+  const [remoteLoading, setRemoteLoading] = useState(false);
+  const [remoteError, setRemoteError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const API = process.env.NEXT_PUBLIC_API_BASE || "/api";
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    setRemoteLoading(true);
+    setRemoteError(null);
+
+    (async () => {
+      try {
+        // prefer typed vendorProfile id, then business_profile_id, then fallback to user.id
+        const vendorId =
+          user.vendorProfile?.id ?? user.business_profile_id ?? user.id;
+        if (!vendorId) {
+          throw new Error("vendor id not found on user");
+        }
+
+        const url = `${API}/products?vendorId=${encodeURIComponent(vendorId)}`;
+        const res = await fetch(url, {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+          signal,
+        });
+
+        if (!res.ok) {
+          throw new Error(`Products fetch failed: ${res.status}`);
+        }
+
+        const json = await res.json().catch(() => null);
+        const fetched: Product[] = (json?.products ?? json ?? []) as Product[];
+        setRemoteProducts(fetched);
+      } catch (err: any) {
+        // ignore abort errors
+        if (err?.name === "AbortError") return;
+        setRemoteError(err?.message ?? "Network error");
+      } finally {
+        setRemoteLoading(false);
+      }
+    })();
+
+    return () => {
+      controller.abort();
+    };
+  }, [user?.vendorProfile?.id, user?.business_profile_id, user?.id]);
+
+  const isOwner = currentUser && currentUser.id === user.id;
+
+  // const isOwner = currentUser?.id === user.id;
   const [isActive, setIsActive] = useState<"grid" | "list">("list");
   const [searchValue, setSearchValue] = useState<string>("");
   const [showSearch, setShowSearch] = useState<boolean>(false);
@@ -87,6 +141,13 @@ export function UserDashboard({
     );
   };
 
+  // console.log("UserDashboard Data:", {
+  //   viewingUser: user.fullName,
+  //   currentUser: currentUser?.fullName,
+  //   isOwner,
+  //   isLoggedIn,
+  // });
+
   if (isOwner) {
     // const [fullWishlist, setFullWishlist] = useState<WishlistItem[]>(wishlist);
 
@@ -101,10 +162,10 @@ export function UserDashboard({
 
     // Private View
     return (
-      <div className="min-h-screen bg-background py-6">
-        <div className="mx-auto  space-y-8">
+      <div className="min-h-screen bg-background lg:py-6 lg:my-6">
+        <div className="lg:mx-auto py-8">
           {/* Profile Header */}
-          <Card
+          {/* <Card
             className="rounded-none w-full shadow-none"
             style={{
               background: `linear-gradient(8deg,rgba(0, 0, 0, 0.47) 0%, rgba(0, 0, 0, 0) 100%), url('${user.vendorProfile?.coverImage}')`,
@@ -143,15 +204,13 @@ export function UserDashboard({
                   </div>
                 </div>
                 <EditProfile />
-                {/* <Button className="rounded-lg bg-primary px-4 py-2 text-white hover:bg-secondary hover:text-secondary-foreground">
-                  Edit Profile
-                </Button> */}
+                
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
 
           {/* Quick Links */}
-          <div className="px-6">
+          <div className="px-6 mb-6">
             <Card className="rounded-xl shadow-sm">
               <CardContent className="py-3 px-6 text-sm text-muted-foreground ">
                 <div className="flex justify-between">
@@ -338,7 +397,20 @@ export function UserDashboard({
         </Card>
       )}
       <h5 className="font-bold text-2xl p-6 pb-2">Shop from {displayName}</h5>
-      <GridListProductList products={demoProducts} />
+
+      {remoteLoading ? (
+        // show skeleton while loading
+        <div className="p-6">
+          <ProductCardGridViewSkeleton />
+        </div>
+      ) : (
+        // render fetched products (falls back to initial props if provided)
+        <GridListProductList products={remoteProducts} />
+      )}
+
+      {remoteError && (
+        <div className="p-4 text-sm text-red-600">Error loading products: {remoteError}</div>
+      )}
     </div>
   );
 }

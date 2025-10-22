@@ -15,6 +15,8 @@ import { ProductCardList } from "../molecules/ProductCardListView";
 // import { demoProducts } from "@/constants/product";
 import { Product } from "@/types/models";
 import { cn } from "@/lib/utils";
+import ProductCards from "../molecules/ProductCards";
+import ProductList from "../molecules/ProductList";
 
 const GridListProductList = ({
   products,
@@ -100,29 +102,30 @@ const GridListProductList = ({
       </article>
 
       {isActive === "grid" ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 pt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pt-6">
           {products.length > 0 &&
             products.map((product) =>
               isPageLoading ? (
                 <ProductCardGridViewSkeleton />
               ) : (
-                <ProductCardGrid
-                  id={product.id}
-                  key={product.id}
-                  name={product?.name!}
-                  description={product?.description!}
-                  price={product?.price!}
-                  image={product?.images[0]!}
-                  estimatedDelivery={""}
-                  minOrder={0}
-                  soldCount={0}
-                  supplier={{
-                    name: "",
-                    yearsActive: 0,
-                    country: "",
-                    countryCode: "",
-                  }}
-                />
+                <ProductCards key={product.id} product={product} />
+                // <ProductCardGrid
+                //   id={product.id}
+                //   key={product.id}
+                //   name={product?.name!}
+                //   description={product?.description!}
+                //   price={product?.price!}
+                //   image={product?.images[0]!}
+                //   estimatedDelivery={""}
+                //   minOrder={0}
+                //   soldCount={0}
+                //   supplier={{
+                //     name: "",
+                //     yearsActive: 0,
+                //     country: "",
+                //     countryCode: "",
+                //   }}
+                // />
               )
             )}
         </div>
@@ -133,23 +136,25 @@ const GridListProductList = ({
               isPageLoading ? (
                 <ProductCardListViewSkeleton />
               ) : (
-                <ProductCardList
-                  id={product.id}
-                  key={product.id}
-                  name={product?.name!}
-                  description={product?.description!}
-                  price={product?.price!}
-                  image={product?.images[0]!}
-                  estimatedDelivery={""}
-                  minOrder={0}
-                  soldCount={0}
-                  supplier={{
-                    name: "",
-                    yearsActive: 0,
-                    country: "",
-                    //   countryCode: "",
-                  }}
-                />
+                <ProductList key={product.id} product={product} />
+
+                // <ProductCardList
+                //   id={product.id}
+                //   key={product.id}
+                //   name={product?.name!}
+                //   description={product?.description!}
+                //   price={product?.price!}
+                //   image={product?.images[0]!}
+                //   estimatedDelivery={""}
+                //   minOrder={0}
+                //   soldCount={0}
+                //   supplier={{
+                //     name: "",
+                //     yearsActive: 0,
+                //     country: "",
+                //     //   countryCode: "",
+                //   }}
+                // />
               )
             )}
         </div>

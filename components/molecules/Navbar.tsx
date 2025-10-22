@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, User, List, Menu } from "lucide-react";
-import SignInModal from "./SignModal";
 import CategoriesModal from "./CategoriesModal";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
@@ -14,7 +13,6 @@ import MobileBottomNav from "./SubNav";
 export default function Navbar() {
   const [showSearch, setShowSearch] = useState(false);
   const [animateSearch, setAnimateSearch] = useState(false);
-  const [showSignIn, setShowSignIn] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
   const [showList, setShowList] = useState(false);
   const [mobileSearch, setMobileSearch] = useState(false);
@@ -236,7 +234,13 @@ export default function Navbar() {
             <div className="flex items-center px-4 pt-4">
               <User className="text-gray-900 bg-gray-300 h-10 p-2 mr-2 w-10 rounded-full" />
               <Button
-                onClick={() => setShowSignIn(true)}
+                onClick={() => {
+                  // close dropdown and open global sign-in modal
+                  setShowList(false);
+                  if (typeof window !== "undefined") {
+                    window.dispatchEvent(new CustomEvent("open-signin-modal"));
+                  }
+                }}
                 className="bg-white hover:bg-gray-200 cursor-pointer text-black px-3 rounded-full transition-all"
               >
                 Sign in/Register
@@ -305,8 +309,7 @@ export default function Navbar() {
         )}
       </AnimatePresence>
 
-      {/* ===== MODALS ===== */}
-      <SignInModal isOpen={showSignIn} onClose={() => setShowSignIn(false)} />
+      {/* removed local SignInModal mount - global manager will handle it */}
       <CategoriesModal
         isOpen={showCategories}
         onClose={() => setShowCategories(false)}

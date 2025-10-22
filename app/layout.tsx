@@ -4,6 +4,8 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import Footer from "@/components/molecules/Footer";
 import Navbar from "@/components/molecules/Navbar";
+import SignModalManager from "@/components/organisms/SignModalManager";
+import RegisterModalManager from "@/components/organisms/RegisterModalManager";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,11 +30,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`overflow-x-hidden max-w-[100dvw] ${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`overflow-x-hidden overflow-y-auto max-w-[100dvw] ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Navbar/>
+        <Navbar />
+        <SignModalManager />
+        <RegisterModalManager />
         {children}
-        <Footer/>
+        <Footer />
       </body>
     </html>
   );

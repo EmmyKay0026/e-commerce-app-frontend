@@ -1,8 +1,12 @@
 "use client";
+import CategoryCardsWithIcon from "@/components/molecules/CategoryCards";
+import CategoryCards from "@/components/molecules/CategoryCards";
 import { ProductCardGrid } from "@/components/molecules/ProductCardGridView";
 import { ProductCardGridViewSkeleton } from "@/components/molecules/ProductCardGridViewSkeleton";
 import { ProductCardList } from "@/components/molecules/ProductCardListView";
 import { ProductCardListViewSkeleton } from "@/components/molecules/ProductCardListViewSkeleton";
+import ProductCards from "@/components/molecules/ProductCards";
+import ProductList from "@/components/molecules/ProductList";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -19,7 +23,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { demoProducts, demoWishlist } from "@/constants/product";
+import {
+  demoCategories,
+  demoProducts,
+  demoWishlist,
+} from "@/constants/product";
 import { useUserStore } from "@/store/useUserStore";
 import { WishlistItem } from "@/types/models";
 import { PopoverClose } from "@radix-ui/react-popover";
@@ -75,12 +83,17 @@ const UserProductList = () => {
   // }, [demoWishlist, demoProducts]);
 
   return (
-    <>
+    <div className="py-[16px] w-full">
       <section className="">
-        <article className="flex items-center gap-2 pt-2 justify-between px-6">
+        <article className="flex flex-wrap justify-center lg:justify-start gap-3 px-6">
+          <CategoryCardsWithIcon category={demoCategories[0]} />
+          <CategoryCardsWithIcon category={demoCategories[1]} />
+          <CategoryCardsWithIcon category={demoCategories[2]} />
+        </article>
+        {/* <article className="flex items-center gap-2 pt-2 justify-between px-6">
           <h1 className="text-2xl font-bold">Products on sale</h1>
           <Settings className="mt-1 cursor-pointer" />
-        </article>
+        </article> */}
         <div className="px-6 py-4 flex flex-col gap-4">
           {/* Filters */}
           <div className="flex flex-wrap gap-4">
@@ -223,29 +236,30 @@ const UserProductList = () => {
           </Empty>
         )}
         {isActive === "grid" ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-6">
             {demoProducts.length > 0 &&
               demoProducts.map((product) =>
                 isPageLoading ? (
                   <ProductCardGridViewSkeleton />
                 ) : (
-                  <ProductCardGrid
-                    id={product.id}
-                    key={product.id}
-                    name={product?.name!}
-                    description={product?.description!}
-                    price={product?.price!}
-                    image={product?.images[0]!}
-                    estimatedDelivery={""}
-                    minOrder={0}
-                    soldCount={0}
-                    supplier={{
-                      name: "",
-                      yearsActive: 0,
-                      country: "",
-                      countryCode: "",
-                    }}
-                  />
+                  <ProductCards key={product.id} product={product} />
+                  // <ProductCardGrid
+                  //   id={product.id}
+                  //   key={product.id}
+                  //   name={product?.name!}
+                  //   description={product?.description!}
+                  //   price={product?.price!}
+                  //   image={product?.images[0]!}
+                  //   estimatedDelivery={""}
+                  //   minOrder={0}
+                  //   soldCount={0}
+                  //   supplier={{
+                  //     name: "",
+                  //     yearsActive: 0,
+                  //     country: "",
+                  //     countryCode: "",
+                  //   }}
+                  // />
                 )
               )}
           </div>
@@ -256,29 +270,30 @@ const UserProductList = () => {
                 isPageLoading ? (
                   <ProductCardListViewSkeleton />
                 ) : (
-                  <ProductCardList
-                    id={product.id}
-                    key={product.id}
-                    name={product?.name!}
-                    description={product?.description!}
-                    price={product?.price!}
-                    image={product?.images[0]!}
-                    estimatedDelivery={""}
-                    minOrder={0}
-                    soldCount={0}
-                    supplier={{
-                      name: "",
-                      yearsActive: 0,
-                      country: "",
-                      //   countryCode: "",
-                    }}
-                  />
+                  <ProductList key={product.id} product={product} />
+                  // <ProductCardList
+                  //   id={product.id}
+                  //   key={product.id}
+                  //   name={product?.name!}
+                  //   description={product?.description!}
+                  //   price={product?.price!}
+                  //   image={product?.images[0]!}
+                  //   estimatedDelivery={""}
+                  //   minOrder={0}
+                  //   soldCount={0}
+                  //   supplier={{
+                  //     name: "",
+                  //     yearsActive: 0,
+                  //     country: "",
+                  //     //   countryCode: "",
+                  //   }}
+                  // />
                 )
               )}
           </div>
         )}
       </section>
-    </>
+    </div>
   );
 };
 

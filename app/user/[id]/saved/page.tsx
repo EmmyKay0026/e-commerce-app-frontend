@@ -1,6 +1,8 @@
 "use client";
+import CategoryCardsWithIcon from "@/components/molecules/CategoryCards";
 import { ProductCardGrid } from "@/components/molecules/ProductCardGridView";
 import { ProductCardList } from "@/components/molecules/ProductCardListView";
+import ProductCards from "@/components/molecules/ProductCards";
 import GridListProductList from "@/components/organisms/GridListProductList";
 // import { ProductCard } from "@/components/molecules/ProductCardListView";
 // import { Popover } from "@/components/ui/popover";
@@ -9,11 +11,16 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { demoProducts, demoWishlist } from "@/constants/product";
+import {
+  demoCategories,
+  demoProducts,
+  demoWishlist,
+} from "@/constants/product";
 import { WishlistItem } from "@/types/models";
 import { PopoverClose } from "@radix-ui/react-popover";
 import {
   ArrowUpDown,
+  Bookmark,
   Grid,
   IndentIncrease,
   List,
@@ -44,12 +51,18 @@ const SaveForLaterPage = () => {
   }, [demoWishlist, demoProducts]);
 
   return (
-    <>
+    <div className="py-[16px] w-full">
       <section className="">
-        <article className="flex items-center gap-2 pt-2 justify-between px-6">
+        <article className="flex items-center gap-2 pt-2 px-6">
+          <Bookmark className="mt-1" />
           <h1 className="text-2xl font-bold">Saved items</h1>
-          <Settings className="mt-1" />
         </article>
+        <article className="flex flex-wrap gap-3 px-6 py-4">
+          <CategoryCardsWithIcon category={demoCategories[0]} />
+          <CategoryCardsWithIcon category={demoCategories[1]} />
+          <CategoryCardsWithIcon category={demoCategories[2]} />
+        </article>
+
         <div className="px-6 py-4 flex flex-col gap-4">{/* Filters */}</div>
       </section>
 
@@ -61,7 +74,7 @@ const SaveForLaterPage = () => {
               product !== undefined
           )}
       />
-    </>
+    </div>
   );
 };
 
