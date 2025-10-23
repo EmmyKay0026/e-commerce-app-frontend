@@ -1,26 +1,81 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
 import { Bookmark, Contact, Settings, Store } from "lucide-react";
 import Link from "next/link";
-import React from "react";
-import { User } from "@/types/models";
 import { usePathname, useParams } from "next/navigation";
+import useApi from "@/hooks/useApi";
+import { User } from "@/types/models";
 
 interface UserSideBarMenuProps {
   currentUser: User | null;
-  profileUser: User | null;
+  profileUser?: User | null;
 }
 
-const UserSideBarMenu: React.FC<UserSideBarMenuProps> = ({
+export default function UserSideBarMenu({
   currentUser,
-  profileUser,
-}) => {
+  profileUser: profileUserProp,
+}: UserSideBarMenuProps) {
   const pathname = usePathname();
   const params = useParams();
-  const userId = params?.id as string;
+  const api = useApi();
 
-  // Safety check while loading
-  if (!currentUser || !profileUser || !userId) {
+  const routeUserId = (params as any)?.id as string | undefined;
+  const [profileUser, setProfileUser] = useState<User | null | undefined>(
+    profileUserProp === undefined ? undefined : profileUserProp
+  );
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // fetch profile user if not provided
+  useEffect(() => {
+    if (profileUserProp !== undefined) {
+      setProfileUser(profileUserProp);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
+    if (!routeUserId) {
+      setProfileUser(null);
+      setLoading(false);
+      setError("Missing user id");
+      return;
+    }
+
+    let mounted = true;
+    const controller = new AbortController();
+
+    async function load() {
+      setLoading(true);
+      setError(null);
+      try {
+        const payload = await api.request<any>(`users/${routeUserId}`, {
+          method: "GET",
+          signal: controller.signal,
+        });
+        const userData = payload?.user ?? payload;
+        if (mounted) setProfileUser(userData ?? null);
+      } catch (err: any) {
+        if ((err as any)?.name === "AbortError") return;
+        if (mounted) {
+          setError(err?.message ?? "Failed to load profile");
+          setProfileUser(null);
+        }
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      mounted = false;
+      controller.abort();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [routeUserId, profileUserProp]);
+
+  if (loading || profileUser === undefined) {
     return (
       <section className="bg-white p-4 rounded shadow text-center">
         <p className="text-gray-500 text-sm">Loading profile...</p>
@@ -28,43 +83,87 @@ const UserSideBarMenu: React.FC<UserSideBarMenuProps> = ({
     );
   }
 
-  const isOwner = String(currentUser.id) === String(profileUser.id);
+  if (error) {
+    return (
+      <section className="bg-white p-4 rounded shadow text-center">
+        <p className="text-red-600 text-sm">Error: {error}</p>
+      </section>
+    );
+  }
 
-  const sideItems = [
-    { name: "My Products", href: `/user/${userId}/products`, icon: Store },
-    { name: "Contact Info", href: `/user/${userId}/profile`, icon: Contact },
-    { name: "Saved", href: `/user/${userId}/saved`, icon: Bookmark },
-    { name: "Settings", href: `/user/${userId}/settings`, icon: Settings },
+  if (!profileUser) {
+    return (
+      <section className="bg-white p-4 rounded shadow text-center">
+        <p className="text-gray-500 text-sm">Profile not found</p>
+      </section>
+    );
+  }
+
+  const isOwner = Boolean(currentUser && String(currentUser.id) === String(profileUser.id));
+  const uid = routeUserId ?? String(profileUser.id);
+
+  const ownerItems = [
+    { name: "My Products", href: `/user/${uid}/products`, icon: Store },
+    { name: "Contact Info", href: `/user/${uid}/profile`, icon: Contact },
+    { name: "Saved", href: `/user/${uid}/saved`, icon: Bookmark },
+    { name: "Settings", href: `/user/${uid}/settings`, icon: Settings },
   ];
 
-  const sideItems2 = [
-    { name: "Products", href: `/user/${userId}/products`, icon: Store },
-    { name: "Contact Info", href: `/user/${userId}/profile`, icon: Contact },
+  const visitorItems = [
+    { name: "Products", href: `/user/${uid}/products`, icon: Store },
+    { name: "Contact Info", href: `/user/${uid}/profile`, icon: Contact },
   ];
 
-  const itemsToRender = isOwner ? sideItems : sideItems2;
+  const itemsToRender = isOwner ? ownerItems : visitorItems;
+
+  function isActive(href: string) {
+    if (!pathname) return false;
+    // treat exact or nested routes as active
+    return pathname === href || pathname.startsWith(href + "/");
+  }
+
+  // contact action for visitors
+  const contactHref = profileUser?.phoneNumber
+    ? `https://wa.me/${profileUser.phoneNumber.replace(/[^0-9+]/g, "")}`
+    : profileUser?.email
+    ? `mailto:${profileUser.email}`
+    : null;
 
   return (
-    <section className="shadow bg-white p-4 rounded flex flex-col gap-4">
-      <ul className="space-y-4">
+    <nav aria-label="User menu" className="shadow bg-white p-4 rounded">
+      <ul className="space-y-3">
         {itemsToRender.map((item) => {
-          const isActive = pathname === item.href;
+          const Active = isActive(item.href);
+          const Icon = item.icon;
           return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`flex items-center gap-2 cursor-pointer hover:text-primary transition-colors ${
-                isActive ? "text-primary font-semibold" : "text-gray-600"
-              }`}
-            >
-              <item.icon className="w-4 h-4" />
-              {item.name}
-            </Link>
+            <li key={item.name}>
+              <Link
+                href={item.href}
+                className={`flex items-center gap-3 px-3 py-2 rounded transition-colors ${
+                  Active ? "text-primary font-semibold bg-primary/5" : "text-gray-700 hover:text-primary"
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                <span>{item.name}</span>
+              </Link>
+            </li>
           );
         })}
-      </ul>
-    </section>
-  );
-};
 
-export default UserSideBarMenu;
+        {!isOwner && contactHref && (
+          <li>
+            <a
+              href={contactHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 px-3 py-2 rounded text-gray-700 hover:text-primary"
+            >
+              <Contact className="w-4 h-4" />
+              <span>Contact Seller</span>
+            </a>
+          </li>
+        )}
+      </ul>
+    </nav>
+  );
+}

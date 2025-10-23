@@ -2,6 +2,9 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useUserStore } from "@/store/useUserStore";
+import useApi from "@/hooks/useApi";
+import type { User } from "@/types/models";
 
 interface RegisterModalProps {
   isOpen: boolean;
@@ -17,7 +20,9 @@ function splitName(fullName: string) {
 
 export default function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
   const router = useRouter();
-  const API = process.env.NEXT_PUBLIC_API_BASE || "/api";
+  const api = useApi();
+  const setUser = useUserStore((s) => s.setUser);
+  const getMe = useUserStore((s) => s.getMe); // Get the getMe action
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -46,66 +51,31 @@ export default function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
     try {
       const { first_name, last_name } = splitName(fullName);
 
-      // prefer the 'name' payload and /signup path you discovered
-      const API_BASE = (process.env.NEXT_PUBLIC_API_BASE || "https://e-commerce-app-backend-khxb.onrender.com/api").replace(/\/+$/, "");
-      const tryList = [
-        { url: `${API_BASE}/signup`, body: { name: fullName, email, password, phone_number: phone || undefined } },
-        { url: `${API_BASE}/auth/signup`, body: { name: fullName, email, password, phone_number: phone || undefined } },
-        { url: `${API_BASE}/auth/register`, body: { name: fullName, email, password, phone_number: phone || undefined } },
-        // fallbacks with first/last split
-        { url: `${API_BASE}/signup`, body: { first_name, last_name, email, password, phone_number: phone || undefined } },
-        { url: `${API_BASE}/auth/register`, body: { first_name, last_name, email, password, phone_number: phone || undefined } },
-      ];
+      // Use Supabase signUp via useApi.auth
+      const signUpRes: any = await api.auth.signUp(email, password, {
+        full_name: fullName,
+        first_name,
+        last_name,
+        phone_number: phone || undefined,
+      });
 
-      let successPayload: any = null;
-      let lastAttemptInfo = "";
-
-      for (const attempt of tryList) {
-        lastAttemptInfo = `${attempt.url} -> ${Object.keys(attempt.body).join(",")}`;
-        console.info("Register attempt:", attempt.url, attempt.body);
-        let res: Response;
-        try {
-          res = await fetch(attempt.url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", Accept: "application/json" },
-            body: JSON.stringify(attempt.body),
-          });
-        } catch (netErr) {
-          console.warn("Network error for", attempt.url, netErr);
-          throw netErr;
-        }
-
-        const text = await res.text().catch(() => "");
-        let payload: any = null;
-        try {
-          payload = text ? JSON.parse(text) : null;
-        } catch {
-          payload = { raw: text };
-        }
-        console.info("Response", attempt.url, res.status, payload);
-
-        if (res.ok) {
-          successPayload = payload;
-          break;
-        }
-
-        // if 404 try next; for other 4xx/5xx surface server message
-        if (res.status === 404) {
-          continue;
-        }
-
-        const msg = payload?.message ?? payload?.error ?? payload?.errors ?? `Registration failed: ${res.status}`;
-        throw new Error(typeof msg === "string" ? msg : JSON.stringify(msg));
+      // Handle multiple supabase response shapes
+      const signUpError = signUpRes?.error ?? signUpRes?.data?.error ?? null;
+      if (signUpError) {
+        throw signUpError;
       }
 
-      if (!successPayload) {
-        throw new Error(`Registration endpoint not found or rejected. Last attempt: ${lastAttemptInfo}`);
-      }
+      // session may be in different places depending on supabase-js version
+      const session = signUpRes?.data?.session ?? signUpRes?.session ?? signUpRes?.data?.session ?? null;
+      const user = signUpRes?.data?.user ?? signUpRes?.user ?? signUpRes?.data?.user ?? null;
 
-      // if backend returned token, store it
-      const token = successPayload?.token ?? successPayload?.accessToken ?? null;
+      const token = session?.access_token ?? session?.accessToken ?? null;
+
       if (token) {
         localStorage.setItem("token", token);
+        // After sign-up, fetch user data and update the store using getMe
+        const newUser = await getMe(api); // Pass api instance
+        setUser(newUser);
         setSuccess("Account created and signed in.");
         setTimeout(() => {
           onClose();
@@ -114,52 +84,19 @@ export default function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
         return;
       }
 
-      // otherwise try login at /auth/login to obtain token
-      try {
-        const loginUrl = `${API_BASE}/auth/login`;
-        console.info("Attempting login at", loginUrl);
-        const loginRes = await fetch(loginUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Accept: "application/json" },
-          body: JSON.stringify({ email, password }),
-        });
-        const loginText = await loginRes.text().catch(() => "");
-        let loginPayload: any = null;
-        try {
-          loginPayload = loginText ? JSON.parse(loginText) : null;
-        } catch {
-          loginPayload = { raw: loginText };
+      setSuccess("Account created. Check your email to confirm your account.");
+      setTimeout(() => {
+        onClose();
+        // open sign-in modal so user can sign in after confirmation
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("open-signin-modal"));
         }
-
-        if (loginRes.ok) {
-          const loginToken = loginPayload?.token ?? loginPayload?.accessToken ?? null;
-          if (loginToken) {
-            localStorage.setItem("token", loginToken);
-            setSuccess("Account created and signed in.");
-            setTimeout(() => {
-              onClose();
-              router.push("/");
-            }, 700);
-            return;
-          }
-        }
-
-        // fallback: prompt sign-in modal
-        setSuccess("Account created. Please sign in.");
-        setTimeout(() => {
-          onClose();
-          if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("open-signin-modal"));
-        }, 700);
-      } catch {
-        setSuccess("Account created. Please sign in.");
-        setTimeout(() => {
-          onClose();
-          if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("open-signin-modal"));
-        }, 700);
-      }
+      }, 900);
     } catch (err: any) {
+      // supabase errors sometimes nested
+      const message = err?.message ?? err?.error_description ?? err?.msg ?? String(err);
       console.error("Register error:", err);
-      setError(err?.message ?? "Registration failed");
+      setError(message || "Registration failed");
     } finally {
       setLoading(false);
     }
@@ -251,6 +188,39 @@ export default function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
             </button>
           </div>
         </form>
+
+        <div className="my-4 flex items-center gap-3">
+          <div className="flex-1 h-px bg-gray-200" />
+          <div className="text-sm text-gray-500">or</div>
+          <div className="flex-1 h-px bg-gray-200" />
+        </div>
+
+        <div className="flex flex-col items-center gap-3">
+          <button
+            type="button"
+            onClick={async () => {
+              setLoading(true);
+              setError(null);
+              const { error } = await api.auth.signInWithOAuth("google", {
+                redirectTo: window.location.origin,
+              });
+              if (error) {
+                setError(error.message);
+                setLoading(false);
+                return;
+              }
+              // The user will be redirected to Google for authentication.
+              // The page will reload upon returning, so we don't need to handle success state here.
+              // On successful redirect back, the app will re-initialize and fetch user.
+              // No need to call getMe(api) here as a full page reload will happen.
+            }}
+            disabled={loading}
+            className="w-full border border-gray-300 rounded-lg py-2 px-3 flex items-center justify-center gap-2"
+          >
+            <img src="/google-icon.svg" alt="Google" className="h-5 w-5" />
+            <span>Continue with Google</span>
+          </button>
+        </div>
 
         {error && <div className="mt-3 text-sm text-red-600">{error}</div>}
         {success && <div className="mt-3 text-sm text-green-600">{success}</div>}

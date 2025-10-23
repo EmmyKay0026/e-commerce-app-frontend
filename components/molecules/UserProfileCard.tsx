@@ -8,6 +8,7 @@ import { Button } from "../ui/button";
 import { Edit } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { User } from "@/types/models";
+import useApi from "@/hooks/useApi";
 
 interface UserProfileCardProps {
   currentUser: User | null;
@@ -16,7 +17,7 @@ interface UserProfileCardProps {
 }
 
 function normalizeUser(data: any): User {
-  const id = data?.id ?? "";
+  const id = data?.id ?? data?.user_id ?? "";
   const first =
     data?.first_name ?? data?.firstName ?? data?.first ?? undefined;
   const last =
@@ -38,8 +39,6 @@ function normalizeUser(data: any): User {
     ? {
         id: vendorProfileSource.id ?? vendorProfileSource.vendorId ?? vendorProfileSource.owner_id ?? undefined,
         businessName:
-          vendorProfileSource.business_name ??
-          vendorProfileSource.businessName ??
           vendorProfileSource.business_name ??
           vendorProfileSource.businessName ??
           vendorProfileSource.user?.first_name ??
@@ -74,6 +73,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
   profileUser: profileUserProp,
   userId,
 }) => {
+  const api = useApi();
   const [profileUser, setProfileUser] = useState<User | null | undefined>(
     profileUserProp === undefined ? undefined : profileUserProp
   );
@@ -81,7 +81,6 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // if caller passed a profileUser prop (including null), use it and skip fetch
     if (profileUserProp !== undefined) {
       setProfileUser(profileUserProp);
       setLoading(false);
@@ -91,33 +90,22 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
 
     let mounted = true;
     const controller = new AbortController();
-    const API = process.env.NEXT_PUBLIC_API_BASE || "/api";
-    const token =
-      typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
     async function load() {
       setLoading(true);
       setError(null);
       try {
-        const endpoint = userId ? `${API}/users/${userId}` : `${API}/users/me`;
-        const res = await fetch(endpoint, {
-          method: "GET",
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-          signal: controller.signal,
-        });
-
-        if (!res.ok) {
-          const msg = `Fetch failed: ${res.status}`;
-          throw new Error(msg);
-        }
-
-        const data = await res.json().catch(() => null);
-        const fetched = data && (data.user ?? data) ? normalizeUser(data.user ?? data) : null;
-        if (mounted) setProfileUser(fetched);
+        const path = userId ? `users/${userId}` : `users/me`;
+        // prefer api.request so token headers are attached by useApi
+        const payload = await api.request<any>(path, { method: "GET", signal: controller.signal });
+        // API may return { user: {...} } or the user object directly
+        const userData = payload?.user ?? payload;
+        const normalized = userData ? normalizeUser(userData) : null;
+        if (mounted) setProfileUser(normalized);
       } catch (err: any) {
         if (err?.name === "AbortError") return;
         if (mounted) {
-          setError(err?.message ?? "Network error");
+          setError(err?.message ?? "Failed to load profile");
           setProfileUser(null);
         }
       } finally {
@@ -130,7 +118,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
       mounted = false;
       controller.abort();
     };
-  }, [profileUserProp, userId]);
+  }, [profileUserProp, userId, api]);
 
   if (loading || profileUser === undefined) {
     return (

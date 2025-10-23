@@ -1,16 +1,17 @@
 import { mockUser, mockUser2, userDB } from "@/constants/userData";
 import { User } from "@/types/models";
 import { create } from "zustand";
+import type { useApi } from "@/hooks/useApi";
 
 interface UserStore {
   user: User | null;
   isOwner: boolean | "unknown";
   isLoading: boolean;
   error?: string | null;
-  setUser: (user: User) => void;
+  setUser: (user: User | null) => void;
   clearUser: () => void;
   updateIsOwner: (currentUserId: string) => boolean | "unknown";
-  getMe: (id?: string) => Promise<User | null>;
+  getMe: (api: ReturnType<typeof useApi>) => Promise<User | null>;
 }
 
 export const useUserStore = create<UserStore>((set, get) => ({
@@ -32,36 +33,16 @@ export const useUserStore = create<UserStore>((set, get) => ({
     return owner;
   },
 
-  // getMe: try backend first (/users/:id or /users/me), fall back to mock userDB
-  getMe: async (id?: string) => {
+  getMe: async (api) => {
     set({ isLoading: true, error: null });
 
-    const API = process.env.NEXT_PUBLIC_API_BASE || "/api";
-    const fallback = ((): User | null => {
-      if (id) return userDB.find((u) => u.id === id) ?? null;
-      return userDB[0] ?? null;
-    })();
+    // Fallback to mock data only if no actual user is fetched
+    const fallback = userDB[0] ?? null;
 
     try {
-      const endpoint = id ? `${API}/users/${id}` : `${API}/users/me`;
-      const token =
-        typeof window !== "undefined"
-          ? localStorage.getItem("token")
-          : null;
-      const res = await fetch(endpoint, {
-        method: "GET",
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-      });
-
-      if (!res.ok) {
-        const message = `Fetch failed: ${res.status}`;
-        set({ user: fallback, isLoading: false, error: message });
-        return fallback;
-      }
-
-      const data = await res.json().catch(() => null);
-      // API might return user directly or wrapped: { user }
-      const fetched: User | undefined = (data && (data.user ?? data)) || undefined;
+      // Use the api.auth.getUser() which already handles fetching from backend
+      // and uses the token from localStorage.
+      const fetched: User | null = await api.auth.getUser();
       const finalUser = fetched ?? fallback ?? null;
 
       set({ user: finalUser, isLoading: false, error: null });

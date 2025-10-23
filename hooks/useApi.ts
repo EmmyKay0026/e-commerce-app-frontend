@@ -134,7 +134,16 @@ export function useApi(baseUrl?: string) {
         : (supabase.auth as any).signIn({ provider });
     },
     signOut: async () => (supabase.auth as any).signOut(),
-    getUser: async () => (supabase.auth as any).getUser ? (await (supabase.auth as any).getUser()).data.user : (await (supabase.auth as any).user()) as any,
+    getUser: async () => {
+      // First, get the user from Supabase to ensure there's an active session
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser) return null;
+
+      // Then, fetch the full user profile from your backend API
+      const backendUser = await request<any>('users/me');
+      // The backend might return { user: ... } or the user object directly
+      return backendUser?.user ?? backendUser;
+    },
     getSession: async () => (supabase.auth as any).getSession ? (await (supabase.auth as any).getSession()).data.session : null,
   };
 
