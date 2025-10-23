@@ -1,52 +1,169 @@
-import { Bookmark, Contact, Settings, Shield, Store } from "lucide-react";
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { Bookmark, Contact, Settings, Store } from "lucide-react";
 import Link from "next/link";
-import React from "react";
-import { FaStore } from "react-icons/fa";
+import { usePathname, useParams } from "next/navigation";
+import useApi from "@/hooks/useApi";
+import { User } from "@/types/models";
 
-const UserSideBarMenu = () => {
-  return (
-    <section className="shadow bg-white p-4  rounded flex flex-col  gap-4   ">
-      <ul className="space-y-4">
-        <li>
-          <Link
-            href={`products`}
-            className="flex items-center gap-1 cursor-pointer hover:text-primary"
-          >
-            <Store className="mr-2 h-4 w-4" />
-            My products
-          </Link>
-        </li>
-        <li>
-          <Link
-            href={`profile`}
-            className="flex items-center gap-1 cursor-pointer hover:text-primary"
-          >
-            <Contact className="mr-2 h-4 w-4" />
-            Contact info
-          </Link>
-        </li>
+interface UserSideBarMenuProps {
+  currentUser: User | null;
+  profileUser?: User | null;
+}
 
-        <li>
-          <Link
-            href={`saved`}
-            className="flex items-center gap-1 cursor-pointer hover:text-primary"
-          >
-            <Bookmark className="mr-2 h-4 w-4" />
-            Saved
-          </Link>
-        </li>
-        <li>
-          <Link
-            href={`/user/settings`}
-            className="flex items-center gap-1 cursor-pointer hover:text-primary"
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            Settings
-          </Link>
-        </li>
-      </ul>
-    </section>
+export default function UserSideBarMenu({
+  currentUser,
+  profileUser: profileUserProp,
+}: UserSideBarMenuProps) {
+  const pathname = usePathname();
+  const params = useParams();
+  const api = useApi();
+
+  const routeUserId = (params as any)?.id as string | undefined;
+  const [profileUser, setProfileUser] = useState<User | null | undefined>(
+    profileUserProp === undefined ? undefined : profileUserProp
   );
-};
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-export default UserSideBarMenu;
+  // fetch profile user if not provided
+  useEffect(() => {
+    if (profileUserProp !== undefined) {
+      setProfileUser(profileUserProp);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
+    if (!routeUserId) {
+      setProfileUser(null);
+      setLoading(false);
+      setError("Missing user id");
+      return;
+    }
+
+    let mounted = true;
+    const controller = new AbortController();
+
+    async function load() {
+      setLoading(true);
+      setError(null);
+      try {
+        const payload = await api.request<any>(`users/${routeUserId}`, {
+          method: "GET",
+          signal: controller.signal,
+        });
+        const userData = payload?.user ?? payload;
+        if (mounted) setProfileUser(userData ?? null);
+      } catch (err: any) {
+        if ((err as any)?.name === "AbortError") return;
+        if (mounted) {
+          setError(err?.message ?? "Failed to load profile");
+          setProfileUser(null);
+        }
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      mounted = false;
+      controller.abort();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [routeUserId, profileUserProp]);
+
+  if (loading || profileUser === undefined) {
+    return (
+      <section className="bg-white p-4 rounded shadow text-center">
+        <p className="text-gray-500 text-sm">Loading profile...</p>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="bg-white p-4 rounded shadow text-center">
+        <p className="text-red-600 text-sm">Error: {error}</p>
+      </section>
+    );
+  }
+
+  if (!profileUser) {
+    return (
+      <section className="bg-white p-4 rounded shadow text-center">
+        <p className="text-gray-500 text-sm">Profile not found</p>
+      </section>
+    );
+  }
+
+  const isOwner = Boolean(currentUser && String(currentUser.id) === String(profileUser.id));
+  const uid = routeUserId ?? String(profileUser.id);
+
+  const ownerItems = [
+    { name: "My Products", href: `/user/${uid}/products`, icon: Store },
+    { name: "Contact Info", href: `/user/${uid}/profile`, icon: Contact },
+    { name: "Saved", href: `/user/${uid}/saved`, icon: Bookmark },
+    { name: "Settings", href: `/user/${uid}/settings`, icon: Settings },
+  ];
+
+  const visitorItems = [
+    { name: "Products", href: `/user/${uid}/products`, icon: Store },
+    { name: "Contact Info", href: `/user/${uid}/profile`, icon: Contact },
+  ];
+
+  const itemsToRender = isOwner ? ownerItems : visitorItems;
+
+  function isActive(href: string) {
+    if (!pathname) return false;
+    // treat exact or nested routes as active
+    return pathname === href || pathname.startsWith(href + "/");
+  }
+
+  // contact action for visitors
+  const contactHref = profileUser?.phoneNumber
+    ? `https://wa.me/${profileUser.phoneNumber.replace(/[^0-9+]/g, "")}`
+    : profileUser?.email
+    ? `mailto:${profileUser.email}`
+    : null;
+
+  return (
+    <nav aria-label="User menu" className="shadow bg-white p-4 rounded">
+      <ul className="space-y-3">
+        {itemsToRender.map((item) => {
+          const Active = isActive(item.href);
+          const Icon = item.icon;
+          return (
+            <li key={item.name}>
+              <Link
+                href={item.href}
+                className={`flex items-center gap-3 px-3 py-2 rounded transition-colors ${
+                  Active ? "text-primary font-semibold bg-primary/5" : "text-gray-700 hover:text-primary"
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                <span>{item.name}</span>
+              </Link>
+            </li>
+          );
+        })}
+
+        {!isOwner && contactHref && (
+          <li>
+            <a
+              href={contactHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 px-3 py-2 rounded text-gray-700 hover:text-primary"
+            >
+              <Contact className="w-4 h-4" />
+              <span>Contact Seller</span>
+            </a>
+          </li>
+        )}
+      </ul>
+    </nav>
+  );
+}

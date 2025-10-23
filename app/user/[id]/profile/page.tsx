@@ -1,8 +1,7 @@
 "use client";
-import { UserProfileSkeleton } from "@/components/molecules/UserProfileSkeleton";
-// import { UserDashboard } from "@/components/user-dashboard";
-import { UserDashboard } from "@/components/organisms/UserProfile";
-import LeftBar from "@/components/templates/LeftSideBar";
+
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -10,44 +9,40 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { UserProfileSkeleton } from "@/components/molecules/UserProfileSkeleton";
+import { UserDashboard } from "@/components/organisms/UserProfile";
 import { demoProducts } from "@/constants/product";
-import {
-  //   mockProducts,
-  mockUser,
-  mockWishlist,
-} from "@/constants/userData";
+import { mockUser, mockWishlist } from "@/constants/userData";
 import { useUserStore } from "@/store/useUserStore";
 import { User } from "@/types/models";
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
 
 export default function DashboardPage() {
   const { id } = useParams();
-  // Change isOwner to false to see the public view
+  const [viewedUser, setViewedUser] = useState<User | null>(null);
+  const currentUser = mockUser; // ✅ Simulated logged-in user (added this line)
+
   const isOwner = useUserStore((state) => state.isOwner);
   const updateIsOwner = useUserStore((state) => state.updateIsOwner);
-  const user = useUserStore((state) => state.user);
   const getMe = useUserStore((state) => state.getMe);
-
-  const [viewedUser, setViewedUser] = useState<User | null>(null);
-
   const isLoggedIn = true;
 
   useEffect(() => {
     if (id) updateIsOwner(id.toString());
 
-    const getViewedUser = async () => {
+    const fetchViewedUser = async () => {
       const user = await getMe(id ? id.toString() : undefined);
       setViewedUser(user);
     };
 
-    getViewedUser();
-  }, []);
+    fetchViewedUser();
+  }, [id, getMe, updateIsOwner]);
 
-  //If the backend returns 404  for user not found, show the 404 page
-  if (isOwner == "unknown" || viewedUser == null) {
+  // Loading or unknown ownership state
+  if (isOwner === "unknown" || viewedUser === null) {
     return <UserProfileSkeleton />;
   }
+
+  // Error fallback
   if (!viewedUser) {
     return (
       <Empty className="h-96">
@@ -71,7 +66,7 @@ export default function DashboardPage() {
     <main className="flex">
       <UserDashboard
         user={viewedUser}
-        isOwner={isOwner}
+        currentUser={currentUser}
         products={demoProducts}
         wishlist={mockWishlist}
         isLoggedIn={isLoggedIn}

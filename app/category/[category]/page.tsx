@@ -2,10 +2,10 @@
 import React, { useMemo, useState, useCallback } from "react";
 import { use } from "react";
 import SidebarFilter from "@/components/molecules/SidebarFilter";
-import ProductCard from "@/components/molecules/ProductCard";
-import { products as allProducts } from "@/data/products";
-import type { Product } from "@/data/products";
-import Link from "next/link";
+import ProductCards from "@/components/molecules/ProductCards";
+import { demoProducts, demoCategories } from "@/constants/product";
+import type { Product } from "@/types/models";
+import { Filter, X } from "lucide-react";
 
 export default function CategoryPage({
   params,
@@ -22,87 +22,112 @@ export default function CategoryPage({
     sort?: string;
   }>({ brands: [] });
 
-  // ✅ Stable callback to prevent infinite re-renders
+  const [showFilter, setShowFilter] = useState(false);
+
   const handleFiltersChange = useCallback((f: typeof filters) => {
     setFilters(f);
   }, []);
 
-  // Filter dataset to only items in this category
-  const categoryProducts = useMemo(
-    () => allProducts.filter((p) => p.category === category),
+  const activeCategory = useMemo(
+    () => demoCategories.find((c) => c.slug === category),
     [category]
   );
 
-  // Apply filtering & sorting
+  const normalizedProducts: Product[] = useMemo(() => {
+    return demoProducts.map((p) => ({
+      id: p.id,
+      vendorId: p.vendorId ?? "mock-vendor-id",
+      name: p.name ?? p.title ?? "Untitled Product",
+      description: p.description ?? "",
+      price: typeof p.price === "string" ? p.price : String(p.price ?? "0"),
+      images: p.images ?? ["/placeholder.png"],
+      categoryId: p.categoryId ?? activeCategory?.id ?? "",
+      status: "active",
+      createdAt: p.createdAt ?? new Date().toISOString(),
+      updatedAt: p.updatedAt ?? new Date().toISOString(),
+      metadata: p.metadata ?? {},
+    }));
+  }, [demoProducts, activeCategory]);
+
+  const categoryProducts = useMemo(
+    () => normalizedProducts.filter((p) => p.categoryId === activeCategory?.id),
+    [normalizedProducts, activeCategory]
+  );
+
   const filteredProducts = useMemo(() => {
     let result: Product[] = [...categoryProducts];
 
-    if (filters.brands?.length) {
+    if (filters.minPrice !== undefined) {
       result = result.filter(
-        (p) => p.brand && filters.brands.includes(p.brand)
+        (p) => parseFloat(p.price) >= (filters.minPrice ?? 0)
       );
     }
 
-    if (filters.location) {
-      result = result.filter((p) => p.location === filters.location);
-    }
-
-    if (filters.minPrice !== undefined) {
-      result = result.filter((p) => p.price >= (filters.minPrice ?? 0));
-    }
     if (filters.maxPrice !== undefined) {
       result = result.filter(
-        (p) => p.price <= (filters.maxPrice ?? Number.MAX_SAFE_INTEGER)
+        (p) =>
+          parseFloat(p.price) <= (filters.maxPrice ?? Number.MAX_SAFE_INTEGER)
       );
     }
 
     if (filters.sort === "price-asc") {
-      result.sort((a, b) => a.price - b.price);
+      result.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
     } else if (filters.sort === "price-desc") {
-      result.sort((a, b) => b.price - a.price);
-    } else if (filters.sort === "newest") {
-      result.sort(
-        (a, b) => (b.listedDaysAgo ?? 0) - (a.listedDaysAgo ?? 0)
-      );
+      result.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
     }
 
     return result;
   }, [categoryProducts, filters]);
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-24">
-      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 pb-12">
-        {/* Top header */}
-        <div className="bg-white p-4 rounded-2xl mb-6 border border-gray-100">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-10 py-10 pb-12">
+        {/* Header */}
+        <div className="bg-white p-4 rounded-2xl mb-6 border border-gray-100 relative">
           <div className="flex items-center justify-between gap-4">
             <h1 className="text-2xl font-bold capitalize">
-              {category.replace(/-/g, " ")}
+              {activeCategory?.name ?? category.replace(/-/g, " ")}
             </h1>
+
             <div className="flex items-center gap-2">
               <input
                 placeholder="Search inside category..."
                 className="border rounded-lg px-3 py-2 w-80 hidden md:block"
               />
-              <Link href={`/category/${category}`}>
-                <button className="bg-secondary text-white px-4 py-2 rounded-full">
-                  See more
-                </button>
-              </Link>
+
+              <button
+                onClick={() => setShowFilter((prev) => !prev)}
+                className="md:hidden text-gray-600 border rounded-full p-2 hover:bg-gray-100 transition"
+                aria-label="Toggle filter menu"
+              >
+                {showFilter ? <X size={20} /> : <Filter size={20} />}
+              </button>
             </div>
           </div>
+
+          {showFilter && (
+            <div className="absolute left-0 right-0 mt-3 bg-white rounded-xl shadow-lg border border-gray-200 z-20 p-4 md:hidden">
+              <SidebarFilter
+                products={categoryProducts}
+                activeCategory={category}
+                onFiltersChangeAction={handleFiltersChange}
+              />
+            </div>
+          )}
         </div>
 
+        {/* Main Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Sidebar */}
-          <div>
+          {/* Sidebar (Desktop) */}
+          <div className="hidden md:block">
             <SidebarFilter
               products={categoryProducts}
               activeCategory={category}
-              onFiltersChangeAction={handleFiltersChange} // ✅ now stable
+              onFiltersChangeAction={handleFiltersChange}
             />
           </div>
 
-          {/* Products */}
+          {/* Product Grid */}
           <div className="md:col-span-3">
             <div className="flex items-center justify-between mb-4">
               <div className="flex gap-3 items-center text-sm text-gray-600">
@@ -123,7 +148,7 @@ export default function CategoryPage({
                 </select>
               </div>
               <div className="text-sm text-gray-500">
-                Showing {filteredProducts.length} results
+                results ({filteredProducts.length})
               </div>
             </div>
 
@@ -134,7 +159,7 @@ export default function CategoryPage({
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredProducts.map((p) => (
-                  <ProductCard key={p.id} product={p} />
+                  <ProductCards key={p.id} product={p} />
                 ))}
               </div>
             )}

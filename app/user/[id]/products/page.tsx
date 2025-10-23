@@ -85,7 +85,7 @@ const UserProductList = () => {
   return (
     <div className="py-[16px] w-full">
       <section className="">
-        <article className="flex flex-wrap gap-3">
+        <article className="flex flex-wrap justify-center lg:justify-start gap-3 px-6">
           <CategoryCardsWithIcon category={demoCategories[0]} />
           <CategoryCardsWithIcon category={demoCategories[1]} />
           <CategoryCardsWithIcon category={demoCategories[2]} />

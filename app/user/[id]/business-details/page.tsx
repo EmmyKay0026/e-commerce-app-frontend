@@ -1,7 +1,7 @@
 // import { UserDashboard } from "@/components/user-dashboard";
 import { BusinessDashboard } from "@/components/organisms/BusniessProfile";
 import { UserDashboard } from "@/components/organisms/UserProfile";
-import LeftBar from "@/components/templates/LeftSideBar";
+// import LeftBar from "@/components/templates/LeftSideBar";
 import { demoProducts } from "@/constants/product";
 import {
   //   mockProducts,

@@ -1,4 +1,5 @@
 "use client";
+
 import { sideMenu } from "@/constants/sideMenu";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
@@ -6,29 +7,25 @@ import Link from "next/link";
 import React, { useEffect, useState, useCallback } from "react";
 import Brand from "../molecules/Brand";
 import { useHambugerShowStore } from "@/store/useHambugerStore";
-import { usePathname } from "next/navigation";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { getInitials } from "@/services/user";
-import { mockUser } from "@/constants/userData";
+import { usePathname, useParams } from "next/navigation";
+import { mockUser, mockUser2 } from "@/constants/userData";
 import UserProfileCard from "../molecules/UserProfileCard";
 import UserProfileCompletion from "../molecules/UserProfileCompletion";
 import UserSideBarMenu from "../molecules/UserSideBarMenu";
-// import Brand from "../molecules/Brand";
-// import { Link, useLocation } from "react-router-dom";
-// import { sideMenu } from "../../constants/sideMenu";
-// import { cn } from "../../utils/twMerge";
-// import { useHambugerShowStore } from "../store";
-// import { IoClose } from "react-icons/io5";
 
 const LeftBar = () => {
   const { hambugerShowState, updateHambugerShowState } = useHambugerShowStore();
   const [isMobile, setIsMobile] = useState<boolean>(false);
-  const location = {
-    pathname: typeof window !== "undefined" ? window.location.pathname : "",
-  };
-
   const pathname = usePathname();
-  console.log(pathname);
+  const params = useParams();
+
+  const userId = params?.id as string; // Get /user/[id] from route
+
+  // ✅ Logged-in user
+  const currentUser = mockUser;
+
+  // ✅ Determine which profile to show
+  const profileUser = userId === currentUser.id ? currentUser : mockUser2;
 
   const checkScreenSize = useCallback(() => {
     const width = window.innerWidth;
@@ -44,35 +41,25 @@ const LeftBar = () => {
   useEffect(() => {
     checkScreenSize();
     window.addEventListener("resize", checkScreenSize);
-
-    return () => {
-      window.removeEventListener("resize", checkScreenSize);
-    };
+    return () => window.removeEventListener("resize", checkScreenSize);
   }, [checkScreenSize]);
 
   const handleMenuClick = () => {
-    if (isMobile) {
-      updateHambugerShowState(hambugerShowState);
-    }
+    if (isMobile) updateHambugerShowState(hambugerShowState);
   };
 
   const isLinkActive = (link: string) =>
-    location.pathname === link ||
-    (location.pathname.startsWith(link) && link.startsWith(location.pathname));
+    pathname === link || pathname.startsWith(link);
 
   return (
     <aside
       id="leftbar"
       className={cn(
-        "flex flex-col gap-2 py-[16px]  absolute h-screen md:sticky md:h-[initial] transition-all duration-500",
-        hambugerShowState ? "w-full md:w-[22%] lg:w-[25%]" : "w-[0%]"
+        "lg:flex flex-col hidden gap-2 py-4 absolute h-screen md:sticky md:h-auto transition-all duration-500",
+        hambugerShowState ? "w-full md:w-[22%] lg:w-[25%]" : "w-0"
       )}
-      // style={{
-      //   background: "rgba(198, 131, 17, 0.19)",
-      //   // background:
-      //   //   "linear-gradient(158deg,rgba(198, 131, 17, 0.42) 0%, rgba(134, 135, 135, 0.37) 57%, rgba(198, 131, 17, 0.36) 100%)",
-      // }}
     >
+      {/* Close button for mobile */}
       <button
         onClick={() => updateHambugerShowState(hambugerShowState)}
         className={cn(
@@ -84,10 +71,10 @@ const LeftBar = () => {
         <X />
       </button>
 
-      <UserProfileCard />
-      <UserSideBarMenu />
-      <UserProfileCompletion />
-
+      {/* ✅ Dynamic User Profile */}
+      <UserProfileCard currentUser={currentUser} profileUser={profileUser} />
+      <UserSideBarMenu currentUser={currentUser} profileUser={profileUser} />
+      <UserProfileCompletion currentUser={currentUser} profileUser={profileUser} />
       {/* <div className="flex justify-center sticky items-center">
         <Avatar className="h-15 w-15">
           <AvatarImage

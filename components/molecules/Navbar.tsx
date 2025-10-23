@@ -2,27 +2,25 @@
 import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, User, List, Menu, X } from "lucide-react";
-import SignInModal from "./SignModal";
+import { Search, User, List, Menu } from "lucide-react";
 import CategoriesModal from "./CategoriesModal";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Link from "next/link";
+import MobileBottomNav from "./SubNav";
 
 export default function Navbar() {
   const [showSearch, setShowSearch] = useState(false);
   const [animateSearch, setAnimateSearch] = useState(false);
-  const [showSignIn, setShowSignIn] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
   const [showList, setShowList] = useState(false);
   const [mobileSearch, setMobileSearch] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-
+  const [showSecondaryNav, setShowSecondaryNav] = useState(true);
   const isMobile = useIsMobile();
-  const listRef = useRef<HTMLDivElement | null>(null); // ref for dropdown
+  const listRef = useRef<HTMLDivElement | null>(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (listRef.current && !listRef.current.contains(e.target as Node)) {
@@ -37,7 +35,6 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showList]);
 
-  // Scroll logic (desktop only)
   useEffect(() => {
     if (isMobile) return;
     const handleScroll = () => {
@@ -58,82 +55,114 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [showSearch, isMobile]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setShowSecondaryNav(false);
+      } else {
+        setShowSecondaryNav(true);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <nav className="sticky top-0 left-0 w-full md:bg-white border-b border-gray-200 z-50 shadow-sm transition-colors">
-      <div className="md:max-w-7xl md:mx-auto flex justify-between items-center md:px-6 md:py-2">
+    <nav className="sticky top-0 left-0 w-full border-b bg-transparent px-0 mx-0 border-none z-50 shadow-sm transition-colors">
+      <div className="w-full">
         {/* ===== DESKTOP NAVBAR ===== */}
         {!isMobile && (
-          <>
-            {/* Logo */}
-            <div className="relative w-32 h-10 cursor-pointer">
-              <Image
-                src="/ind_logo.png"
-                alt="IndustrialMart"
-                fill
-                className="object-cover"
-              />
-            </div>
+          <div className="block w-full">
+            {/* Top Bar */}
+            <div className="w-full bg-white flex justify-between z-50 py-2 px-16">
+              {/* Logo */}
+              <div className="relative w-32 h-10 cursor-pointer">
+                <Image
+                  src="/ind_logo.png"
+                  alt="IndustrialMart"
+                  fill
+                  className="object-cover"
+                />
+              </div>
 
-            <div className="flex items-center gap-3">
-              {showSearch && (
-                <Button
-                  onClick={() => setShowCategories(true)}
-                  className="cursor-pointer gap-2 hover:bg-white bg-white rounded-none text-black transition-all duration-200"
-                >
-                  <List />
-                  Categories
-                </Button>
-              )}
+              {/* Search Bar (shows on scroll) */}
+              <div className="flex items-center gap-3">
+                {showSearch && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{
+                      opacity: animateSearch ? 1 : 0,
+                      y: animateSearch ? 0 : -5,
+                    }}
+                    exit={{ opacity: 0, y: -5 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                    className="hidden md:flex items-center bg-white rounded-full overflow-hidden shadow-sm border border-gray-200 pl-2 pr-0 w-[300px]"
+                  >
+                    <Input
+                      placeholder="Search industrial products..."
+                      className="border-none outline-none shadow-none focus:ring-0 focus-visible:ring-0"
+                    />
+                    <Search className="text-white bg-secondary ml-2 h-9 p-2 w-10 rounded-full" />
+                  </motion.div>
+                )}
+              </div>
 
-              {showSearch && (
-                <motion.div
-                  initial={{ opacity: 0, y: -5 }}
-                  animate={{
-                    opacity: animateSearch ? 1 : 0,
-                    y: animateSearch ? 0 : -5,
-                  }}
-                  exit={{ opacity: 0, y: -5 }}
-                  transition={{ duration: 0.3, ease: "easeOut" }}
-                  className="hidden md:flex items-center bg-white rounded-full overflow-hidden shadow-sm border border-gray-200 pl-2 pr-0 w-[300px]"
-                >
-                  <Input
-                    placeholder="Search industrial products..."
-                    className="border-none outline-none shadow-none focus:ring-0 focus-visible:ring-0"
-                  />
-                  <Search className="text-white bg-secondary ml-2 h-9 p-2 w-10 rounded-full" />
-                </motion.div>
-              )}
-            </div>
+              {/* Links + Sign-in */}
+              <div className="flex justify-between items-center gap-6 relative">
+                <ul className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-700">
+                  <li className="hover:text-secondary transition-colors cursor-pointer">
+                    ABOUT US
+                  </li>
+                  <li className="hover:text-secondary transition-colors cursor-pointer">
+                    <Link href="/market-place">MARKET PLACE</Link>
+                  </li>
+                  <li className="hover:text-secondary transition-colors cursor-pointer">
+                    CONTACT US
+                  </li>
+                </ul>
 
-            <div className="flex justify-between items-center gap-6 relative">
-              <ul className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-700">
-                <li className="hover:text-secondary transition-colors cursor-pointer">
-                  About us{" "}
-                </li>
-                <li className="hover:text-secondary transition-colors cursor-pointer">
-                  <Link href="/market-place">Market place</Link>
-                </li>
-                <li className="hover:text-secondary transition-colors cursor-pointer">
-                  Contact us{" "}
-                </li>
-              </ul>
-
-              {/* Sign-in button and dropdown */}
-              <div onMouseEnter={() => setShowList(true)} className="relative">
-                <Button className="bg-white hover:bg-gray-200 cursor-pointer text-black px-5 rounded-full transition-all flex items-center gap-2">
-                  <User /> Sign in/Register
-                </Button>
+                <div onMouseEnter={() => setShowList(true)} className="relative">
+                  <Button className="bg-white hover:bg-gray-200 cursor-pointer text-black px-5 rounded-full transition-all flex items-center gap-2">
+                    <User /> Sign in/Register
+                  </Button>
+                </div>
               </div>
             </div>
-          </>
+
+            {/* Secondary Nav (Desktop) */}
+            <AnimatePresence>
+              {showSecondaryNav && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                  className="flex justify-start gap-7 pl-20 items-center bg-black/40 backdrop-blur-sm text-sm text-white font-medium py-2"
+                >
+                  <div
+                    className="flex items-center gap-2 cursor-pointer"
+                    onClick={() => setShowCategories(true)}
+                  >
+                    <List className="w-4 h-4" />
+                    <span>Categories</span>
+                  </div>
+                  <Link
+                    href="/market-place"
+                    className="cursor-pointer hover:text-gray-200"
+                  >
+                    Market Place
+                  </Link>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         )}
 
         {/* ===== MOBILE NAVBAR ===== */}
         {isMobile && (
           <div className="w-full">
-            {/* Top bar */}
+            {/* Top Bar */}
             <div className="flex justify-between items-center bg-white pr-4">
-              {/* Logo */}
               <div className="relative w-36 h-14">
                 <Image
                   src="/ind_logo.png"
@@ -143,7 +172,6 @@ export default function Navbar() {
                 />
               </div>
 
-              {/* Icons */}
               <div className="flex items-center gap-4">
                 <Search
                   className="text-gray-800 w-5 h-5 cursor-pointer"
@@ -160,17 +188,27 @@ export default function Navbar() {
               </div>
             </div>
 
-            {/* Second bar (Categories / Market Place) */}
-            <div className="flex justify-around items-center bg-black/40 backdrop-blur-sm text-sm text-white font-medium border-t border-gray-200 py-1">
-              <div
-                className="flex items-center gap-1 cursor-pointer"
-                onClick={() => setShowCategories(true)}
-              >
-                <List className="w-4 h-4" />
-                <span>Categories</span>
-              </div>
-              <span className="cursor-pointer ">Market Place</span>
-            </div>
+            {/* Secondary Nav (Mobile) */}
+            <AnimatePresence>
+              {showSecondaryNav && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                  className="flex justify-around items-center bg-black/40 backdrop-blur-sm text-sm text-white font-medium border-t border-gray-200 py-1"
+                >
+                  <div
+                    className="flex items-center gap-1 cursor-pointer"
+                    onClick={() => setShowCategories(true)}
+                  >
+                    <List className="w-4 h-4" />
+                    <span>Categories</span>
+                  </div>
+                  <span className="cursor-pointer">Market Place</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )}
       </div>
@@ -189,27 +227,28 @@ export default function Navbar() {
             <Button
               variant="ghost"
               onClick={() => setShowList(false)}
-              className=" flex items-end justify-end text-gray-700 w-full text-xl text-right  font-bold"
+              className="flex justify-end text-gray-700 w-full text-xl font-bold"
             >
               ✕
             </Button>
-            {/* <X
-              className="text-gray-700 w-full text-xl text-right  font-bold my-2 pr-4 cursor-pointer"
-            /> */}
             <div className="flex items-center px-4 pt-4">
               <User className="text-gray-900 bg-gray-300 h-10 p-2 mr-2 w-10 rounded-full" />
               <Button
-                onClick={() => setShowSignIn(true)}
+                onClick={() => {
+                  // close dropdown and open global sign-in modal
+                  setShowList(false);
+                  if (typeof window !== "undefined") {
+                    window.dispatchEvent(new CustomEvent("open-signin-modal"));
+                  }
+                }}
                 className="bg-white hover:bg-gray-200 cursor-pointer text-black px-3 rounded-full transition-all"
               >
                 Sign in/Register
               </Button>
             </div>
             <div className="flex flex-col text-sm text-gray-800 p-4 space-y-3">
-              <p className="hover:text-secondary cursor-pointer">My Products</p>
-              <p className="hover:text-secondary cursor-pointer">
-                Notifications
-              </p>
+              <p className="hover:text-secondary cursor-pointer">My Orders</p>
+              <p className="hover:text-secondary cursor-pointer">Notifications</p>
               <p className="hover:text-secondary cursor-pointer">Saved</p>
               <p className="hover:text-secondary cursor-pointer">Wish List</p>
             </div>
@@ -217,7 +256,7 @@ export default function Navbar() {
         )}
       </AnimatePresence>
 
-      {/* Sign In Dropdown */}
+      {/* Mobile Menu Dropdown */}
       <AnimatePresence>
         {showMenu && (
           <motion.div
@@ -239,13 +278,12 @@ export default function Navbar() {
               <p className="hover:text-secondary cursor-pointer">ABOUT US</p>
               <p className="hover:text-secondary cursor-pointer">PRODUCTS</p>
               <p className="hover:text-secondary cursor-pointer">CONTACT US</p>
-              {/* <p className="hover:text-secondary cursor-pointer">Wish List</p> */}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Mobile search overlay */}
+      {/* Mobile Search Overlay */}
       <AnimatePresence>
         {mobileSearch && (
           <motion.div
@@ -271,12 +309,12 @@ export default function Navbar() {
         )}
       </AnimatePresence>
 
-      {/* ===== MODALS ===== */}
-      <SignInModal isOpen={showSignIn} onClose={() => setShowSignIn(false)} />
+      {/* removed local SignInModal mount - global manager will handle it */}
       <CategoriesModal
         isOpen={showCategories}
         onClose={() => setShowCategories(false)}
       />
+      <MobileBottomNav />
     </nav>
   );
 }

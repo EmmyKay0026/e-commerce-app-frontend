@@ -6,7 +6,7 @@ import React from "react";
 
 const MarketPlace = () => {
   return (
-    <>
+    <div className="max-w-[100dvw] w-full">
       <CategoryCards
         categoryTitle="Safety & Security"
         categoryProduct={demoProducts}
@@ -27,7 +27,7 @@ const MarketPlace = () => {
       <div className="h-4" />
 
       {/* <ProductList product={demoProducts[3]} /> */}
-    </>
+    </div>
   );
 };
 

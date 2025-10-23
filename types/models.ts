@@ -1,6 +1,7 @@
 // TypeScript types for the UserDashboard component
 
 export interface VendorProfile {
+  id?: string;
   businessName: string;
   coverImage?: string;
   address?: string;
@@ -16,6 +17,9 @@ export interface User {
   profilePicture?: string;
   role: "user" | "vendor";
   vendorProfile?: VendorProfile;
+  business_profile_id?: string;
+  business_profile?: { id: string; business_name?: string } | null;
+  vendor?: { id: string } | null;
 }
 
 export interface Product {
@@ -31,6 +35,10 @@ export interface Product {
   createdAt: string;
   updatedAt: string;
   metadata: {}; // to contain more description of the item
+  title?: string;
+  category?: string;
+  brand?: string;
+  location?: string;
 }
 
 export interface Category {
