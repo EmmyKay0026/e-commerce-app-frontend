@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import ProductCards from "@/components/molecules/ProductCards";
 import type { Product as DataProduct } from "@/types/models";
-import useApi from "@/hooks/useApi";
+import { getProductsByCategory } from "@/services/categoryService";
 
 interface SimpleProduct {
   id: string;
@@ -17,6 +17,7 @@ interface SimpleProduct {
 export interface CategorySectionProps {
   title: string;
   categorySlug?: string;
+  categoryId?: string;
   products?: SimpleProduct[];
   limit?: number;
 }
@@ -24,20 +25,27 @@ export interface CategorySectionProps {
 export default function CategorySection({
   title,
   categorySlug = "",
+  categoryId,
   products = [],
   limit = 5,
 }: CategorySectionProps) {
-  const api = useApi();
   const [fetched, setFetched] = useState<DataProduct[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // helper that produces a full DataProduct shape expected by ProductCards (matches types/models.Product)
-  const toDataProduct = (raw: any, fallbackCategory = categorySlug): DataProduct => {
-    const id = String(raw?.id ?? raw?.product_id ?? Math.random().toString(36).slice(2));
-    const name = raw?.name ?? raw?.title ?? raw?.productName ?? "Untitled product";
+  // Helper to normalize raw product data
+  const toDataProduct = (
+    raw: any,
+    fallbackCategory = categorySlug
+  ): DataProduct => {
+    const id = String(
+      raw?.id ?? raw?.product_id ?? Math.random().toString(36).slice(2)
+    );
+    const name =
+      raw?.name ?? raw?.title ?? raw?.productName ?? "Untitled product";
     const priceVal = raw?.price ?? raw?.amount ?? raw?.cost ?? 0;
-    const price = typeof priceVal === "number" ? String(priceVal) : String(priceVal ?? "0");
+    const price =
+      typeof priceVal === "number" ? String(priceVal) : String(priceVal ?? "0");
     const images: string[] = Array.isArray(raw?.images)
       ? raw.images
       : raw?.image
@@ -46,9 +54,15 @@ export default function CategorySection({
       ? [raw.image_url]
       : [];
 
-    const description = raw?.description ?? raw?.details ?? raw?.metadata?.description ?? "";
-    const vendorId = raw?.vendorId ?? raw?.vendor_id ?? raw?.seller_id ?? raw?.vendor?.id ?? "";
-    const category = raw?.category ?? raw?.categorySlug ?? fallbackCategory ?? undefined;
+    const description =
+      raw?.description ?? raw?.details ?? raw?.metadata?.description ?? "";
+    const vendorId =
+      raw?.vendorId ??
+      raw?.vendor_id ??
+      raw?.seller_id ??
+      raw?.vendor?.id ??
+      "";
+    const category = raw?.category ?? raw?.categorySlug ?? fallbackCategory;
     const createdAt = raw?.created_at ?? raw?.createdAt ?? new Date().toISOString();
     const updatedAt = raw?.updated_at ?? raw?.updatedAt ?? createdAt;
     const status = (raw?.status as any) ?? "active";
@@ -61,8 +75,8 @@ export default function CategorySection({
       description,
       price,
       images,
-      categoryId: raw?.categoryId ?? raw?.category_id ?? undefined,
-      tags: raw?.tags ?? undefined,
+      categoryId: raw?.categoryId ?? raw?.category_id,
+      tags: raw?.tags ?? [],
       status,
       createdAt,
       updatedAt,
@@ -71,34 +85,21 @@ export default function CategorySection({
       category,
       brand: raw?.brand ?? undefined,
       location: raw?.location ?? undefined,
-    } as DataProduct;
+    } as unknown as DataProduct;
   };
 
-  // If no products provided, fetch a few from API
   useEffect(() => {
     let mounted = true;
-    if (products && products.length > 0) {
-      setFetched(products.map((p) => toDataProduct(p)));
-      return () => {
-        mounted = false;
-      };
-    }
 
-    if (!categorySlug) {
-      setFetched([]);
-      return () => {
-        mounted = false;
-      };
-    }
+    if (!categoryId) return;
 
-    setLoading(true);
-    setError(null);
-    (async () => {
+    const fetchProducts = async () => {
       try {
-        const payload = await api.get<any>("/products", { category: categorySlug, limit });
-        const list = payload?.products ?? payload?.data ?? payload ?? [];
-        const normalized = Array.isArray(list) ? list.slice(0, limit).map((x: any) => toDataProduct(x, categorySlug)) : [];
-        if (mounted) setFetched(normalized);
+        setLoading(true);
+        setError(null);
+
+        const list = await getProductsByCategory(categoryId);
+        if (mounted) setFetched(list.slice(0, limit));
       } catch (err: any) {
         if (mounted) {
           setError(err?.message ?? "Failed to load products");
@@ -107,22 +108,30 @@ export default function CategorySection({
       } finally {
         if (mounted) setLoading(false);
       }
-    })();
+    };
 
+    fetchProducts();
     return () => {
       mounted = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [categorySlug, products, limit, api]);
+  }, [categoryId, limit]);
 
-  const items = useMemo(() => (fetched ?? products.map((p) => toDataProduct(p))).slice(0, limit), [fetched, products, limit]);
+
+
+  const items = useMemo(
+    () => (fetched ?? products.map((p) => toDataProduct(p))).slice(0, limit),
+    [fetched, products, limit]
+  );
 
   return (
     <section className="mb-10">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold">{title}</h2>
         {categorySlug && (
-          <Link href={`/category/${categorySlug}`} className="text-sm text-blue-600 hover:underline">
+          <Link
+            href={`/category/${categorySlug}`}
+            className="text-sm text-blue-600 hover:underline"
+          >
             See more
           </Link>
         )}

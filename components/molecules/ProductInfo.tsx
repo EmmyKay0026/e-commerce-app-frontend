@@ -105,7 +105,13 @@ export function ProductInfo({
                   <span className="text-muted-foreground capitalize">
                     {key}
                   </span>
-                  <span className="font-medium text-foreground">{value}</span>
+                  <span className="font-medium text-foreground">
+                    {typeof value === "object"
+                      ? Object.entries(value)
+                          .map(([k, v]) => `${k}: ${v}`)
+                          .join(", ")
+                      : String(value)}
+                  </span>
                 </div>
               ))}
             </div>
