@@ -1,18 +1,20 @@
 "use client";
-import React, { useMemo, useState, useCallback } from "react";
-import { use } from "react";
+import React, { useMemo, useState, useCallback, useEffect, use } from "react";
 import SidebarFilter from "@/components/molecules/SidebarFilter";
 import ProductCards from "@/components/molecules/ProductCards";
-import { demoProducts, demoCategories } from "@/constants/product";
-import type { Product } from "@/types/models";
 import { Filter, X } from "lucide-react";
+import type { Product, Category } from "@/types/models";
+import { getAllCategories, getProductsByCategory } from "@/services/categoryService";
 
-export default function CategoryPage({
-  params,
-}: {
-  params: Promise<{ category: string }>;
-}) {
+export default function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
   const { category } = use(params);
+
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [activeCategory, setActiveCategory] = useState<Category | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loadingCats, setLoadingCats] = useState(false);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [filters, setFilters] = useState<{
     brands: string[];
@@ -28,48 +30,70 @@ export default function CategoryPage({
     setFilters(f);
   }, []);
 
-  const activeCategory = useMemo(
-    () => demoCategories.find((c) => c.slug === category),
-    [category]
-  );
+  useEffect(() => {
+    let mounted = true;
+    setLoadingCats(true);
+    (async () => {
+      try {
+        const cats = await getAllCategories();
+        if (mounted) setCategories(cats);
+      } catch (err: any) {
+        if (mounted) setError(err?.message ?? "Failed to fetch categories");
+      } finally {
+        if (mounted) setLoadingCats(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
-  const normalizedProducts: Product[] = useMemo(() => {
-    return demoProducts.map((p) => ({
-      id: p.id,
-      vendorId: p.vendorId ?? "mock-vendor-id",
-      name: p.name ?? p.title ?? "Untitled Product",
-      description: p.description ?? "",
-      price: typeof p.price === "string" ? p.price : String(p.price ?? "0"),
-      images: p.images ?? ["/placeholder.png"],
-      categoryId: p.categoryId ?? activeCategory?.id ?? "",
-      status: "active",
-      createdAt: p.createdAt ?? new Date().toISOString(),
-      updatedAt: p.updatedAt ?? new Date().toISOString(),
-      metadata: p.metadata ?? {},
-    }));
-  }, [demoProducts, activeCategory]);
+  // Set active category based on slug
+  useEffect(() => {
+    const cat = categories.find((c) => c.slug === category);
+    setActiveCategory(cat ?? null);
+  }, [categories, category]);
 
-  const categoryProducts = useMemo(
-    () => normalizedProducts.filter((p) => p.categoryId === activeCategory?.id),
-    [normalizedProducts, activeCategory]
-  );
+  // Fetch products for the active category
+  useEffect(() => {
+    if (!activeCategory?.id) {
+      setProducts([]);
+      return;
+    }
 
+    let mounted = true;
+    setLoadingProducts(true);
+    setError(null);
+
+    (async () => {
+      try {
+        const list = await getProductsByCategory(activeCategory.id);
+        if (mounted) setProducts(list ?? []);
+      } catch (err: any) {
+        if (mounted) {
+          setError(err?.message ?? "Failed to fetch products");
+          setProducts([]);
+        }
+      } finally {
+        if (mounted) setLoadingProducts(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [activeCategory]);
+
+  // Apply filters and sorting
   const filteredProducts = useMemo(() => {
-    let result: Product[] = [...categoryProducts];
+    let result = [...products];
 
     if (filters.minPrice !== undefined) {
-      result = result.filter(
-        (p) => parseFloat(p.price) >= (filters.minPrice ?? 0)
-      );
+      result = result.filter((p) => parseFloat(p.price) >= filters.minPrice!);
     }
-
     if (filters.maxPrice !== undefined) {
-      result = result.filter(
-        (p) =>
-          parseFloat(p.price) <= (filters.maxPrice ?? Number.MAX_SAFE_INTEGER)
-      );
+      result = result.filter((p) => parseFloat(p.price) <= filters.maxPrice!);
     }
-
     if (filters.sort === "price-asc") {
       result.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
     } else if (filters.sort === "price-desc") {
@@ -77,7 +101,7 @@ export default function CategoryPage({
     }
 
     return result;
-  }, [categoryProducts, filters]);
+  }, [products, filters]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -105,10 +129,10 @@ export default function CategoryPage({
             </div>
           </div>
 
-          {showFilter && (
+          {showFilter && activeCategory && (
             <div className="absolute left-0 right-0 mt-3 bg-white rounded-xl shadow-lg border border-gray-200 z-20 p-4 md:hidden">
               <SidebarFilter
-                products={categoryProducts}
+                products={products}
                 activeCategory={category}
                 onFiltersChangeAction={handleFiltersChange}
               />
@@ -121,7 +145,7 @@ export default function CategoryPage({
           {/* Sidebar (Desktop) */}
           <div className="hidden md:block">
             <SidebarFilter
-              products={categoryProducts}
+              products={products}
               activeCategory={category}
               onFiltersChangeAction={handleFiltersChange}
             />
@@ -131,28 +155,30 @@ export default function CategoryPage({
           <div className="md:col-span-3">
             <div className="flex items-center justify-between mb-4">
               <div className="flex gap-3 items-center text-sm text-gray-600">
-                <span className="px-3 py-1 bg-gray-100 rounded-full">
-                  View: Grid
-                </span>
+                <span className="px-3 py-1 bg-gray-100 rounded-full">View: Grid</span>
                 <span className="text-sm">Sort:</span>
                 <select
                   className="border rounded px-2 py-1 text-sm"
                   value={filters.sort ?? "recommended"}
-                  onChange={(e) =>
-                    setFilters((s) => ({ ...s, sort: e.target.value }))
-                  }
+                  onChange={(e) => setFilters((s) => ({ ...s, sort: e.target.value }))}
                 >
                   <option value="recommended">Recommended</option>
                   <option value="price-asc">Price low-high</option>
                   <option value="price-desc">Price high-low</option>
                 </select>
               </div>
-              <div className="text-sm text-gray-500">
-                results ({filteredProducts.length})
-              </div>
+              <div className="text-sm text-gray-500">results ({filteredProducts.length})</div>
             </div>
 
-            {filteredProducts.length === 0 ? (
+            {loadingProducts ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="h-48 bg-white rounded shadow animate-pulse" />
+                ))}
+              </div>
+            ) : error ? (
+              <p className="text-red-600 text-sm mb-4">{error}</p>
+            ) : filteredProducts.length === 0 ? (
               <div className="text-gray-600 py-20 bg-white rounded-2xl p-6 border border-gray-100">
                 No products found with current filters.
               </div>

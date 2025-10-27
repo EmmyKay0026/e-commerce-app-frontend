@@ -1,32 +1,71 @@
-import ProductCards from "@/components/molecules/ProductCards";
-import ProductList from "@/components/molecules/ProductList";
+"use client";
+import React, { useEffect, useState } from "react";
 import CategoryCards from "@/components/organisms/CategoryCards";
-import { demoProducts } from "@/constants/product";
-import React from "react";
+import { getAllCategories, getProductsByCategory } from "@/services/categoryService";
+import type { Category, Product } from "@/types/models";
 
 const MarketPlace = () => {
-  return (
-    <div className="max-w-[100dvw] w-full">
-      <CategoryCards
-        categoryTitle="Safety & Security"
-        categoryProduct={demoProducts}
-        categoryLink="/category/safety-security"
-      />
-      <div className="h-4" />
-      <CategoryCards
-        categoryTitle="Lighting and Electricals"
-        categoryProduct={demoProducts}
-        categoryLink="/category/lighting-electricals"
-      />
-      <div className="h-4" />
-      <CategoryCards
-        categoryTitle="Measurement tools and equipment's"
-        categoryProduct={demoProducts}
-        categoryLink="/category/measurement-tools-equipment"
-      />
-      <div className="h-4" />
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [productsMap, setProductsMap] = useState<Record<string, Product[]>>({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-      {/* <ProductList product={demoProducts[3]} /> */}
+  useEffect(() => {
+    let mounted = true;
+
+    const fetchCategoriesAndProducts = async () => {
+      try {
+        setLoading(true);
+        const cats = await getAllCategories();
+        if (!mounted) return;
+
+        setCategories(cats);
+
+        // Fetch products for each category in parallel
+        const productsPromises = cats.map(async (cat) => {
+          const prods = await getProductsByCategory(cat.id);
+          return [cat.id, prods ?? []] as [string, Product[]];
+        });
+
+        const productsEntries = await Promise.all(productsPromises);
+        if (!mounted) return;
+
+        const prodMap: Record<string, Product[]> = {};
+        productsEntries.forEach(([catId, prods]) => {
+          prodMap[catId] = prods;
+        });
+
+        setProductsMap(prodMap);
+      } catch (err: any) {
+        if (mounted) setError(err?.message ?? "Failed to load categories or products");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    fetchCategoriesAndProducts();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  if (loading) return <p className="text-center py-20 text-gray-500">Loading marketplace...</p>;
+  if (error) return <p className="text-center py-20 text-red-600">{error}</p>;
+
+  return (
+    <div className="max-w-[100dvw] w-full px-4 md:px-6 lg:px-10">
+      {categories.map((cat) => (
+        <div key={cat.id} className="mb-8">
+          <CategoryCards
+            key={cat.id}
+            categoryTitle={cat.name}
+            categoryProduct={productsMap[cat.id] ?? []}
+            categoryLink={`/category/${cat.slug}`}
+          />
+
+        </div>
+      ))}
     </div>
   );
 };
