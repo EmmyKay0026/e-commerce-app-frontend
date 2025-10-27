@@ -1,70 +1,75 @@
 // TypeScript types for the UserDashboard component
 
-export interface VendorProfile {
+export interface BusinessProfile {
   id?: string;
-  businessName: string;
-  coverImage?: string;
+  owner_id?: string;
+  business_name: string;
+  business_email: string;
+  business_phone: string;
+
+  business_whatsapp_number: string;
+  cover_image?: string;
   address?: string;
   description?: string;
-  vendorId?: string;
+  status?: "active" | "suspended" | "pending_verification" | "rejected";
+  slug?: string;
+  featured_product?: string[];
 }
 
+// fullName: string;
 export interface User {
   id: string;
-  fullName: string;
+  first_name: string;
+  last_name: string;
+  phone_number?: string;
   email: string;
-  phoneNumber?: string;
-  profilePicture?: string;
+  created_at: string;
+  whatsapp_number: string | null;
+  is_verified: boolean;
+  profile_picture?: string | null;
   role: "user" | "vendor";
-  vendorProfile?: VendorProfile;
-  business_profile_id?: string;
-  business_profile?: { id: string; business_name?: string } | null;
-  vendor?: { id: string } | null;
+  status: "active" | "suspended" | "deleted";
+  last_login: string;
+  shop_link: string;
+  profile_link: string;
+  saved_items: string[] | null;
+  business_profile_id?: string | null;
+  business_profile?: Partial<BusinessProfile> | null;
+  suspended_status_release_date?: string;
 }
 
 export interface Product {
   id: string; // UUID
-  vendorId: string; // FK -> VendorProfile.id
+  product_owner_id: string; // FK -> VendorProfile.id
   name: string;
   description: string;
   price: string; // for display only (not transactions)
   images: string[]; // URLs to Google Storage
-  categoryId?: string; // FK -> Category.id
-  tags?: Tag[];
-  status: "active" | "inactive" | "deleted";
+  category_id?: string; // FK -> Category.id
+  tags?: string[];
+  status: "active" | "inactive" | "deleted" | "pending_review";
   createdAt: string;
-  updatedAt: string;
-  metadata: {}; // to contain more description of the item
-  title?: string;
-  category?: string;
-  brand?: string;
-  location?: string;
+  metadata: Record<string, any>; // to contain more description of the item
+  view_count?: string;
 }
 
 export interface Category {
   id: string; // UUID
   name: string;
   slug: string; // URL-friendly identifier
-  parentCategory: string[] | null; // FK -> Category.id (self-referential)
+  parent_category_id: string[] | null; // FK -> Category.id (self-referential)
   description?: string;
-  createdAt: string;
-  updatedAt: string;
+  icon?: string;
+  image?: string;
+  child_categories?: string[];
 }
 
-export interface WishlistItem {
-  id: string;
-  userId: string;
-  productId: string;
-  product?: Product;
-  createdAt: string;
-}
-
-export interface Tag {
-  id: string; // UUID
-  name: string;
-  createdAt: string;
-  updatedAt: string;
-}
+export type ServiceResult<T> = {
+  success: boolean;
+  status?: number;
+  data?: T | null;
+  error?: string | null;
+};
 
 export type CategoryName =
   | "Environment"

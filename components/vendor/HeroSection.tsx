@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useUserStore } from "@/store/useUserStore";
 import { User } from "@/types/models";
 import { get } from "http";
-import { getInitials } from "@/services/user";
+import { getInitials } from "@/services/userService";
 import { FaWhatsapp } from "react-icons/fa";
 
 export function HeroSection({ vendor }: { vendor: User }) {

@@ -24,8 +24,8 @@ import {
   X,
   ArrowUpDown,
 } from "lucide-react";
-import { User, Product, WishlistItem } from "@/types/models";
-import { getInitials } from "@/services/user";
+import { User, Product } from "@/types/models";
+import { getInitials } from "@/services/userService";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import {
@@ -44,29 +44,31 @@ import GridListProductList from "./GridListProductList";
 import { EditProfile } from "./EditUserProfile";
 
 interface UserDashboardProps {
-  user: User;
+  viewedUser: User;
   currentUser?: User;
   products: Product[];
-  wishlist: WishlistItem[];
   isLoggedIn?: boolean;
 }
 
 export function UserDashboard({
-  user,
+  viewedUser,
   currentUser,
   products,
-  wishlist,
   isLoggedIn = false,
 }: UserDashboardProps) {
-  const [remoteProducts, setRemoteProducts] = useState<Product[]>(products ?? []);
+  const [remoteProducts, setRemoteProducts] = useState<Product[]>(
+    products ?? []
+  );
   const [remoteLoading, setRemoteLoading] = useState(false);
   const [remoteError, setRemoteError] = useState<string | null>(null);
 
+  // const getUsersProducts = async () => {
+  //   // const ;
+  // };
+  // getUsersProducts();
   useEffect(() => {
-    if (!user) return;
+    if (!viewedUser) return;
 
-    const API = process.env.NEXT_PUBLIC_API_BASE || "/api";
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
     const controller = new AbortController();
     const signal = controller.signal;
 
@@ -76,10 +78,9 @@ export function UserDashboard({
     (async () => {
       try {
         // prefer typed vendorProfile id, then business_profile_id, then fallback to user.id
-        const vendorId =
-          user.vendorProfile?.id ?? user.business_profile_id ?? user.id;
-        if (!vendorId) {
-          throw new Error("vendor id not found on user");
+        const business_id = viewedUser.business_profile_id;
+        if (!business_id) {
+          throw new Error("Business id not found on user");
         }
 
         const url = `${API}/products?vendorId=${encodeURIComponent(vendorId)}`;
@@ -107,9 +108,9 @@ export function UserDashboard({
     return () => {
       controller.abort();
     };
-  }, [user?.vendorProfile?.id, user?.business_profile_id, user?.id]);
+  }, [viewedUser?.business_profile_id, viewedUser?.id]);
 
-  const isOwner = currentUser && currentUser.id === user.id;
+  const isOwner = currentUser && currentUser.id === viewedUser.id;
 
   // const isOwner = currentUser?.id === user.id;
   const [isActive, setIsActive] = useState<"grid" | "list">("list");
@@ -124,91 +125,11 @@ export function UserDashboard({
     { icon: Headphones, label: "Support", href: "/support" },
   ];
 
-  const renderStars = (rating: number) => {
-    return (
-      <div className="flex gap-1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star
-            key={star}
-            className={`h-4 w-4 ${
-              star <= rating
-                ? "fill-yellow-400 text-yellow-400"
-                : "text-gray-300"
-            }`}
-          />
-        ))}
-      </div>
-    );
-  };
-
-  // console.log("UserDashboard Data:", {
-  //   viewingUser: user.fullName,
-  //   currentUser: currentUser?.fullName,
-  //   isOwner,
-  //   isLoggedIn,
-  // });
-
   if (isOwner) {
-    // const [fullWishlist, setFullWishlist] = useState<WishlistItem[]>(wishlist);
-
-    // useEffect(() => {
-    //   // Populate wishlist items with their corresponding product objects
-    //   const populatedWishlist = wishlist.map((item) => {
-    //     const product = products.find((p) => p.id === item.productId);
-    //     return product ? { ...item, product } : item;
-    //   });
-    //   setFullWishlist(populatedWishlist as any); // 'as any' if WishlistItem doesn't have 'product' field
-    // }, [wishlist, products]);
-
     // Private View
     return (
-      <div className="min-h-screen bg-background lg:py-6 lg:my-6">
+      <div className="min-h-screen bg-background lg:py-6 lg:my-0 rounded">
         <div className="lg:mx-auto py-8">
-          {/* Profile Header */}
-          {/* <Card
-            className="rounded-none w-full shadow-none"
-            style={{
-              background: `linear-gradient(8deg,rgba(0, 0, 0, 0.47) 0%, rgba(0, 0, 0, 0) 100%), url('${user.vendorProfile?.coverImage}')`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-            }}
-          >
-            <CardContent className="p-2 pt-44 px-6 shadow-0">
-              <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
-                <Avatar className="h-24 w-24">
-                  <AvatarImage
-                    src={user.profilePicture || "/placeholder.svg"}
-                    alt={user.fullName}
-                    className="object-cover"
-                  />
-                  <AvatarFallback className="text-xl font-bold">
-                    {getInitials(user.fullName)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 space-y-2">
-                  <h1 className="text-3xl  font-bold text-background">
-                    {user.fullName}
-                  </h1>
-                  <div className="space-y-1 text-sm text-gray-300">
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4" />
-                      <span>{user.email}</span>
-                    </div>
-                    {user.phoneNumber && (
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4" />
-                        <span>{user.phoneNumber}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <EditProfile />
-                
-              </div>
-            </CardContent>
-          </Card> */}
-
           {/* Quick Links */}
           <div className="px-6 mb-6">
             <Card className="rounded-xl shadow-sm">
@@ -227,13 +148,17 @@ export function UserDashboard({
                       <h4 className="font-bold text-muted-foreground">
                         Full name:
                       </h4>
-                      <p className="text-muted-foreground">{user.fullName}</p>
+                      <p className="text-muted-foreground">
+                        {viewedUser.last_name} {viewedUser.first_name}
+                      </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <h4 className="font-bold text-muted-foreground">
                         Email:
                       </h4>
-                      <p className="text-muted-foreground">{user.email}</p>
+                      <p className="text-muted-foreground">
+                        {viewedUser.email}
+                      </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <h4 className="font-bold text-muted-foreground">
@@ -249,34 +174,19 @@ export function UserDashboard({
                         WhatsApp contact:
                       </h4>
                       <p className="text-muted-foreground"></p>{" "}
-                      {user.phoneNumber}
+                      {viewedUser.whatsapp_number}
                     </div>
                     <div className="flex items-center gap-2">
                       <h4 className="font-bold text-muted-foreground">
                         Phone number:
                       </h4>
                       <p className="text-muted-foreground"></p>{" "}
-                      {user.phoneNumber}
+                      {viewedUser.phone_number}
                     </div>
                   </article>
                 </div>
               </CardContent>
             </Card>
-            {/* <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-              {quickLinks.map((link) => (
-                <Card
-                  key={link.label}
-                  className="cursor-pointer rounded-xl shadow-sm transition-shadow hover:shadow-md"
-                >
-                  <CardContent className="flex flex-col items-center justify-center gap-3 p-6">
-                    <link.icon className="h-8 w-8 text-primary" />
-                    <span className="text-center text-sm font-medium text-foreground">
-                      {link.label}
-                    </span>
-                  </CardContent>
-                </Card>
-              ))}
-            </div> */}
           </div>
           <div className="px-6">
             <Card className="rounded-xl shadow-sm">
@@ -296,7 +206,8 @@ export function UserDashboard({
                         Store name:
                       </h4>
                       <p className="text-muted-foreground">
-                        {user?.vendorProfile?.businessName ?? "none"}
+                        {viewedUser?.business_profile?.business_name ??
+                          "No business name added"}
                       </p>
                     </div>
 
@@ -305,7 +216,8 @@ export function UserDashboard({
                         Store address:
                       </h4>
                       <p className="text-muted-foreground">
-                        {user?.vendorProfile?.address ?? "none"}
+                        {viewedUser?.business_profile?.address ??
+                          "No business address added"}
                       </p>
                     </div>
                   </article>
@@ -316,7 +228,8 @@ export function UserDashboard({
                         Store description:
                       </h4>
                       <p className="text-muted-foreground">
-                        {user?.vendorProfile?.description ?? "none"}
+                        {viewedUser?.business_profile?.description ??
+                          "No business description added"}
                       </p>
                     </div>
                   </article>
@@ -345,19 +258,19 @@ export function UserDashboard({
   }
 
   // Public View (Vendor Profile)
-  const isVendor = user.role === "vendor";
+  const isVendor = viewedUser.role === "vendor";
   const displayName = isVendor
-    ? user.vendorProfile?.businessName || user.fullName
-    : user.fullName;
+    ? viewedUser.business_profile?.business_name
+    : viewedUser.first_name + " " + viewedUser.last_name;
 
   return (
     <div className="min-h-screen w-full bg-background">
       {/* Cover Image */}
-      {isVendor && user.vendorProfile?.coverImage && (
+      {isVendor && viewedUser.business_profile?.cover_image && (
         <Card
           className="rounded-none w-full shadow-none"
           style={{
-            background: `linear-gradient(8deg,rgba(0, 0, 0, 0.47) 0%, rgba(0, 0, 0, 0) 100%), url('${user.vendorProfile?.coverImage}')`,
+            background: `linear-gradient(8deg,rgba(0, 0, 0, 0.47) 0%, rgba(0, 0, 0, 0) 100%), url('${viewedUser.business_profile?.cover_image}')`,
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
@@ -367,12 +280,14 @@ export function UserDashboard({
             <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
               <Avatar className="h-24 w-24">
                 <AvatarImage
-                  src={user.profilePicture || "/placeholder.svg"}
-                  alt={user.fullName}
+                  src={viewedUser.profile_picture || "/placeholder.svg"}
+                  alt={viewedUser.first_name + " " + viewedUser.last_name}
                   className="object-cover"
                 />
                 <AvatarFallback className="text-xl font-bold">
-                  {getInitials(user.fullName)}
+                  {getInitials(
+                    viewedUser.first_name + " " + viewedUser.last_name
+                  )}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 space-y-2">
@@ -382,12 +297,12 @@ export function UserDashboard({
                 <div className="space-y-1 text-sm text-gray-300">
                   <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4" />
-                    <span>{user.email}</span>
+                    <span>{viewedUser.email}</span>
                   </div>
-                  {user.phoneNumber && (
+                  {viewedUser.phone_number && (
                     <div className="flex items-center gap-2">
                       <Phone className="h-4 w-4" />
-                      <span>{user.phoneNumber}</span>
+                      <span>{viewedUser.phone_number}</span>
                     </div>
                   )}
                 </div>
@@ -409,7 +324,9 @@ export function UserDashboard({
       )}
 
       {remoteError && (
-        <div className="p-4 text-sm text-red-600">Error loading products: {remoteError}</div>
+        <div className="p-4 text-sm text-red-600">
+          Error loading products: {remoteError}
+        </div>
       )}
     </div>
   );

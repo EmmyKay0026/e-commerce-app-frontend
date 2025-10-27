@@ -29,7 +29,6 @@ import {
   demoWishlist,
 } from "@/constants/product";
 import { useUserStore } from "@/store/useUserStore";
-import { WishlistItem } from "@/types/models";
 import { PopoverClose } from "@radix-ui/react-popover";
 import {
   ArrowUpDown,
@@ -221,7 +220,7 @@ const UserProductList = () => {
                 {isOwner
                   ? "Your store is empty"
                   : `${
-                      user?.vendorProfile?.businessName || user?.fullName
+                      user?.business_profile?.business_name || user?.first_name
                     }'s store is empty`}
               </EmptyTitle>
               <EmptyDescription>
@@ -243,23 +242,6 @@ const UserProductList = () => {
                   <ProductCardGridViewSkeleton />
                 ) : (
                   <ProductCards key={product.id} product={product} />
-                  // <ProductCardGrid
-                  //   id={product.id}
-                  //   key={product.id}
-                  //   name={product?.name!}
-                  //   description={product?.description!}
-                  //   price={product?.price!}
-                  //   image={product?.images[0]!}
-                  //   estimatedDelivery={""}
-                  //   minOrder={0}
-                  //   soldCount={0}
-                  //   supplier={{
-                  //     name: "",
-                  //     yearsActive: 0,
-                  //     country: "",
-                  //     countryCode: "",
-                  //   }}
-                  // />
                 )
               )}
           </div>
@@ -271,23 +253,6 @@ const UserProductList = () => {
                   <ProductCardListViewSkeleton />
                 ) : (
                   <ProductList key={product.id} product={product} />
-                  // <ProductCardList
-                  //   id={product.id}
-                  //   key={product.id}
-                  //   name={product?.name!}
-                  //   description={product?.description!}
-                  //   price={product?.price!}
-                  //   image={product?.images[0]!}
-                  //   estimatedDelivery={""}
-                  //   minOrder={0}
-                  //   soldCount={0}
-                  //   supplier={{
-                  //     name: "",
-                  //     yearsActive: 0,
-                  //     country: "",
-                  //     //   countryCode: "",
-                  //   }}
-                  // />
                 )
               )}
           </div>

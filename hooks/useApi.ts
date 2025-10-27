@@ -250,6 +250,6 @@ export function useApi(baseUrl?: string) {
     auth,
     db,
   };
-}
+} 
 
 export default useApi;

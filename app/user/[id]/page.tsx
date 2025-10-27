@@ -7,8 +7,8 @@ import { demoProducts, demoWishlist } from "@/constants/product";
 import { userDB, mockUser } from "@/constants/userData";
 
 export default function ProfilePage() {
-  const { id } = useParams(); 
-  const currentUser = mockUser; 
+  const { id } = useParams();
+  const currentUser = mockUser;
   const viewedUser = userDB.find((user) => user.id === id); // Profile being viewed
 
   if (!viewedUser) {
@@ -20,13 +20,13 @@ export default function ProfilePage() {
   const finalUser = isOwner ? currentUser : viewedUser;
   const isLoggedIn = true;
 
-  console.log("🧭 ProfilePage Data:", {
-    id,
-    currentUser: currentUser.fullName,
-    viewedUser: viewedUser.fullName,
-    finalUser: finalUser.fullName,
-    isOwner,
-  });
+  // console.log("🧭 ProfilePage Data:", {
+  //   id,
+  //   currentUser: currentUser.fullName,
+  //   viewedUser: viewedUser.fullName,
+  //   finalUser: finalUser.fullName,
+  //   isOwner,
+  // });
 
   return (
     <main className="flex">

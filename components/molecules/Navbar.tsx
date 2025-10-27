@@ -111,17 +111,20 @@ export default function Navbar() {
               <div className="flex justify-between items-center gap-6 relative">
                 <ul className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-700">
                   <li className="hover:text-secondary transition-colors cursor-pointer">
-                    ABOUT US
+                    About us
                   </li>
                   <li className="hover:text-secondary transition-colors cursor-pointer">
-                    <Link href="/market-place">MARKET PLACE</Link>
+                    <Link href="/market-place">Market Place</Link>
                   </li>
                   <li className="hover:text-secondary transition-colors cursor-pointer">
-                    CONTACT US
+                    Contact Us
                   </li>
                 </ul>
 
-                <div onMouseEnter={() => setShowList(true)} className="relative">
+                <div
+                  onMouseEnter={() => setShowList(true)}
+                  className="relative"
+                >
                   <Button className="bg-white hover:bg-gray-200 cursor-pointer text-black px-5 rounded-full transition-all flex items-center gap-2">
                     <User /> Sign in/Register
                   </Button>
@@ -247,10 +250,9 @@ export default function Navbar() {
               </Button>
             </div>
             <div className="flex flex-col text-sm text-gray-800 p-4 space-y-3">
-              <p className="hover:text-secondary cursor-pointer">My Orders</p>
-              <p className="hover:text-secondary cursor-pointer">Notifications</p>
-              <p className="hover:text-secondary cursor-pointer">Saved</p>
-              <p className="hover:text-secondary cursor-pointer">Wish List</p>
+              <p className="hover:text-secondary cursor-pointer">My account</p>
+              <p className="hover:text-secondary cursor-pointer">Saved items</p>
+              <p className="hover:text-secondary cursor-pointer">Settings</p>
             </div>
           </motion.div>
         )}

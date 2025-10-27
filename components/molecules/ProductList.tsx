@@ -13,7 +13,7 @@ const ProductList = ({ product }: { product: Product }) => {
   return (
     <article className="relative flex flex-col justify-between bg-white shadow rounded py-[15px] px-6 gap-6 mx-3  lg:flex-row">
       <ImageCarousel
-        // className={"w-[60%]"}
+        className={"w-[40%]"}
         allowLightbox
         images={product.images}
       />

@@ -66,16 +66,26 @@ export default function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
       }
 
       // session may be in different places depending on supabase-js version
-      const session = signUpRes?.data?.session ?? signUpRes?.session ?? signUpRes?.data?.session ?? null;
-      const user = signUpRes?.data?.user ?? signUpRes?.user ?? signUpRes?.data?.user ?? null;
+      const session =
+        signUpRes?.data?.session ??
+        signUpRes?.session ??
+        signUpRes?.data?.session ??
+        null;
+      const user =
+        signUpRes?.data?.user ??
+        signUpRes?.user ??
+        signUpRes?.data?.user ??
+        null;
 
       const token = session?.access_token ?? session?.accessToken ?? null;
 
       if (token) {
+        console.log(token);
+
         localStorage.setItem("token", token);
         // After sign-up, fetch user data and update the store using getMe
-        const newUser = await getMe(api); // Pass api instance
-        setUser(newUser);
+        const newUser = await getMe(token);
+        setUser(newUser!);
         setSuccess("Account created and signed in.");
         setTimeout(() => {
           onClose();
@@ -94,7 +104,8 @@ export default function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
       }, 900);
     } catch (err: any) {
       // supabase errors sometimes nested
-      const message = err?.message ?? err?.error_description ?? err?.msg ?? String(err);
+      const message =
+        err?.message ?? err?.error_description ?? err?.msg ?? String(err);
       console.error("Register error:", err);
       setError(message || "Registration failed");
     } finally {
@@ -111,7 +122,7 @@ export default function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
     >
       <div
         className="bg-white/95 rounded-xl shadow-xl w-full max-w-md p-6 relative"
-        onClick={(e) => e.stopPropagation()}
+        // onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-2xl font-semibold mb-2">Create an account</h2>
         <p className="text-sm text-gray-600 mb-4">Join the marketplace</p>
@@ -223,7 +234,9 @@ export default function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
         </div>
 
         {error && <div className="mt-3 text-sm text-red-600">{error}</div>}
-        {success && <div className="mt-3 text-sm text-green-600">{success}</div>}
+        {success && (
+          <div className="mt-3 text-sm text-green-600">{success}</div>
+        )}
 
         <button
           onClick={onClose}

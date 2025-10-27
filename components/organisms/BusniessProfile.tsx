@@ -20,7 +20,7 @@ import {
   PenSquareIcon,
 } from "lucide-react";
 import { User, Product, WishlistItem } from "@/types/models";
-import { getInitials } from "@/services/user";
+import { getInitials } from "@/services/userService";
 import { useEffect, useState } from "react";
 
 interface BusinessDashboardProps {

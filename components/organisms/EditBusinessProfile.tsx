@@ -30,25 +30,26 @@ import { useUserStore } from "@/store/useUserStore";
 import useApi from "@/hooks/useApi";
 import type { User } from "@/types/models";
 import { updateProfile } from "@/services/userService";
+import { updateBusinessProfile } from "@/services/businessProfileService";
 
-export function EditProfile() {
+export function EditBusinessProfile() {
   const [open, setOpen] = React.useState(false);
   const isMobile = useMediaQuery();
   if (!isMobile) {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline">Edit profile</Button>
+          <Button variant="outline">Edit business</Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Edit profile</DialogTitle>
+            <DialogTitle>Edit business</DialogTitle>
             <DialogDescription>
               Make changes to your profile here. Click save when you&apos;re
               done.
             </DialogDescription>
           </DialogHeader>
-          <ProfileForm />
+          <BusinessForm />
         </DialogContent>
       </Dialog>
     );
@@ -57,16 +58,16 @@ export function EditProfile() {
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        <Button variant="outline">Edit Profile</Button>
+        <Button variant="outline">Edit business</Button>
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader className="text-left">
-          <DrawerTitle>Edit profile</DrawerTitle>
+          <DrawerTitle>Edit business</DrawerTitle>
           <DrawerDescription>
             Make changes to your profile here. Click save when you&apos;re done.
           </DrawerDescription>
         </DrawerHeader>
-        <ProfileForm className="px-4" />
+        <BusinessForm className="px-4" />
         <DrawerFooter className="pt-2">
           <DrawerClose asChild>
             <Button variant="outline">Cancel</Button>
@@ -77,105 +78,33 @@ export function EditProfile() {
   );
 }
 
-// function splitFullName(fullName?: string) {
-//   const parts = (fullName ?? "").trim().split(/\s+/).filter(Boolean);
-//   return {
-//     first: parts.length ? parts[0] : "",
-//     last: parts.length > 1 ? parts.slice(1).join(" ") : "",
-//   };
-// }
-
-/**
- * Normalize arbitrary backend/user shapes into the local User type
- */
-// function normalizeToUser(raw: any): User {
-//   const id = String(raw?.id ?? raw?.user_id ?? raw?.uuid ?? "");
-//   const first =
-//     raw?.first_name ??
-//     raw?.firstName ??
-//     raw?.first ??
-//     splitFullName(raw?.fullName ?? raw?.name).first;
-//   const last =
-//     raw?.last_name ??
-//     raw?.lastName ??
-//     raw?.last ??
-//     splitFullName(raw?.fullName ?? raw?.name).last;
-//   const fullName =
-//     raw?.fullName ||
-//     `${first}${last ? " " + last : ""}`.trim() ||
-//     raw?.name ||
-//     "";
-//   const email = raw?.email ?? raw?.user?.email ?? "";
-//   const phoneNumber =
-//     raw?.phone_number ?? raw?.phoneNumber ?? raw?.phone ?? undefined;
-//   const profilePicture =
-//     raw?.profile_picture ??
-//     raw?.profilePicture ??
-//     raw?.avatar ??
-//     raw?.photoUrl ??
-//     undefined;
-//   const role = (raw?.role as any) ?? (raw?.vendor ? "vendor" : "user");
-//   const vendorProfile =
-//     raw?.vendor ??
-//     raw?.vendorProfile ??
-//     (raw?.business_profile ? { ...raw.business_profile } : undefined) ??
-//     raw?.business_profile?.vendor ??
-//     undefined;
-
-//   return {
-//     id,
-//     fullName,
-//     email,
-//     phoneNumber,
-//     profilePicture,
-//     role,
-//     vendorProfile: vendorProfile
-//       ? {
-//           id: vendorProfile?.id ?? vendorProfile?.vendorId ?? undefined,
-//           businessName:
-//             vendorProfile?.business_name ??
-//             vendorProfile?.businessName ??
-//             vendorProfile?.name ??
-//             "",
-//           coverImage:
-//             vendorProfile?.cover_image ??
-//             vendorProfile?.coverImage ??
-//             undefined,
-//           address: vendorProfile?.address ?? undefined,
-//           description: vendorProfile?.description ?? undefined,
-//           vendorId: vendorProfile?.vendorId ?? undefined,
-//         }
-//       : undefined,
-//     business_profile_id:
-//       raw?.business_profile_id ?? raw?.business_profile?.id ?? undefined,
-//     business_profile: raw?.business_profile ?? undefined,
-//     vendor: raw?.vendor ? { id: raw.vendor.id } : raw?.vendor ?? null,
-//   } as User;
-// }
-
-function ProfileForm({ className }: React.ComponentProps<"form">) {
+function BusinessForm({ className }: React.ComponentProps<"form">) {
   const api = useApi();
   const router = useRouter();
   // const rawUser = useUserStore((s) => s.user) as any;
   const setUser = useUserStore((s) => s.setUser);
   const user = useUserStore((s) => s.user);
-  const altStoreName = user?.first_name + "'s business";
+  const altBusName = user?.first_name + "'s business";
   // const user = React.useMemo(
   //   () => (rawUser ? normalizeToUser(rawUser) : null),
   //   [rawUser]
   // );
 
-  const [firstName, setFirstName] = useState<string>(
-    user?.first_name ?? "none"
+  const [businessName, setBusinessName] = useState<string>(
+    user?.business_profile?.business_name ?? altBusName ?? "none"
   );
-  const [lastName, setLastName] = useState<string>(user?.last_name ?? "none");
-  const [email, setEmail] = useState<string>(user?.email ?? "none");
-  const [whatsAppNumber, setWhatsAppNumber] = useState<string>(
-    user?.whatsapp_number ?? "none"
+  const [slug, setSlug] = useState<string>(
+    user?.business_profile?.slug ?? "none"
   );
-  const [phoneNumber, setPhoneNumber] = useState<string>(
-    user?.phone_number ?? "none"
+  const [desc, setDesc] = useState<string>(
+    user?.business_profile?.description ?? "none"
   );
+  const [address, setAddress] = useState<string>(
+    user?.business_profile?.address ?? "none"
+  );
+  // const [phoneNumber, setPhoneNumber] = useState<string>(
+  //   user?.phone_number ?? "none"
+  // );
   // const [storeName, setStoreName] = React.useState<string>(
   //   user?.business_profile?.business_name ?? altStoreName ?? "none"
   // );
@@ -214,31 +143,31 @@ function ProfileForm({ className }: React.ComponentProps<"form">) {
     setError(null);
     setSuccess(null);
 
-    if (!firstName || !lastName) {
-      setError("First and last name are required");
+    if (!businessName) {
+      setError("Business name are required");
       return;
     }
 
     setLoading(true);
     try {
+      // businessName slug desc,address
       // Build payload accommodating common backend shapes
       const body: any = {
-        first_name: firstName,
-        last_name: lastName,
-        phone_number: phoneNumber,
-        whatsapp_number: whatsAppNumber,
-        email,
+        business_name: businessName,
+        slug: slug.toLowerCase(),
+        description: desc,
+
+        address,
       };
 
       // PATCH users/me (API expects authenticated request; useApi attaches token)
-      const res = await updateProfile(body);
+      const res = await updateBusinessProfile(body);
       // api.patch<any>("users/me", body);
-      console.log(res.data);
 
       // update client store if setter exists
       try {
         if (setUser && typeof setUser === "function") {
-          setUser(res.data as User);
+          setUser(res.data as any);
         }
       } catch {
         // ignore store update errors
@@ -273,50 +202,43 @@ function ProfileForm({ className }: React.ComponentProps<"form">) {
       onSubmit={handleSubmit}
       className={cn("grid items-start gap-6", className)}
     >
-      <article className="flex flex-col md:flex-row md:items-start gap-4">
-        <div className="grid gap-3 flex-1">
-          <Label htmlFor="fname">First name</Label>
-          <Input
-            id="fname"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-          />
-        </div>
-        <div className="grid gap-3 flex-1">
-          <Label htmlFor="lname">Last name</Label>
-          <Input
-            id="lname"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-          />
-        </div>
-      </article>
-
-      <div className="grid gap-3">
-        <Label htmlFor="email">Email</Label>
+      <div className="grid gap-3 flex-1">
+        <Label htmlFor="bus_name">Business name</Label>
         <Input
-          id="email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          id="bus_name"
+          value={businessName}
+          onChange={(e) => setBusinessName(e.target.value)}
+        />
+      </div>
+
+      <div className="grid gap-3 flex-1">
+        <Label htmlFor="desc">Description</Label>
+        <textarea
+          id="desc"
+          value={desc}
+          onChange={(e) => setDesc(e.target.value)}
+          rows={4}
+          className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
         />
       </div>
 
       <div className="grid gap-3">
-        <Label htmlFor="phone_number">Phone number</Label>
+        <Label htmlFor="address">Address</Label>
+        <Input
+          id="address"
+          type="text"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+        />
+      </div>
+
+      <div className="grid gap-3">
+        <Label htmlFor="phone_number">Slug</Label>
         <Input
           id="phone_number"
-          value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
-        />
-      </div>
-
-      <div className="grid gap-3">
-        <Label htmlFor="whatsapp_number">WhatsApp number</Label>
-        <Input
-          id="whatsapp_number"
-          value={whatsAppNumber}
-          onChange={(e) => setWhatsAppNumber(e.target.value)}
+          placeholder={slug}
+          value={slug}
+          onChange={(e) => setSlug(e.target.value)}
         />
       </div>
 

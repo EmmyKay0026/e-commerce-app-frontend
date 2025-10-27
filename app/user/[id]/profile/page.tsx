@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -15,27 +15,57 @@ import { demoProducts } from "@/constants/product";
 import { mockUser, mockWishlist } from "@/constants/userData";
 import { useUserStore } from "@/store/useUserStore";
 import { User } from "@/types/models";
+import { getPublicProfile } from "@/services/userService";
 
 export default function DashboardPage() {
   const { id } = useParams();
+  const router = useRouter();
   const [viewedUser, setViewedUser] = useState<User | null>(null);
-  const currentUser = mockUser; // ✅ Simulated logged-in user (added this line)
+  const currentUser = useUserStore((state) => state.user); // ✅ Simulated logged-in user (added this line)
 
   const isOwner = useUserStore((state) => state.isOwner);
   const updateIsOwner = useUserStore((state) => state.updateIsOwner);
-  const getMe = useUserStore((state) => state.getMe);
-  const isLoggedIn = true;
+
+  if (!id) {
+    router.push("/404");
+    return null;
+  }
 
   useEffect(() => {
-    if (id) updateIsOwner(id.toString());
+    if (!id) return;
 
+    let cancelled = false;
+
+    const ensureOwner = async () => {
+      // updateIsOwner may be sync or return a promise; handle both safely
+      const result = updateIsOwner(id.toString());
+      // treat result as any to safely check for a thenable without incorrect type comparisons
+      if (result != null && typeof (result as any).then === "function") {
+        await (result as unknown as Promise<unknown>);
+      }
+      if (cancelled) return;
+      // no further action needed — the store updateIsOwner handles state
+    };
+
+    ensureOwner();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id, updateIsOwner]);
+
+  useEffect(() => {
     const fetchViewedUser = async () => {
-      const user = await getMe(id ? id.toString() : undefined);
-      setViewedUser(user);
+      const user = await getPublicProfile(id?.toString());
+      if (user.status === 404) {
+        router.push("/404");
+        return;
+      }
+      setViewedUser(user.data ?? null);
     };
 
     fetchViewedUser();
-  }, [id, getMe, updateIsOwner]);
+  }, []);
 
   // Loading or unknown ownership state
   if (isOwner === "unknown" || viewedUser === null) {
@@ -65,11 +95,10 @@ export default function DashboardPage() {
   return (
     <main className="flex">
       <UserDashboard
-        user={viewedUser}
-        currentUser={currentUser}
+        viewedUser={viewedUser}
+        currentUser={currentUser ?? undefined}
         products={demoProducts}
-        wishlist={mockWishlist}
-        isLoggedIn={isLoggedIn}
+        isLoggedIn={!!currentUser}
       />
     </main>
   );

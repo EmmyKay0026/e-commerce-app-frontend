@@ -5,20 +5,18 @@ import { Edit } from "lucide-react";
 import { User } from "@/types/models";
 
 interface UserProfileCompletionProps {
-  currentUser: User | null;
-  profileUser: User | null;
+  profileDetails: User | null;
 }
 
 const UserProfileCompletion: React.FC<UserProfileCompletionProps> = ({
-  currentUser,
-  profileUser,
+  profileDetails,
 }) => {
   // ✅ If data isn't ready yet, return nothing but safely
-  if (!currentUser || !profileUser) {
+  if (!profileDetails) {
     return null;
   }
 
-  const isOwner = String(currentUser.id) === String(profileUser.id);
+  const isOwner = !!String(profileDetails.id);
 
   if (!isOwner) {
     return null;

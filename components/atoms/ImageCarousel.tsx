@@ -127,7 +127,6 @@ function ImageCarousel({
         ))}
       </div>
 
-
       <div className="absolute top-1 bg-amber-50/70 left-2 w-6 h-6 rounded-full flex items-center justify-center   inset-0  px-2">
         <p className=" text-[12px] text-muted-foreground font-medium">
           {index + 1}/{images.length}

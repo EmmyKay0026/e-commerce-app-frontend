@@ -1,4 +1,7 @@
 "use client";
+import { EditBusinessProfile } from "@/components/organisms/EditBusinessProfile";
+import { EditProfile } from "@/components/organisms/EditUserProfile";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,7 +11,7 @@ import {
 import { mockUser } from "@/constants/userData";
 import { useUserStore } from "@/store/useUserStore";
 import { User } from "@/types/models";
-import { Edit, LucideSettings } from "lucide-react";
+import { Edit, EditIcon, LucideSettings, Plus } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 
@@ -38,13 +41,24 @@ const Settings = () => {
                   <h4 className="font-bold text-muted-foreground">
                     Personal photo:
                   </h4>
-                  <Image
-                    src={user?.profilePicture ?? ""}
-                    alt={user?.fullName ?? "null"}
-                    width={200}
-                    height={200}
-                    className="object-cover rounded-full w-60 h-60"
-                  />
+                  {user?.profile_picture ? (
+                    <div className="relative w-60 h-60">
+                      <Image
+                        src={user?.profile_picture}
+                        alt={user?.first_name ?? "null"}
+                        width={200}
+                        height={200}
+                        className="object-cover rounded-full w-60 h-60"
+                      />
+                      {/* <EditIcon className="absolute bottom-2 right-2 w-6 h-6 p-3 bg- z-50 rounded-full  cursor-pointer" /> */}
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="w-60 h-60 bg-gray-200 flex items-center justify-center rounded-full">
+                        <Plus className="w-12 h-12 text-gray-400" />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </article>
 
@@ -53,26 +67,37 @@ const Settings = () => {
                   <h4 className="font-bold whitespace-nowrap text-muted-foreground">
                     Business photo:
                   </h4>
-                  <div className="relative w-60 h-60">
-                    <Image
-                      src={user?.vendorProfile?.coverImage ?? ""}
-                      alt={user?.vendorProfile?.businessName ?? "null"}
-                      width={200}
-                      height={200}
-                      className="object-cover rounded-full w-60 h-60"
-                    />
-                    <Edit className="absolute bottom-2 right-2 w-6 h-6 text-white p-3 rounded-full  cursor-pointer" />
-                  </div>
+                  {user?.business_profile &&
+                  user?.business_profile?.cover_image ? (
+                    <div className="relative w-60 h-60">
+                      <Image
+                        src={user?.business_profile?.cover_image ?? ""}
+                        // src={user?.business_profile?.cover_image ?? ""}
+                        alt={user?.business_profile?.business_name ?? "null"}
+                        width={200}
+                        height={200}
+                        className="object-cover rounded-full w-60 h-60"
+                      />
+                      {/* <Edit className="absolute bottom-2 right-2 w-6 h-6 text-white p-3 bg-black z-50 rounded-full  cursor-pointer" /> */}
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="w-60 h-60 bg-gray-200 flex items-center justify-center rounded-full">
+                        <Plus className="w-12 h-12 text-gray-400" />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </article>
             </div>
           </CardContent>
         </Card>
         <Card className="mb-6 p-4 gap-2">
-          <CardHeader className="font-bold">
-            {/* <h2 className="text-lg font-semibold "> */}
-            Personal information
-            {/* </h2> */}
+          <CardHeader className="font-bold ">
+            <div className="flex justify-between items-center h-auto">
+              <h2 className="text-lg font-semibold ">Personal information</h2>
+              <EditProfile />
+            </div>
           </CardHeader>
           {/* <CardDescription> */}
           {/* <p className="text-sm text-gray-600"> */}
@@ -86,11 +111,15 @@ const Settings = () => {
                   <h4 className="font-bold text-muted-foreground">
                     Full name:
                   </h4>
-                  <p className="text-muted-foreground">{user?.fullName}</p>
+                  <p className="text-muted-foreground capitalize">
+                    {user?.first_name} {user?.last_name}
+                  </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <h4 className="font-bold text-muted-foreground">Email:</h4>
-                  <p className="text-muted-foreground">{user?.email}</p>
+                  <p className="text-muted-foreground">
+                    {user?.email ?? "None"}
+                  </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <h4 className="font-bold text-muted-foreground">
@@ -105,13 +134,15 @@ const Settings = () => {
                   <h4 className="font-bold text-muted-foreground">
                     WhatsApp contact:
                   </h4>
-                  <p className="text-muted-foreground"></p> {user?.phoneNumber}
+                  <p className="text-muted-foreground"></p>{" "}
+                  {user?.whatsapp_number ?? "None"}
                 </div>
                 <div className="flex items-center gap-2">
                   <h4 className="font-bold text-muted-foreground">
                     Phone number:
                   </h4>
-                  <p className="text-muted-foreground"></p> {user?.phoneNumber}
+                  <p className="text-muted-foreground"></p>{" "}
+                  {user?.phone_number ?? "None"}
                 </div>
               </article>
             </div>
@@ -122,64 +153,69 @@ const Settings = () => {
           <CardContent className="py-3 px-6 text-sm text-muted-foreground ">
             <div className="flex justify-between">
               <h2 className="mb-4 text-lg font-bold text-foreground">
-                Store Information
+                Business Information
               </h2>
+              <EditBusinessProfile />
               {/* <Button variant="outline" size="sm" className="rounded-lg">
                     <PenSquareIcon />
                   </Button> */}
             </div>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <article className="space-y-2 ">
-                <div className="flex items-center gap-2">
-                  <h4 className="font-bold text-muted-foreground">
-                    Store name:
-                  </h4>
-                  <p className="text-muted-foreground">
-                    {user?.vendorProfile?.businessName ?? "none"}
-                  </p>
-                </div>
+            {user?.role == "vendor" ? (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <article className="space-y-2 ">
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-bold text-muted-foreground">
+                      Business name:
+                    </h4>
+                    <p className="text-muted-foreground">
+                      {user?.business_profile?.business_name ?? "none"}
+                    </p>
+                  </div>
 
-                <div className="flex items-center gap-2">
-                  <h4 className="font-bold text-muted-foreground">
-                    Store address:
-                  </h4>
-                  <p className="text-muted-foreground">
-                    {user?.vendorProfile?.address ?? "none"}
-                  </p>
-                </div>
-              </article>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-bold text-muted-foreground">
+                      Business address:
+                    </h4>
+                    <p className="text-muted-foreground">
+                      {user?.business_profile?.address ?? "none"}
+                    </p>
+                  </div>
+                </article>
 
-              <article className="space-y-2 ">
-                <div className="flex  gap-2">
-                  <h4 className="font-bold whitespace-nowrap text-muted-foreground">
-                    Store description:
-                  </h4>
-                  <p className="text-muted-foreground">
-                    {user?.vendorProfile?.description ?? "none"}
-                  </p>
-                </div>
+                <article className="space-y-2 ">
+                  <div className="flex  gap-2">
+                    <h4 className="font-bold whitespace-nowrap text-muted-foreground">
+                      Business description:
+                    </h4>
+                    <p className="text-muted-foreground">
+                      {user?.business_profile?.description ?? "none"}
+                    </p>
+                  </div>
+                </article>
+              </div>
+            ) : (
+              <article className="flex items-center justify-center">
+                <Button>Create a business account</Button>
               </article>
-            </div>
+            )}
           </CardContent>
         </Card>
-        <Card className="rounded-xl shadow-sm">
+        {/* <Card className="rounded-xl shadow-sm">
           <CardContent className="py-3 px-6 text-sm text-muted-foreground ">
             <div className="flex justify-between">
               <h2 className="mb-4 text-lg font-bold text-foreground">
                 Security Information
               </h2>
-              {/* <Button variant="outline" size="sm" className="rounded-lg">
-                    <PenSquareIcon />
-                  </Button> */}
+         
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <article className="space-y-2 ">
                 <div className="flex items-center gap-2">
                   <h4 className="font-bold text-muted-foreground">
-                    Store name:
+                    Password:
                   </h4>
                   <p className="text-muted-foreground">
-                    {user?.vendorProfile?.businessName ?? "none"}
+                    {user?.business_profile?.business_name ?? "none"}
                   </p>
                 </div>
 
@@ -188,7 +224,7 @@ const Settings = () => {
                     Store address:
                   </h4>
                   <p className="text-muted-foreground">
-                    {user?.vendorProfile?.address ?? "none"}
+                    {user?.business_profile?.address ?? "none"}
                   </p>
                 </div>
               </article>
@@ -199,32 +235,13 @@ const Settings = () => {
                     Store description:
                   </h4>
                   <p className="text-muted-foreground">
-                    {user?.vendorProfile?.description ?? "none"}
+                    {user?.business_profile?.description ?? "none"}
                   </p>
                 </div>
               </article>
             </div>
           </CardContent>
-        </Card>
-        <section style={{ marginBottom: "2rem" }}>
-          <h2>Personal Settings</h2>
-        </section>
-        <section style={{ marginBottom: "2rem" }}>
-          <h2>Business Settings</h2>
-          <ul>
-            <li>Business Profile</li>
-            <li>Team Members</li>
-            <li>Payment Methods</li>
-          </ul>
-        </section>
-        <section>
-          <h2>Security Settings</h2>
-          <ul>
-            <li>Password</li>
-            <li>Two-Factor Authentication</li>
-            <li>Login Activity</li>
-          </ul>
-        </section>
+        </Card> */}
       </div>
     </div>
   );
