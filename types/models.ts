@@ -61,7 +61,11 @@ export interface Category {
   description?: string;
   icon?: string;
   image?: string;
-  child_categories?: string[];
+  child_categories?: string[]; // Sub categories
+}
+
+export interface CategoryTree extends Category {
+  children?: CategoryTree[];
 }
 
 export type ServiceResult<T> = {

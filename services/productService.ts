@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Product } from "@/types/models";
+import { Product, Category, BusinessProfile } from "@/types/models";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE;
 
@@ -34,9 +34,11 @@ export interface TransformedProduct {
   parentCategories: any[];
 }
 
+/**
+ * Fetch a single product by ID and transform it into a frontend-friendly format
+ */
 export async function getProductById(id: string): Promise<TransformedProduct> {
   try {
-
     const { data } = await api.get<{ success: boolean; product: Product }>(
       `/products/${id}`
     );
@@ -52,18 +54,25 @@ export async function getProductById(id: string): Promise<TransformedProduct> {
 
     if (cleanedCategoryId) {
       try {
-        const categoryRes = await api.get(`/category/${cleanedCategoryId}`);
-        const category = categoryRes.data.data;
+        const { data: categoryData } = await api.get<{
+          success: boolean;
+          data: Category;
+        }>(`/category/${cleanedCategoryId}`);
 
-        categoryName = category?.name || "Uncategorized";
-        categorySlug =
-          category?.slug ||
-          categoryName.toLowerCase().replace(/\s+/g, "-");
-        parentCategories = category?.parentCategory || [];
+        const category = categoryData.data;
+        if (category) {
+          categoryName = category.name;
+          categorySlug = category.slug;
+          parentCategories = category.parent_category_id || [];
+        }
       } catch {
         console.warn("Category not found for product:", cleanedCategoryId);
       }
     }
+
+    // Extract vendor data safely
+    const vendor: Partial<BusinessProfile> | null =
+      (product as any).business_profile || null;
 
     const transformedProduct: TransformedProduct = {
       id: product.id,
@@ -78,16 +87,16 @@ export async function getProductById(id: string): Promise<TransformedProduct> {
       images: product.images || [],
       metadata: product.metadata || {},
       vendor: {
-        name: product.business?.businessName || "Unknown Vendor",
+        name: vendor?.business_name || "Unknown Vendor",
         country: "NG",
         yearsActive: 2,
         rating: 4.6,
-        id: product.business?.id,
-        address: product.business?.address,
-        businessPhoneNumber: product.business?.businessPhoneNumber,
-        businessWhatsAppNumber: product.business?.businessWhatsAppNumber,
+        id: vendor?.id,
+        address: vendor?.address || null,
+        businessPhoneNumber: vendor?.business_phone || null,
+        businessWhatsAppNumber: vendor?.business_whatsapp_number || null,
       },
-      createdAt: product.created_at,
+      createdAt: product.createdAt,
       parentCategories,
     };
 
@@ -97,10 +106,16 @@ export async function getProductById(id: string): Promise<TransformedProduct> {
     throw new Error(error.response?.data?.error || "Failed to fetch product");
   }
 }
+
+/**
+ * Fetch related products based on category ID
+ */
 export const getRelatedProducts = async (categoryId: string) => {
   try {
-    const response = await api.get(`/products?category_id=${categoryId}`);
-    return response.data?.data || [];
+    const { data } = await api.get<{ success: boolean; data: Product[] }>(
+      `/products?category_id=${categoryId}`
+    );
+    return data?.data || [];
   } catch (error) {
     console.error("Failed to fetch related products:", error);
     return [];
