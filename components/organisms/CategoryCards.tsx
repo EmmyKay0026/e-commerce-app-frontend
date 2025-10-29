@@ -4,6 +4,8 @@ import ProductCards from "../molecules/ProductCards";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { transformProduct } from "@/services/productService";
+
 
 const CategoryCards = ({
   categoryTitle,
@@ -32,7 +34,7 @@ const CategoryCards = ({
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
         {categoryProduct.slice(0, 5).map((product) => (
-          <ProductCards key={product.id} product={product} />
+          <ProductCards key={product.id} product={transformProduct(product)} />
         ))}
       </div>
     </section>

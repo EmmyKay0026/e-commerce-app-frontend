@@ -61,24 +61,18 @@ export const getCategoryByIdOrSlug = async (
 /**
  * Get products by category ID
  */
-export const getProductsByCategory = async (
-  categoryId: string
-): Promise<Product[]> => {
-  try {
-    const res = await api.get<ApiResponse<Product[]>>("/products", {
-      params: { category_id: categoryId },
-    });
+export const getProductsByCategory = async (categoryId: string): Promise<Product[]> => {
+  const res = await axios.get(`${BASE_URL}/products`, {
+    params: { category: categoryId },
+  });
 
-    const data = res.data;
+  const data = res.data;
 
-    if (Array.isArray(data)) return data;
-    if (data?.data && Array.isArray(data.data)) return data.data;
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.products)) return data.products;
 
-    return [];
-  } catch (error) {
-    console.error("Failed to fetch products by category:", error);
-    return [];
-  }
+  return [];
 };
 
 // ===== HIERARCHY UTILITIES =====

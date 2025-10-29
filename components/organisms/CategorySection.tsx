@@ -1,59 +1,54 @@
 "use client";
 
-import React, {
-  useEffect,
-  useState,
-  useMemo,
-  useCallback,
-} from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { slugify } from "@/lib/utils";
-import { demoCategories, demoProducts } from "@/constants/product";
 import ProductCards from "../molecules/ProductCards";
 import {
   getAllCategories,
   getChildCategories,
   getProductsByCategory,
-  // buildCategoryTree,
   getRootCategories,
   hasChildren,
 } from "@/services/categoryService";
 import { Category, Product } from "@/types/models";
+import { transformProduct } from "@/services/productService";
 
 const CategorySection: React.FC = () => {
   const [allCategories, setAllCategories] = useState<Category[]>([]);
   const [loadingCats, setLoadingCats] = useState(true);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
+    null
+  );
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showMobile, setShowMobile] = useState(false);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
-  // Fetch all categories once
+  /** Fetch all categories once */
   useEffect(() => {
     (async () => {
       try {
         setLoadingCats(true);
         const data = await getAllCategories();
-        console.log("All categories fetched:", data);
-        setAllCategories(data.length ? data : (demoCategories as Category[]));
-      } catch (e) {
+        setAllCategories(data);
+      } catch (e: any) {
         console.error("getAllCategories error:", e);
-        setAllCategories(demoCategories as Category[]);
+        setError("Failed to load categories");
       } finally {
         setLoadingCats(false);
       }
     })();
   }, []);
 
-  // Get root categories for top-level navigation
+  /** Root categories for sidebar and dropdown */
   const rootCategories = useMemo(() => {
     return getRootCategories(allCategories);
   }, [allCategories]);
 
-  // Fetch products when category is selected
+  /** Fetch products when a category is selected */
   useEffect(() => {
     if (!selectedCategoryId) {
       setProducts([]);
@@ -64,23 +59,23 @@ const CategorySection: React.FC = () => {
         setLoadingProducts(true);
         setError(null);
         const prods = await getProductsByCategory(selectedCategoryId);
-        setProducts(prods.length ? prods : demoProducts);
+        setProducts(prods);
       } catch (e: any) {
+        console.error("getProductsByCategory error:", e);
         setError(e.message ?? "Failed to load products");
-        setProducts(demoProducts);
       } finally {
         setLoadingProducts(false);
       }
     })();
   }, [selectedCategoryId]);
 
-  // Get selected category info
+  /** Selected category info */
   const selectedCategory = useMemo(() => {
     if (!selectedCategoryId) return null;
     return allCategories.find((c) => c.id === selectedCategoryId) ?? null;
   }, [selectedCategoryId, allCategories]);
 
-  // Get children for a category
+  /** Get child categories */
   const getCategoryChildren = useCallback(
     (categoryId: string): Category[] => {
       return getChildCategories(categoryId, allCategories);
@@ -88,7 +83,7 @@ const CategorySection: React.FC = () => {
     [allCategories]
   );
 
-  // Desktop menu item with recursive children
+  /** Desktop item (recursive) */
   const DesktopItem = useCallback(
     (cat: Category, depth = 0) => {
       const categoryHasChildren = hasChildren(cat);
@@ -116,18 +111,14 @@ const CategorySection: React.FC = () => {
             style={{ paddingLeft: `${16 + depth * 12}px` }}
           >
             <span>{cat.name}</span>
-            {categoryHasChildren && (
-              <>
-                {isHover ? (
-                  <ChevronUp className="ml-1 h-4 w-4" />
-                ) : (
-                  <ChevronDown className="ml-1 h-4 w-4" />
-                )}
-              </>
-            )}
+            {categoryHasChildren &&
+              (isHover ? (
+                <ChevronUp className="ml-1 h-4 w-4" />
+              ) : (
+                <ChevronDown className="ml-1 h-4 w-4" />
+              ))}
           </div>
 
-          {/* Hover dropdown for children */}
           {categoryHasChildren && isHover && children.length > 0 && (
             <ul
               className="absolute left-0 top-0 ml-1 min-w-[200px] rounded-lg border border-gray-200 bg-white shadow-lg z-20"
@@ -143,7 +134,7 @@ const CategorySection: React.FC = () => {
     [hoveredId, selectedCategoryId, getCategoryChildren]
   );
 
-  // Mobile menu item with expandable children
+  /** Mobile item (recursive expandable) */
   const MobileItem = useCallback(
     (cat: Category, depth = 0) => {
       const categoryHasChildren = hasChildren(cat);
@@ -187,7 +178,6 @@ const CategorySection: React.FC = () => {
             )}
           </div>
 
-          {/* Expanded children */}
           {categoryHasChildren && expanded && children.length > 0 && (
             <ul className="mt-1 space-y-1">
               {children.map((child) => MobileItem(child, depth + 1))}
@@ -257,7 +247,7 @@ const CategorySection: React.FC = () => {
         <div className="lg:col-span-3">
           <div className="mb-6 flex items-center justify-between">
             <h4 className="text-xl font-bold text-gray-900">
-              {selectedCategory?.name ?? "All Products"}
+              {selectedCategory?.name ?? "Products"}
             </h4>
             {selectedCategory && (
               <Link
@@ -283,7 +273,7 @@ const CategorySection: React.FC = () => {
           ) : products.length ? (
             <div className="grid grid-cols-2 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {products.map((p) => (
-                <ProductCards key={p.id} product={p} />
+                <ProductCards key={p.id} product={transformProduct(p)} />
               ))}
             </div>
           ) : (

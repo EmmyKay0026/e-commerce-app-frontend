@@ -5,6 +5,7 @@ import Link from "next/link";
 import ProductCards from "@/components/molecules/ProductCards";
 import type { Product as DataProduct } from "@/types/models";
 import { getProductsByCategory } from "@/services/categoryService";
+import { transformProduct } from "@/services/productService";
 
 interface SimpleProduct {
   id: string;
@@ -149,9 +150,9 @@ export default function CategorySection({
         <div className="text-red-600 text-sm">{error}</div>
       ) : items && items.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          {items.map((product) => (
-            <div key={product.id} className="p-2">
-              <ProductCards product={product} />
+          {items.map((p) => (
+            <div key={p.id} className="p-2">
+              <ProductCards key={p.id} product={transformProduct(p)} />
             </div>
           ))}
         </div>
