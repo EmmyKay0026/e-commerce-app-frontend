@@ -23,10 +23,11 @@ import {
   Search,
   X,
   ArrowUpDown,
+  Store,
 } from "lucide-react";
 import { User, Product } from "@/types/models";
 import { getInitials } from "@/services/userService";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import Image from "next/image";
 import {
   Popover,
@@ -42,6 +43,16 @@ import { ProductCardListViewSkeleton } from "../molecules/ProductCardListViewSke
 import { ProductCardList } from "../molecules/ProductCardListView";
 import GridListProductList from "./GridListProductList";
 import { EditProfile } from "./EditUserProfile";
+import { useUserStore } from "@/store/useUserStore";
+import { getBusinessProducts } from "@/services/productService";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "../ui/empty";
 
 interface UserDashboardProps {
   viewedUser: User;
@@ -61,57 +72,61 @@ export function UserDashboard({
   );
   const [remoteLoading, setRemoteLoading] = useState(false);
   const [remoteError, setRemoteError] = useState<string | null>(null);
+  const isOwner = useUserStore((state) => state.isOwner);
+
+  // const par
 
   // const getUsersProducts = async () => {
   //   // const ;
   // };
   // getUsersProducts();
-  useEffect(() => {
-    if (!viewedUser) return;
+  // useEffect(() => {
+  //   if (!viewedUser) return;
 
-    const controller = new AbortController();
-    const signal = controller.signal;
+  //   const controller = new AbortController();
+  //   const signal = controller.signal;
 
-    setRemoteLoading(true);
-    setRemoteError(null);
+  //   setRemoteLoading(true);
+  //   setRemoteError(null);
 
-    (async () => {
-      try {
-        // prefer typed vendorProfile id, then business_profile_id, then fallback to user.id
-        const business_id = viewedUser.business_profile_id;
-        if (!business_id) {
-          throw new Error("Business id not found on user");
-        }
+  //   (async () => {
+  //     try {
+  //       // prefer typed vendorProfile id, then business_profile_id, then fallback to user.id
+  //       const business_id = viewedUser.business_profile_id;
+  //       if (!business_id) {
+  //         throw new Error("Business id not found on user");
+  //       }
 
-        const url = `${API}/products?vendorId=${encodeURIComponent(vendorId)}`;
-        const res = await fetch(url, {
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-          signal,
-        });
+  //       const url = `${API}/products?vendorId=${encodeURIComponent(vendorId)}`;
+  //       const res = await fetch(url, {
+  //         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  //         signal,
+  //       });
 
-        if (!res.ok) {
-          throw new Error(`Products fetch failed: ${res.status}`);
-        }
+  //       if (!res.ok) {
+  //         throw new Error(`Products fetch failed: ${res.status}`);
+  //       }
 
-        const json = await res.json().catch(() => null);
-        const fetched: Product[] = (json?.products ?? json ?? []) as Product[];
-        setRemoteProducts(fetched);
-      } catch (err: any) {
-        // ignore abort errors
-        if (err?.name === "AbortError") return;
-        setRemoteError(err?.message ?? "Network error");
-      } finally {
-        setRemoteLoading(false);
-      }
-    })();
+  //       const json = await res.json().catch(() => null);
+  //       const fetched: Product[] = (json?.products ?? json ?? []) as Product[];
+  //       setRemoteProducts(fetched);
+  //     } catch (err: any) {
+  //       // ignore abort errors
+  //       if (err?.name === "AbortError") return;
+  //       setRemoteError(err?.message ?? "Network error");
+  //     } finally {
+  //       setRemoteLoading(false);
+  //     }
+  //   })();
 
-    return () => {
-      controller.abort();
-    };
-  }, [viewedUser?.business_profile_id, viewedUser?.id]);
+  //   return () => {
+  //     controller.abort();
+  //   };
+  // }, [viewedUser?.business_profile_id, viewedUser?.id]);
 
-  const isOwner = currentUser && currentUser.id === viewedUser.id;
+  useEffect(() => {}, []);
 
+  // const isOwner = currentUser && currentUser.id === viewedUser.id;
   // const isOwner = currentUser?.id === user.id;
   const [isActive, setIsActive] = useState<"grid" | "list">("list");
   const [searchValue, setSearchValue] = useState<string>("");
@@ -259,9 +274,31 @@ export function UserDashboard({
 
   // Public View (Vendor Profile)
   const isVendor = viewedUser.role === "vendor";
-  const displayName = isVendor
-    ? viewedUser.business_profile?.business_name
-    : viewedUser.first_name + " " + viewedUser.last_name;
+  const displayName =
+    viewedUser.business_profile?.business_name ??
+    `${viewedUser.first_name}'s business`;
+  const [businessProducts, setBusinessProducts] = useState<Product[] | null>(
+    null
+  );
+  // console.log(viewedUser.first_name);
+
+  useEffect(() => {
+    const getBusniessProducts = async () => {
+      if (!viewedUser.business_profile_id || !viewedUser.id) return;
+      setIsPageLoading(true);
+
+      const res = await getBusinessProducts(viewedUser.business_profile_id);
+      if (res.success && res.data) {
+        // console.log(res.data);
+
+        setBusinessProducts(res.data.data);
+      }
+      // console.log(res);
+      setIsPageLoading(false);
+    };
+
+    getBusniessProducts();
+  }, []);
 
   return (
     <div className="min-h-screen w-full bg-background">
@@ -313,14 +350,62 @@ export function UserDashboard({
       )}
       <h5 className="font-bold text-2xl p-6 pb-2">Shop from {displayName}</h5>
 
+      {/* <section className="">
+          {businessProducts?.length === 0 && (
+            <Empty className="border border-dashed">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Store />
+                </EmptyMedia>
+                <EmptyTitle>
+                  {`
+                      ${
+                        vendor?.business_name || vendor?.user.first_name
+                      }'s store is empty`}
+                </EmptyTitle>
+                <EmptyDescription>
+                  Add products to your store to start selling.
+                </EmptyDescription>
+              </EmptyHeader>
+              <EmptyContent>
+                <Button variant="outline" size="sm">
+                  Continue shopping
+                </Button>
+              </EmptyContent>
+            </Empty>
+          )} */}
+
       {remoteLoading ? (
         // show skeleton while loading
         <div className="p-6">
           <ProductCardGridViewSkeleton />
         </div>
+      ) : businessProducts === null ? (
+        <Empty className="border border-dashed">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Store />
+            </EmptyMedia>
+            <EmptyTitle>
+              {`
+                      ${
+                        viewedUser?.business_profile?.business_name ||
+                        viewedUser.first_name
+                      }'s store is empty`}
+            </EmptyTitle>
+            <EmptyDescription>
+              Add products to your store to start selling.
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button variant="outline" size="sm">
+              Continue shopping
+            </Button>
+          </EmptyContent>
+        </Empty>
       ) : (
         // render fetched products (falls back to initial props if provided)
-        <GridListProductList products={remoteProducts} />
+        <GridListProductList products={businessProducts} />
       )}
 
       {remoteError && (

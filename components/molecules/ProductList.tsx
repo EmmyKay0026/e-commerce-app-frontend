@@ -8,7 +8,12 @@ import { Button } from "../ui/button";
 import Link from "next/link";
 
 const ProductList = ({ product }: { product: Product }) => {
-  const convertedDate = convertToCustomFormat(product.createdAt);
+  const convertedDate = convertToCustomFormat(product.created_at);
+  // console.log(convertedDate);
+
+  const handleSaveItem = () => {
+    console.log("Item saved");
+  };
 
   return (
     <article className="relative flex flex-col justify-between bg-white shadow rounded py-[15px] px-6 gap-6 mx-3  lg:flex-row">
@@ -20,10 +25,10 @@ const ProductList = ({ product }: { product: Product }) => {
 
       <div className="w-full lg:w-[70%] space-y-3">
         <div className="flex items-center justify-between">
-          <p className="font-bold text-xl">₦{product.price}</p>
+          <p className="font-bold text-xl">{product.price}</p>
           <span className="block text-secondary italic text-[12px] ">
-            Posted {convertedDate.dayWithSuffix} {convertedDate.monthOfYear},{" "}
-            {convertedDate.year}
+            Posted {convertedDate?.dayWithSuffix} {convertedDate?.monthOfYear},{" "}
+            {convertedDate?.year}
           </span>
         </div>
         <div>
@@ -32,7 +37,7 @@ const ProductList = ({ product }: { product: Product }) => {
             {product.description}
           </p>
         </div>
-        <div className="flex gap-5 items-center">
+        {/* <div className="flex gap-5 items-center">
           <div className="flex gap-1 items-center ">
             <MapPin className="w-4 h-4 text-muted-foreground" />
             <span className="text-[13px] text-muted-foreground">
@@ -40,11 +45,14 @@ const ProductList = ({ product }: { product: Product }) => {
             </span>
           </div>
           <span className="text-[13px] text-muted-foreground">UK used</span>
-        </div>
+        </div> */}
       </div>
       <div className="w-full lg:w-[15%] flex  lg:flex-col items-end justify-between">
-        <Bookmark className="w-8 h-8 lg:w-4 lg:h-4 text-muted-foreground absolute top-3 right-3 lg:static" />
-        <Link className="" href={`/product/${product.id}`}>
+        <Bookmark
+          onClick={() => handleSaveItem(product.id)}
+          className="w-8 h-8 lg:w-4 lg:h-4 text-muted-foreground absolute top-3 right-3 lg:static"
+        />
+        <Link className="" href={`/products/${product.id}`}>
           <Button
             variant={"link"}
             className="w-full mt-3 text-primary font-bold"

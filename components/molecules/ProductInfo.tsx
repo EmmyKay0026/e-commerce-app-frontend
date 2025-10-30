@@ -17,10 +17,11 @@ import Image from "next/image";
 import { User } from "@/types/models";
 import { convertToCustomFormat } from "@/lib/utils";
 import Link from "next/link";
+import ShowContactButton from "../atoms/ShowContactButton";
 
 interface ProductInfoProps {
   name: string;
-  price: number;
+  price: string;
   currency?: string;
   description?: string;
   category?: string;
@@ -47,10 +48,12 @@ export function ProductInfo({
 }: ProductInfoProps) {
   const [quantity, setQuantity] = useState(minOrder);
   const convertedDate = convertToCustomFormat(dateOfPosting);
+  console.log(convertedDate);
 
   const handleChatNow = () => {
     toast.info("Opening chat with supplier...");
   };
+  console.log(vendor);
 
   const handleShare = () => {
     toast.success("Product link copied to clipboard!");
@@ -60,10 +63,10 @@ export function ProductInfo({
     <div className="space-y-6 mt-2">
       {/* Product Title */}
       <div>
-        <span className="text-muted-foreground italic text-sm block mb-1">
+        {/* <span className="text-muted-foreground italic text-sm block mb-1">
           Posted {convertedDate.dayWithSuffix}-{convertedDate.monthOfYear}-
           {convertedDate.year}
-        </span>
+        </span> */}
         <h1 className="text-3xl font-bold text-balance mb-2">{name}</h1>
         {category && (
           <Badge variant="secondary" className="text-sm">
@@ -84,11 +87,8 @@ export function ProductInfo({
       <div className="space-y-2">
         <div className="flex items-baseline gap-2">
           <span className="text-4xl font-bold text-foreground">
-            {currency}
-            {price.toLocaleString("en-US", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
+            {/* {currency} */}
+            {price}
           </span>
         </div>
       </div>
@@ -126,18 +126,18 @@ export function ProductInfo({
             <h3 className="font-semibold">Vendor Information</h3>
             <div className="flex flex-col  lg:items-center gap-2 lg:flex-row">
               <Image
-                src={vendor.vendorProfile?.coverImage || "/placeholder.svg"}
-                alt={vendor.fullName || "Vendor"}
+                src={vendor?.cover_image || "/placeholder.svg"}
+                alt={vendor.first_name || "Vendor"}
                 width={40}
                 height={40}
                 className="w-10 h-10 rounded-full object-cover"
               />
               <div className="">
                 <Link
-                  href={`/shop/${vendor.vendorProfile?.vendorId}`}
+                  href={`/shop/${vendor.slug}`}
                   className="hover:underline font-semibold text-foreground"
                 >
-                  {vendor.vendorProfile?.businessName}
+                  {vendor?.name}
                 </Link>
                 <p className="text-sm text-muted-foreground">
                   {vendor.vendorProfile?.description ||
@@ -149,7 +149,10 @@ export function ProductInfo({
             </div>
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 mt-5">
-              <Button
+              <ShowContactButton
+                userPhoneNumber={vendor.businessPhoneNumber ?? "No contact"}
+              />
+              {/* <Button
                 size="lg"
                 variant="default"
                 className=""
@@ -157,7 +160,7 @@ export function ProductInfo({
               >
                 <Phone className="w-5 h-5 mr-2" />
                 Show contact
-              </Button>
+              </Button> */}
               <Button size="lg" variant="outline" onClick={handleShare}>
                 <Share2 className="w-5 h-5" />
               </Button>

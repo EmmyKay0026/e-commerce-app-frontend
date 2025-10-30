@@ -66,7 +66,7 @@ export async function getPublicProfile(
       return {
         success: true,
         status: res.status,
-        data: res.data.publicUser as User,
+        data: res.data.data as User,
       };
     }
 

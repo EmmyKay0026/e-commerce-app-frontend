@@ -10,6 +10,7 @@ import { FaWhatsapp } from "react-icons/fa";
 import { User } from "@/types/models";
 import useApi from "@/hooks/useApi";
 import { useUserStore } from "@/store/useUserStore";
+import ShowContactButton from "../atoms/ShowContactButton";
 
 interface UserProfileCardProps {
   // currentUser: User | null;
@@ -184,10 +185,9 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
             Edit Profile
           </Button>
         ) : (
-          <Button variant="outline">
-            <FaWhatsapp className="mr-2 h-4 w-4" />
-            Chat
-          </Button>
+          <ShowContactButton
+            userPhoneNumber={profileDetails.phone_number ?? "No contact info"}
+          />
         )}
       </div>
     </section>

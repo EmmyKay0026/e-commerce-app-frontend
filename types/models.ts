@@ -48,7 +48,7 @@ export interface Product {
   category_id?: string; // FK -> Category.id
   tags?: string[];
   status: "active" | "inactive" | "deleted" | "pending_review";
-  createdAt: string;
+  created_at: string;
   metadata: Record<string, any>; // to contain more description of the item
   view_count?: string;
 }

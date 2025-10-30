@@ -1,7 +1,8 @@
 import axios from "axios";
 import type { Category, Product } from "@/types/models";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE;
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5000/api";
 
 export const getAllCategories = async (): Promise<Category[]> => {
   const response = await axios.get(`${BASE_URL}/categories`);
@@ -36,7 +37,9 @@ export const getChildCategories = async (
   return res.data.data;
 };
 
-export const getProductsByCategory = async (categoryId: string): Promise<Product[]> => {
+export const getProductsByCategory = async (
+  categoryId: string
+): Promise<Product[]> => {
   const res = await axios.get(`${BASE_URL}/products`, {
     params: { category: categoryId },
   });

@@ -25,7 +25,7 @@ const HomeHeroSection = () => {
           Your No.1 Marketplace For Quality Industrial Equipments
         </h2>
         <p className="mt-3 text-lg text-gray-100">
-          A platform for easy buying and selling of industrial equipment across
+          A platform for easy buying and selling of industria l equipment across
           the oil & gas industrial sectors
         </p>
 
@@ -38,7 +38,7 @@ const HomeHeroSection = () => {
             placeholder="Search products..."
             className="flex-1 border-none rounded-2xl focus:ring-0 focus:outline-none shadow-none focus:border-none text-black px-6"
           />
-          <Button className="bg-secondary rounded-3xl hover:bg-primary m-1 text-white px-6 py-5">
+          <Button className="bg-primary rounded-3xl hover:bg-[#0852a2] m-1 text-white px-6 py-5">
             Search
           </Button>
         </div>
@@ -54,7 +54,7 @@ const HomeHeroSection = () => {
                 className="cursor-pointer gap-1 hover:bg-white bg-transparent rounded-full hover:text-black text-white"
               >
                 <List />
-                Categories
+                All Categories
               </Button>
             ))}
         </div>

@@ -115,10 +115,10 @@ const LeftBar = () => {
         // currentUser={currentUser}
         profileDetails={profileDetails}
       />
-      <UserProfileCompletion
+      {/* <UserProfileCompletion
         // currentUser={currentUser}
         profileDetails={profileDetails}
-      />
+      /> */}
       {/* <div className="flex justify-center sticky items-center">
         <Avatar className="h-15 w-15">
           <AvatarImage

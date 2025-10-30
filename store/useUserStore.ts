@@ -25,7 +25,7 @@ function extractUserIdRegex(url: string): string | null {
 
 export const useUserStore = create<UserStore>((set, get) => ({
   user: null,
-  isOwner: "unknown",
+  isOwner: false,
   isLoading: false,
   error: null,
 
@@ -38,9 +38,10 @@ export const useUserStore = create<UserStore>((set, get) => ({
 
     if (!current) {
       // console.log("Ran auto unknown");
-
-      set({ isOwner: "unknown" });
-      return "unknown";
+      set({ isOwner: false });
+      return false;
+      // set({ isOwner: "unknown" });
+      // return "unknown";
     }
     const owner = viewedUserId === current.id;
     set({ isOwner: owner });
@@ -81,10 +82,10 @@ export const useUserStore = create<UserStore>((set, get) => ({
 
         const id = extractUserIdRegex(window.location.pathname);
         if (id) {
-          // console.log("User params:", id);
+          console.log("User params:", id);
 
           get().updateIsOwner(id as string);
-          // console.log("User params updated isOwner:", get().isOwner);
+          console.log("User params updated isOwner:", get().isOwner);
         }
       }
     } catch (err: any) {

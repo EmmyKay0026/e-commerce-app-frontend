@@ -4,7 +4,7 @@ import { ImageGallery } from "@/components/molecules/ImageGallery";
 import { ProductInfo } from "@/components/molecules/ProductInfo";
 import { ProductDetailSkeleton } from "@/components/molecules/ProductPageSkeleton";
 import CategoryCards from "@/components/organisms/CategoryCards";
-import { getProductById, getRelatedProducts } from "@/services/productService";
+// import { getProductById, getRelatedProducts } from "@/services/productService";
 
 import {
   Breadcrumb,
@@ -15,6 +15,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { demoProducts } from "@/constants/product";
+import { getProductById, getRelatedProducts } from "@/services/productService";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
@@ -23,7 +24,6 @@ export default function ProductDetailPage() {
   const [productDetails, setProductDetails] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
-
 
   useEffect(() => {
     if (!id) return;
@@ -35,11 +35,11 @@ export default function ProductDetailPage() {
         const product = await getProductById(id as string);
         setProductDetails(product);
 
+        // console.log(product);
+
         if (product.category?.slug) {
           const related = await getRelatedProducts(product.category.slug);
-          setRelatedProducts(
-            related.filter((p: any) => p.id !== product.id)
-          );
+          setRelatedProducts(related.filter((p: any) => p.id !== product.id));
         }
       } catch (error) {
         console.error("Failed to load product:", error);
@@ -51,10 +51,9 @@ export default function ProductDetailPage() {
     fetchProduct();
   }, [id]);
 
-
-
   if (loading) return <ProductDetailSkeleton />;
-  if (!productDetails) return <div className="text-center py-20">Product not found</div>;
+  if (!productDetails)
+    return <div className="text-center py-20">Product not found</div>;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background">
@@ -72,21 +71,26 @@ export default function ProductDetailPage() {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/market-place">Market place</BreadcrumbLink>
+                  <BreadcrumbLink href="/market-place">
+                    Market place
+                  </BreadcrumbLink>
                 </BreadcrumbItem>
 
                 {productDetails.parentCategories &&
                   productDetails.parentCategories.length > 0 &&
                   productDetails.parentCategories.map(
-                    (parentCat: { name: string; slug: string }, index: number) => (
+                    (
+                      parentCat: { name: string; slug: string },
+                      index: number
+                    ) => (
                       <React.Fragment key={index}>
                         <BreadcrumbSeparator />
                         <BreadcrumbItem>
                           <BreadcrumbLink
                             href={
                               index === 0
-                                ? `/${parentCat.slug}`
-                                : `/${productDetails.parentCategories
+                                ? `/category/${parentCat.slug}`
+                                : `/category/${productDetails.parentCategories
                                     .slice(0, index + 1)
                                     .map((cat: any) => cat.slug)
                                     .join("/")}`
@@ -143,8 +147,8 @@ export default function ProductDetailPage() {
               description={productDetails.description}
               category={productDetails?.category?.name}
               metadata={productDetails.metadata}
-              vendor={productDetails.vendor}
-              dateOfPosting={productDetails.createdAt}
+              vendor={productDetails.business}
+              dateOfPosting={productDetails.created_at}
             />
           </div>
         </div>
