@@ -10,6 +10,7 @@ import RegisterModalManager from "@/components/organisms/RegisterModalManager";
 import AuthModal from "@/components/organisms/AuthModal";
 import { useAuthModal } from "@/store/useAuthModal";
 import { useFetchDataOnMount } from "@/store/useUserStore";
+import { useFetchCategoriesOnMount } from "@/store/useCategoryStore";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,6 +33,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   useFetchDataOnMount();
+  useFetchCategoriesOnMount();
   return (
     <html lang="en">
       <body

@@ -1,7 +1,7 @@
 import axios from "axios";
 import type { Category, Product } from "@/types/models";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE;
+export const BASE_URL = process.env.NEXT_PUBLIC_API_BASE;
 
 const api = axios.create({
   baseURL: BASE_URL,

@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { slugify } from "@/lib/utils";
 import ProductCards from "../molecules/ProductCards";
 import {
-  getAllCategories,
   getChildCategories,
   getProductsByCategory,
   getRootCategories,
@@ -14,55 +13,41 @@ import {
 } from "@/services/categoryService";
 import { Category, Product } from "@/types/models";
 import { transformProduct } from "@/services/productService";
+import { useCategoryStore, useFetchCategoriesOnMount } from "@/store/useCategoryStore";
 
 const CategorySection: React.FC = () => {
-  const [allCategories, setAllCategories] = useState<Category[]>([]);
-  const [loadingCats, setLoadingCats] = useState(true);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
-    null
-  );
+  const { categories, loading, error } = useCategoryStore();
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [productError, setProductError] = useState<string | null>(null);
   const [showMobile, setShowMobile] = useState(false);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
-  /** Fetch all categories once */
-  useEffect(() => {
-    (async () => {
-      try {
-        setLoadingCats(true);
-        const data = await getAllCategories();
-        setAllCategories(data);
-      } catch (e: any) {
-        console.error("getAllCategories error:", e);
-        setError("Failed to load categories");
-      } finally {
-        setLoadingCats(false);
-      }
-    })();
-  }, []);
+  // ✅ Automatically fetch categories on mount
+  useFetchCategoriesOnMount();
 
   /** Root categories for sidebar and dropdown */
   const rootCategories = useMemo(() => {
-    return getRootCategories(allCategories);
-  }, [allCategories]);
+    return getRootCategories(categories);
+  }, [categories]);
 
   /** Fetch products when a category is selected */
-  useEffect(() => {
+  React.useEffect(() => {
     if (!selectedCategoryId) {
       setProducts([]);
       return;
     }
+
     (async () => {
       try {
         setLoadingProducts(true);
-        setError(null);
+        setProductError(null);
         const prods = await getProductsByCategory(selectedCategoryId);
         setProducts(prods);
       } catch (e: any) {
         console.error("getProductsByCategory error:", e);
-        setError(e.message ?? "Failed to load products");
+        setProductError(e.message ?? "Failed to load products");
       } finally {
         setLoadingProducts(false);
       }
@@ -72,15 +57,15 @@ const CategorySection: React.FC = () => {
   /** Selected category info */
   const selectedCategory = useMemo(() => {
     if (!selectedCategoryId) return null;
-    return allCategories.find((c) => c.id === selectedCategoryId) ?? null;
-  }, [selectedCategoryId, allCategories]);
+    return categories.find((c) => c.id === selectedCategoryId) ?? null;
+  }, [selectedCategoryId, categories]);
 
   /** Get child categories */
   const getCategoryChildren = useCallback(
     (categoryId: string): Category[] => {
-      return getChildCategories(categoryId, allCategories);
+      return getChildCategories(categoryId, categories);
     },
-    [allCategories]
+    [categories]
   );
 
   /** Desktop item (recursive) */
@@ -209,7 +194,7 @@ const CategorySection: React.FC = () => {
             Categories
           </h4>
 
-          {loadingCats ? (
+          {loading ? (
             <div className="space-y-2">
               <div className="h-3 w-3/4 animate-pulse rounded bg-gray-200" />
               <div className="h-3 w-2/3 animate-pulse rounded bg-gray-200" />
@@ -259,7 +244,7 @@ const CategorySection: React.FC = () => {
             )}
           </div>
 
-          {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
+          {productError && <p className="mb-4 text-sm text-red-600">{productError}</p>}
 
           {loadingProducts ? (
             <div className="grid grid-cols-2 gap-6 sm:grid-cols-2 lg:grid-cols-3">
