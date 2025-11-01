@@ -5,7 +5,7 @@ import type { useApi } from "@/hooks/useApi";
 import { getMyProfile } from "@/services/userService";
 import { toast } from "sonner";
 import React from "react";
-import { useParams } from "next/navigation";
+// import { useParams } from "next/navigation";
 
 interface UserStore {
   user: User | null;
