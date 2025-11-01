@@ -1,32 +1,49 @@
 "use client";
 import React from "react";
-import { Home, List, MessageCircle, User, DollarSign, Plus } from "lucide-react";
+import {
+  Home,
+  List,
+  MessageCircle,
+  User,
+  DollarSign,
+  Plus,
+  Store,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUserStore } from "@/store/useUserStore";
+import { useAuthModal } from "@/store/useAuthModal";
 
 const staticNavItems = [
   { name: "Home", href: "/", icon: Home },
-  { name: "Categories", href: "/category", icon: List },
+  { name: "Marketplace", href: "/market-place", icon: Store },
   // Spacer will be inserted manually between index 1 and 2
-  { name: "Support", href: "/contact-us", icon: MessageCircle },
+  { name: "Products", href: "/products", icon: List },
 ];
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
   const user = useUserStore((s) => s.user);
+  const setIsOpen = useAuthModal((s) => s.setIsOpen);
 
   const handleAccountClick = (e: React.MouseEvent) => {
     if (!user) {
       e.preventDefault();
-      window.dispatchEvent(new CustomEvent("open-signin-modal"));
+      setIsOpen(true);
     }
   };
 
-  const navItems = React.useMemo(() => [
-    ...staticNavItems,
-    { name: "Account", href: user ? `/user/${user.id}/profile` : "#", icon: User },
-  ], [user]);
+  const navItems = React.useMemo(
+    () => [
+      ...staticNavItems,
+      {
+        name: "Account",
+        href: user ? `/user/${user.id}/profile` : "#",
+        icon: User,
+      },
+    ],
+    [user]
+  );
 
   return (
     <nav className="fixed bottom-0 left-0 w-full bg-transparent z-50 lg:hidden">
@@ -47,8 +64,19 @@ export default function MobileBottomNav() {
               preserveAspectRatio="none"
             >
               <defs>
-                <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feDropShadow dx="0" dy="-2" stdDeviation="8" floodOpacity="0.15" />
+                <filter
+                  id="shadow"
+                  x="-50%"
+                  y="-50%"
+                  width="200%"
+                  height="200%"
+                >
+                  <feDropShadow
+                    dx="0"
+                    dy="-2"
+                    stdDeviation="8"
+                    floodOpacity="0.15"
+                  />
                 </filter>
               </defs>
 
@@ -80,10 +108,16 @@ export default function MobileBottomNav() {
                     <React.Fragment key={item.name}>
                       <div className="w-16"></div>
                       <Link
-                        onClick={item.name === "Account" ? handleAccountClick : undefined}
+                        onClick={
+                          item.name === "Account"
+                            ? handleAccountClick
+                            : undefined
+                        }
                         href={item.href}
                         className={`flex flex-col items-center justify-center w-16 py-2 rounded-xl transition-colors ${
-                          pathname === item.href ? "text-primary" : "text-gray-600"
+                          pathname === item.href
+                            ? "text-primary"
+                            : "text-gray-600"
                         }`}
                       >
                         <Icon className="w-6 h-6" />
@@ -96,7 +130,9 @@ export default function MobileBottomNav() {
                 return (
                   <Link
                     key={item.name}
-                    onClick={item.name === "Account" ? handleAccountClick : undefined}
+                    onClick={
+                      item.name === "Account" ? handleAccountClick : undefined
+                    }
                     href={item.href}
                     className={`flex flex-col items-center justify-center w-16 py-2 rounded-xl transition-colors ${
                       pathname === item.href ? "text-primary" : "text-gray-600"

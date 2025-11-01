@@ -2,13 +2,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "@/components/ui/sonner";
 import Footer from "@/components/molecules/Footer";
 import Navbar from "@/components/molecules/Navbar";
-import SignModalManager from "@/components/organisms/SignModalManager";
-import RegisterModalManager from "@/components/organisms/RegisterModalManager";
 import AuthModal from "@/components/organisms/AuthModal";
-import { useAuthModal } from "@/store/useAuthModal";
+// import { useAuthModal } from "@/store/useAuthModal";
 import { useFetchDataOnMount } from "@/store/useUserStore";
 
 const geistSans = Geist({

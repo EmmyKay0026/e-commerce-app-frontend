@@ -25,7 +25,7 @@ import {
   ArrowUpDown,
   Store,
 } from "lucide-react";
-import { User, Product } from "@/types/models";
+import { User, Product, BusinessProfile } from "@/types/models";
 import { getInitials } from "@/services/userService";
 import { use, useEffect, useState } from "react";
 import Image from "next/image";
@@ -58,7 +58,7 @@ import Link from "next/link";
 interface UserDashboardProps {
   viewedUser: User;
   currentUser?: User;
-  products: Product[];
+  products?: Product[];
   isLoggedIn?: boolean;
 }
 

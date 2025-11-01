@@ -106,7 +106,7 @@ export default function DashboardPage() {
       <UserDashboard
         viewedUser={viewedUser}
         currentUser={currentUser ?? undefined}
-        products={demoProducts}
+        // products={demoProducts}
         isLoggedIn={!!currentUser}
       />
     </main>

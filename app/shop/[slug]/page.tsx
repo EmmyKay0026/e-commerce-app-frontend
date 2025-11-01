@@ -7,7 +7,7 @@
 // import { VendorFooter } from "@/components/vendor-shop/footer";
 "use client";
 import { VendorHeroSkeleton } from "@/components/molecules/VendorShopSkeleton";
-import { CategoriesSection } from "@/components/vendor/CategoriesSection";
+// import { CategoriesSection } from "@/components/vendor/CategoriesSection";
 import { ContactSection } from "@/components/vendor/ContactSection";
 import { FeaturedProducts } from "@/components/vendor/FeaturedProducts";
 import { VendorFooter } from "@/components/vendor/Footer";
@@ -39,7 +39,7 @@ export default function VendorShopPage() {
 
     const fetchVendor = async () => {
       const res = await getBusinessProfileBySlug(slug?.toString());
-      console.log(res);
+      // console.log(res);
 
       if (res.success && res.data) {
         setVendor(res.data as BusinessProfile & { user: User });
@@ -61,7 +61,7 @@ export default function VendorShopPage() {
       {/* <VendorHeader /> */}
       <main className="">
         <HeroSection vendor={vendor} />
-        <FeaturedProducts />
+        {/* <FeaturedProducts /> */}
         {/* <CategoriesSection /> */}
         <ProductsGrid vendor={vendor} />
         <ContactSection vendor={vendor} />
