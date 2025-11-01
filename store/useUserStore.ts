@@ -1,11 +1,8 @@
-import { mockUser, mockUser2, userDB } from "@/constants/userData";
 import { User } from "@/types/models";
 import { create } from "zustand";
-import type { useApi } from "@/hooks/useApi";
 import { getMyProfile } from "@/services/userService";
 import { toast } from "sonner";
 import React from "react";
-import { useParams } from "next/navigation";
 
 interface UserStore {
   user: User | null;

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ImageCarousel from "../atoms/ImageCarousel";
 import { demoProducts } from "@/constants/product";
 import { Product } from "@/types/models";
@@ -6,14 +6,36 @@ import { Bookmark, BookMarked, MapPin } from "lucide-react";
 import { convertToCustomFormat } from "@/lib/utils";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import { updateSavedItems } from "@/services/userService";
+import { useUserStore } from "@/store/useUserStore";
 
 const ProductList = ({ product }: { product: Product }) => {
   const convertedDate = convertToCustomFormat(product.created_at);
   // console.log(convertedDate);
+  const user = useUserStore((state) => state.user);
+  const [isSaved, setIsSaved] = useState<boolean>(false);
 
-  const handleSaveItem = () => {
-    console.log("Item saved");
+  const handleSaveItem = async () => {
+    await updateSavedItems(product.id);
+    // console.log(res);
   };
+
+  useEffect(() => {
+    if (!user?.saved_items) return;
+    // console.log(user?.saved_items);
+
+    const checkSaved = user?.saved_items?.some(
+      (savedId) => savedId == product.id
+    );
+    // console.log(checkSaved);
+
+    setIsSaved(checkSaved ? true : false);
+
+    // Cleanup function
+    return () => {
+      setIsSaved(false);
+    };
+  }, [user, product.id]);
 
   return (
     <article className="relative flex flex-col justify-between bg-white shadow rounded py-[15px] px-6 gap-6 mx-3  lg:flex-row">
@@ -49,7 +71,7 @@ const ProductList = ({ product }: { product: Product }) => {
       </div>
       <div className="w-full lg:w-[15%] flex  lg:flex-col items-end justify-between">
         <Bookmark
-          onClick={() => handleSaveItem(product.id)}
+          onClick={() => handleSaveItem()}
           className="w-8 h-8 lg:w-4 lg:h-4 text-muted-foreground absolute top-3 right-3 lg:static"
         />
         <Link className="" href={`/products/${product.id}`}>

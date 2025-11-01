@@ -4,6 +4,7 @@ import ProductCards from "../molecules/ProductCards";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { transformProduct } from "@/services/productService";
 
 const CategoryCards = ({
   categoryTitle,

@@ -53,6 +53,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "../ui/empty";
+import Link from "next/link";
 
 interface UserDashboardProps {
   viewedUser: User;
@@ -74,57 +75,23 @@ export function UserDashboard({
   const [remoteError, setRemoteError] = useState<string | null>(null);
   const isOwner = useUserStore((state) => state.isOwner);
 
-  // const par
+  useEffect(() => {
+    const getBusniessProducts = async () => {
+      if (!viewedUser.business_profile_id || !viewedUser.id) return;
+      setIsPageLoading(true);
 
-  // const getUsersProducts = async () => {
-  //   // const ;
-  // };
-  // getUsersProducts();
-  // useEffect(() => {
-  //   if (!viewedUser) return;
+      const res = await getBusinessProducts(viewedUser.business_profile_id);
+      if (res.success && res.data) {
+        console.log("get business ", res.data);
 
-  //   const controller = new AbortController();
-  //   const signal = controller.signal;
+        setBusinessProducts(res.data.data);
+      }
+      // console.log(res);
+      setIsPageLoading(false);
+    };
 
-  //   setRemoteLoading(true);
-  //   setRemoteError(null);
-
-  //   (async () => {
-  //     try {
-  //       // prefer typed vendorProfile id, then business_profile_id, then fallback to user.id
-  //       const business_id = viewedUser.business_profile_id;
-  //       if (!business_id) {
-  //         throw new Error("Business id not found on user");
-  //       }
-
-  //       const url = `${API}/products?vendorId=${encodeURIComponent(vendorId)}`;
-  //       const res = await fetch(url, {
-  //         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-  //         signal,
-  //       });
-
-  //       if (!res.ok) {
-  //         throw new Error(`Products fetch failed: ${res.status}`);
-  //       }
-
-  //       const json = await res.json().catch(() => null);
-  //       const fetched: Product[] = (json?.products ?? json ?? []) as Product[];
-  //       setRemoteProducts(fetched);
-  //     } catch (err: any) {
-  //       // ignore abort errors
-  //       if (err?.name === "AbortError") return;
-  //       setRemoteError(err?.message ?? "Network error");
-  //     } finally {
-  //       setRemoteLoading(false);
-  //     }
-  //   })();
-
-  //   return () => {
-  //     controller.abort();
-  //   };
-  // }, [viewedUser?.business_profile_id, viewedUser?.id]);
-
-  useEffect(() => {}, []);
+    getBusniessProducts();
+  }, []);
 
   // const isOwner = currentUser && currentUser.id === viewedUser.id;
   // const isOwner = currentUser?.id === user.id;
@@ -208,7 +175,7 @@ export function UserDashboard({
               <CardContent className="py-3 px-6 text-sm text-muted-foreground ">
                 <div className="flex justify-between">
                   <h2 className="mb-4 text-lg font-bold text-foreground">
-                    Store Information
+                    Business Information
                   </h2>
                   {/* <Button variant="outline" size="sm" className="rounded-lg">
                     <PenSquareIcon />
@@ -218,7 +185,7 @@ export function UserDashboard({
                   <article className="space-y-2 ">
                     <div className="flex items-center gap-2">
                       <h4 className="font-bold text-muted-foreground">
-                        Store name:
+                        Business name:
                       </h4>
                       <p className="text-muted-foreground">
                         {viewedUser?.business_profile?.business_name ??
@@ -228,7 +195,7 @@ export function UserDashboard({
 
                     <div className="flex items-center gap-2">
                       <h4 className="font-bold text-muted-foreground">
-                        Store address:
+                        Business address:
                       </h4>
                       <p className="text-muted-foreground">
                         {viewedUser?.business_profile?.address ??
@@ -240,7 +207,7 @@ export function UserDashboard({
                   <article className="space-y-2 ">
                     <div className="flex  gap-2">
                       <h4 className="font-bold whitespace-nowrap text-muted-foreground">
-                        Store description:
+                        Business description:
                       </h4>
                       <p className="text-muted-foreground">
                         {viewedUser?.business_profile?.description ??
@@ -283,13 +250,15 @@ export function UserDashboard({
   // console.log(viewedUser.first_name);
 
   useEffect(() => {
+    console.log("Herre");
+
     const getBusniessProducts = async () => {
-      if (!viewedUser.business_profile_id || !viewedUser.id) return;
+      if (!viewedUser.business_profile?.id || !viewedUser.id) return;
       setIsPageLoading(true);
 
-      const res = await getBusinessProducts(viewedUser.business_profile_id);
+      const res = await getBusinessProducts(viewedUser.business_profile.id);
       if (res.success && res.data) {
-        // console.log(res.data);
+        console.log("get business ", res.data);
 
         setBusinessProducts(res.data.data);
       }
@@ -328,20 +297,26 @@ export function UserDashboard({
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 space-y-2">
+                <h2 className=""></h2>
                 <h1 className="text-3xl  font-bold text-background">
-                  {displayName}
+                  {viewedUser.first_name} owns{" "}
+                  {viewedUser.business_profile.business_name}
                 </h1>
+                <Link href={`/shop/${viewedUser.shop_link}`}>
+                  <Button>Visit business page</Button>
+                </Link>
+
                 <div className="space-y-1 text-sm text-gray-300">
-                  <div className="flex items-center gap-2">
+                  {/* <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4" />
                     <span>{viewedUser.email}</span>
-                  </div>
-                  {viewedUser.phone_number && (
+                  </div> */}
+                  {/* {viewedUser.phone_number && (
                     <div className="flex items-center gap-2">
                       <Phone className="h-4 w-4" />
                       <span>{viewedUser.phone_number}</span>
                     </div>
-                  )}
+                  )} */}
                 </div>
               </div>
             </div>

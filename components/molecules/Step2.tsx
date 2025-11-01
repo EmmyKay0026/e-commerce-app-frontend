@@ -4,20 +4,17 @@ import type { UseFormReturn } from "react-hook-form";
 import type { ProductFormData } from "@/types/productForm";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useUserStore } from "@/store/useUserStore";
+import Link from "next/link";
 
 interface Step2Props {
   form: UseFormReturn<ProductFormData>;
 }
 
 export function Step2({ form }: Step2Props) {
-  const category = form.watch("category");
+  const category = form.watch("category")?.name;
+  const user = useUserStore((s) => s.user);
 
   if (!category) {
     return (
@@ -30,156 +27,177 @@ export function Step2({ form }: Step2Props) {
   return (
     <div className="space-y-6">
       <div className="mb-4">
-        <h3 className="text-lg font-semibold">{category} Details</h3>
+        <h3 className="text-lg font-semibold">Product Details</h3>
         <p className="text-sm text-muted-foreground">
-          Provide specific information about your {category.toLowerCase()}
+          Provide information about your product
         </p>
       </div>
 
-      {category === "Electronics" && (
-        <>
+      <div className="space-y-2">
+        <Label htmlFor="name">Product Name *</Label>
+        <Input
+          id="name"
+          placeholder="Enter product name"
+          {...form.register("name")}
+        />
+        {form.formState.errors.name && (
+          <p className="text-sm text-destructive">
+            {form.formState.errors.name.message}
+          </p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="description">Description *</Label>
+        <Textarea
+          id="description"
+          placeholder="Describe your product..."
+          className="min-h-[100px]"
+          {...form.register("description")}
+        />
+        {form.formState.errors.description && (
+          <p className="text-sm text-destructive">
+            {form.formState.errors.description.message}
+          </p>
+        )}
+      </div>
+
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="price">Price *</Label>
+          <Input
+            id="price"
+            type="text"
+            placeholder="Enter price"
+            {...form.register("price")}
+          />
+          {form.formState.errors.price && (
+            <p className="text-sm text-destructive">
+              {form.formState.errors.price.message}
+            </p>
+          )}
+        </div>
+
+        {/* Price Type Radio Buttons */}
+        <div className="space-y-2">
+          <Label>Price Type *</Label>
+          <div className="flex gap-4 mt-1">
+            <label className="flex items-center space-x-2">
+              <input
+                type="radio"
+                value="wholesale"
+                {...form.register("priceType")}
+                className="w-4 h-4 text-primary border-muted"
+              />
+              <span>Wholesale</span>
+            </label>
+            <label className="flex items-center space-x-2">
+              <input
+                type="radio"
+                value="retail"
+                {...form.register("priceType")}
+                className="w-4 h-4 text-primary border-muted"
+              />
+              <span>Retail</span>
+            </label>
+          </div>
+          {form.formState.errors.priceType && (
+            <p className="text-sm text-destructive">
+              {form.formState.errors.priceType.message}
+            </p>
+          )}
+        </div>
+
+        {/* Price Negotiability Radio Buttons */}
+        <div className="space-y-2">
+          <Label>Price Negotiability *</Label>
+          <div className="flex gap-4 mt-1">
+            <label className="flex items-center space-x-2">
+              <input
+                type="radio"
+                value="fixed"
+                {...form.register("priceNegotiable")}
+                className="w-4 h-4 text-primary border-muted"
+              />
+              <span>Fixed Price</span>
+            </label>
+            <label className="flex items-center space-x-2">
+              <input
+                type="radio"
+                value="negotiable"
+                {...form.register("priceNegotiable")}
+                className="w-4 h-4 text-primary border-muted"
+              />
+              <span>Negotiable</span>
+            </label>
+          </div>
+          {form.formState.errors.priceNegotiable && (
+            <p className="text-sm text-destructive">
+              {form.formState.errors.priceNegotiable.message}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="features">Features *</Label>
+        <Textarea
+          id="features"
+          placeholder="Enter features separated by | (e.g., Fast Charging | Water Resistant | 5G Compatible)"
+          className="min-h-[100px]"
+          {...form.register("features")}
+        />
+        <p className="text-sm text-muted-foreground">
+          Separate each feature with a | symbol
+        </p>
+        {form.formState.errors.features && (
+          <p className="text-sm text-destructive">
+            {form.formState.errors.features.message}
+          </p>
+        )}
+      </div>
+
+      <section className=" ">
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold">Contact information</h3>
+          <p className="text-sm text-muted-foreground">
+            This information will be displayed on your product page. You can
+            update it later in your business profile{" "}
+            <Link className="underline text-primary" href={"/user/settings"}>
+              {" "}
+              settings
+            </Link>
+            .
+          </p>
+        </div>
+        <div className="flex items-center gap-9 flex-wrap">
           <div className="space-y-2">
-            <Label htmlFor="brand">Brand *</Label>
+            <Label>Business name</Label>
             <Input
-              id="brand"
-              placeholder="e.g., Apple, Samsung, Sony"
-              {...form.register("brand")}
+              id="business-name"
+              type="text"
+              placeholder="Enter business contact info"
+              className="opacity-80"
+              disabled
+              value={user?.business_profile?.business_name || ""}
+              // {...form.register("price")}
             />
-            {form.formState.errors.brand && (
-              <p className="text-sm text-destructive">
-                {form.formState.errors.brand.message}
-              </p>
-            )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="model">Model *</Label>
+            <Label>Contact number</Label>
             <Input
-              id="model"
-              placeholder="e.g., iPhone 15 Pro, Galaxy S24"
-              {...form.register("model")}
+              id="business-name"
+              type="text"
+              placeholder="Enter business contact info"
+              className="opacity-80"
+              disabled
+              value={user?.phone_number || ""}
+              // {...form.register("price")}
             />
-            {form.formState.errors.model && (
-              <p className="text-sm text-destructive">
-                {form.formState.errors.model.message}
-              </p>
-            )}
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="condition">Condition *</Label>
-            <Select
-              value={form.watch("condition")}
-              onValueChange={(value) =>
-                form.setValue("condition", value as any, {
-                  shouldValidate: true,
-                })
-              }
-            >
-              <SelectTrigger id="condition">
-                <SelectValue placeholder="Select condition" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="new">New</SelectItem>
-                <SelectItem value="used">Used</SelectItem>
-              </SelectContent>
-            </Select>
-            {form.formState.errors.condition && (
-              <p className="text-sm text-destructive">
-                {form.formState.errors.condition.message}
-              </p>
-            )}
-          </div>
-        </>
-      )}
-
-      {category === "Furniture" && (
-        <>
-          <div className="space-y-2">
-            <Label htmlFor="material">Material *</Label>
-            <Input
-              id="material"
-              placeholder="e.g., Oak wood, Metal, Leather"
-              {...form.register("material")}
-            />
-            {form.formState.errors.material && (
-              <p className="text-sm text-destructive">
-                {form.formState.errors.material.message}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="dimensions">Dimensions *</Label>
-            <Input
-              id="dimensions"
-              placeholder="e.g., 120x80x75 cm (L x W x H)"
-              {...form.register("dimensions")}
-            />
-            {form.formState.errors.dimensions && (
-              <p className="text-sm text-destructive">
-                {form.formState.errors.dimensions.message}
-              </p>
-            )}
-          </div>
-        </>
-      )}
-
-      {category === "Clothing" && (
-        <>
-          <div className="space-y-2">
-            <Label htmlFor="size">Size *</Label>
-            <Input
-              id="size"
-              placeholder="e.g., S, M, L, XL, 32, 34"
-              {...form.register("size")}
-            />
-            {form.formState.errors.size && (
-              <p className="text-sm text-destructive">
-                {form.formState.errors.size.message}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="color">Color *</Label>
-            <Input
-              id="color"
-              placeholder="e.g., Black, Blue, Red"
-              {...form.register("color")}
-            />
-            {form.formState.errors.color && (
-              <p className="text-sm text-destructive">
-                {form.formState.errors.color.message}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="gender">Gender *</Label>
-            <Select
-              value={form.watch("gender")}
-              onValueChange={(value) =>
-                form.setValue("gender", value as any, { shouldValidate: true })
-              }
-            >
-              <SelectTrigger id="gender">
-                <SelectValue placeholder="Select gender" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="male">Male</SelectItem>
-                <SelectItem value="female">Female</SelectItem>
-                <SelectItem value="unisex">Unisex</SelectItem>
-              </SelectContent>
-            </Select>
-            {form.formState.errors.gender && (
-              <p className="text-sm text-destructive">
-                {form.formState.errors.gender.message}
-              </p>
-            )}
-          </div>
-        </>
-      )}
+        </div>
+      </section>
     </div>
   );
 }

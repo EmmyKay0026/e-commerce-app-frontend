@@ -38,17 +38,23 @@ export const clothingSchema = z.object({
 export const productFormSchema = z.object({
   // Step 1
   images: z.array(z.instanceof(File)).min(1, "At least one image is required"),
-  category: z.enum(["Electronics", "Furniture", "Clothing"]),
+  category: z.object({
+    id: z.string().min(1, "Please select a category"),
+    name: z.string(),
+  }),
   location: z.string().min(2, "Location must be at least 2 characters"),
-  // Step 2 - category specific (optional, validated conditionally)
-  brand: z.string().optional(),
-  model: z.string().optional(),
-  condition: z.enum(["new", "used"]).optional(),
-  material: z.string().optional(),
-  dimensions: z.string().optional(),
-  size: z.string().optional(),
-  color: z.string().optional(),
-  gender: z.enum(["male", "female", "unisex"]).optional(),
+
+  // Step 2 - Product Details
+  name: z.string().min(2, "Product name must be at least 2 characters"),
+  description: z.string().min(10, "Description must be at least 10 characters"),
+  price: z.string().min(1, "Price is required"),
+  priceType: z
+    .enum(["wholesale", "retail"])
+    .describe("Please select a price type"),
+  priceNegotiable: z
+    .enum(["fixed", "negotiable"])
+    .describe("Please indicate if the price is negotiable"),
+  features: z.string().min(1, "At least one feature is required"),
 });
 
 export type ProductFormData = z.infer<typeof productFormSchema>;

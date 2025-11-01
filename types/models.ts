@@ -51,6 +51,15 @@ export interface Product {
   created_at: string;
   metadata: Record<string, any>; // to contain more description of the item
   view_count?: string;
+  business: {
+    id: string;
+    business_name: string;
+    address?: string;
+    cover_image: string;
+    slug: string;
+    business_phone: string;
+    business_whatsApp_number: string;
+  }; // Vendor info
 }
 
 export interface Category {
@@ -61,7 +70,11 @@ export interface Category {
   description?: string;
   icon?: string;
   image?: string;
-  child_categories?: string[];
+  child_categories?: string[]; // Sub categories
+}
+
+export interface CategoryTree extends Category {
+  children?: CategoryTree[];
 }
 
 export type ServiceResult<T> = {

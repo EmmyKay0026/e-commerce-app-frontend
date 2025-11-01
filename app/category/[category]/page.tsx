@@ -4,9 +4,16 @@ import SidebarFilter from "@/components/molecules/SidebarFilter";
 import ProductCards from "@/components/molecules/ProductCards";
 import { Filter, X } from "lucide-react";
 import type { Product, Category } from "@/types/models";
-import { getAllCategories, getProductsByCategory } from "@/services/categoryService";
+import {
+  getAllCategories,
+  getProductsByCategory,
+} from "@/services/categoryService";
 
-export default function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
+export default function CategoryPage({
+  params,
+}: {
+  params: Promise<{ category: string }>;
+}) {
   const { category } = use(params);
 
   const [categories, setCategories] = useState<Category[]>([]);
@@ -68,7 +75,7 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
     (async () => {
       try {
         const list = await getProductsByCategory(activeCategory.id);
-        if (mounted) setProducts(list ?? []);
+        if (mounted) setProducts(list.data ?? []);
       } catch (err: any) {
         if (mounted) {
           setError(err?.message ?? "Failed to fetch products");
@@ -155,25 +162,34 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
           <div className="md:col-span-3">
             <div className="flex items-center justify-between mb-4">
               <div className="flex gap-3 items-center text-sm text-gray-600">
-                <span className="px-3 py-1 bg-gray-100 rounded-full">View: Grid</span>
+                <span className="px-3 py-1 bg-gray-100 rounded-full">
+                  View: Grid
+                </span>
                 <span className="text-sm">Sort:</span>
                 <select
                   className="border rounded px-2 py-1 text-sm"
                   value={filters.sort ?? "recommended"}
-                  onChange={(e) => setFilters((s) => ({ ...s, sort: e.target.value }))}
+                  onChange={(e) =>
+                    setFilters((s) => ({ ...s, sort: e.target.value }))
+                  }
                 >
                   <option value="recommended">Recommended</option>
                   <option value="price-asc">Price low-high</option>
                   <option value="price-desc">Price high-low</option>
                 </select>
               </div>
-              <div className="text-sm text-gray-500">results ({filteredProducts.length})</div>
+              <div className="text-sm text-gray-500">
+                results ({filteredProducts.length})
+              </div>
             </div>
 
             {loadingProducts ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="h-48 bg-white rounded shadow animate-pulse" />
+                  <div
+                    key={i}
+                    className="h-48 bg-white rounded shadow animate-pulse"
+                  />
                 ))}
               </div>
             ) : error ? (

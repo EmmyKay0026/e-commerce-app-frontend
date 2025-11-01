@@ -2,15 +2,25 @@
 
 import React from "react";
 import Image from "next/image";
-import { demoProducts } from "@/constants/product";
 import ImageCarousel from "../atoms/ImageCarousel";
 import { convertToCustomFormat } from "@/lib/utils";
-import { Product } from "@/types/models";
 import { MapPin } from "lucide-react";
 import Link from "next/link";
+import { TransformedProduct } from "@/services/productService";
+import { Product } from "@/types/models";
+
+// interface ProductCardsProps {
+//   product: roduct;
+// }
 
 const ProductCards = ({ product }: { product: Product }) => {
   const convertedDate = convertToCustomFormat(product.created_at);
+
+  // Extract brand from metadata if available
+  const brand = product.metadata?.brand;
+
+  // Extract location from vendor address if available
+  const location = product.business?.address || "Lagos, Nigeria";
 
   return (
     <div className="space-y-2" style={{ marginBottom: "2rem" }}>
@@ -34,6 +44,9 @@ const ProductCards = ({ product }: { product: Product }) => {
             Brand: {product.brand}
           </p> 
         )}*/}
+        {/* {brand && (
+          <p className="text-sm text-gray-600 font-medium">Brand: {brand}</p>
+        )} */}
 
         {/* <div className="flex gap-1 items-center">
           <MapPin className="w-3 h-3 text-muted-foreground" />
@@ -41,6 +54,8 @@ const ProductCards = ({ product }: { product: Product }) => {
             {product.location ?? "Lagos, Nigeria"}
           </span>
         </div> */}
+        {/* <span className="text-[13px] text-muted-foreground">{location}</span> */}
+        {/* </div> */}
       </Link>
     </div>
   );

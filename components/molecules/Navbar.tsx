@@ -24,6 +24,8 @@ import { useRouter } from "next/navigation";
 import MobileBottomNav from "./SubNav";
 import { useUserStore } from "@/store/useUserStore";
 import { useAuthModal } from "@/store/useAuthModal";
+import { toast } from "sonner";
+import { supabase } from "@/config/supabase";
 
 export default function Navbar() {
   const [showSearch, setShowSearch] = useState(false);
@@ -67,6 +69,22 @@ export default function Navbar() {
     };
   }, []);
 
+  // logout handler
+  const handleLogout = async () => {
+    toast("");
+
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      toast(error.message);
+    } else {
+      toast("✅ Logged out successfully!");
+      setIsOpen(true);
+      // optional: close modal (if this modal is open) or redirect
+      // toogle(); // uncomment to close the modal
+      window.location.href = "/"; // uncomment to redirect after logout
+    }
+  };
   // close search results when clicking outside the search area
   useEffect(() => {
     const handleOutside = (e: MouseEvent) => {
@@ -532,7 +550,7 @@ export default function Navbar() {
               </li>
               {user && (
                 <li
-                  onClick={() => setIsOpen(true)}
+                  onClick={() => handleLogout()}
                   className="hover:text-secondary cursor-pointer flex gap-2"
                 >
                   <LogOut className="w-5 h-5" />

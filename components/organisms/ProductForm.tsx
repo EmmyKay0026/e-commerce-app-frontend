@@ -25,6 +25,7 @@ import { Step2 } from "../molecules/Step2";
 import { Step3 } from "../molecules/Step3";
 import { StepIndicator } from "../molecules/StepIndicator";
 import { toast } from "sonner";
+import { createProduct } from "@/services/productService";
 
 const TOTAL_STEPS = 3;
 
@@ -37,52 +38,74 @@ export function ProductForm() {
     mode: "onChange",
     defaultValues: {
       images: [],
-      category: undefined,
+      category: undefined as any,
       location: "",
+      name: "",
+      description: "",
+      price: "",
+      priceType: undefined,
+      priceNegotiable: undefined,
+      features: "",
     },
   });
 
   const validateStep = async (step: number): Promise<boolean> => {
     const formData = form.getValues();
+    console.log("Validating step", step, "with data:", formData);
 
     try {
       if (step === 1) {
-        await step1Schema.parseAsync({
-          images: formData.images,
-          category: formData.category,
-          location: formData.location,
-        });
+        // Validate required fields for step 1
+        if (!formData.images || formData.images.length === 0) {
+          toast.error("Please upload at least one image");
+          return false;
+        }
+
+        if (!formData.category) {
+          toast.error("Please select a category");
+          return false;
+        }
+
+        if (!formData.location) {
+          toast.error("Please enter a location");
+          return false;
+        }
+
         return true;
       }
 
       if (step === 2) {
-        const category = formData.category;
-        if (category === "Electronics") {
-          await electronicsSchema.parseAsync({
-            brand: formData.brand,
-            model: formData.model,
-            condition: formData.condition,
-          });
-        } else if (category === "Furniture") {
-          await furnitureSchema.parseAsync({
-            material: formData.material,
-            dimensions: formData.dimensions,
-          });
-        } else if (category === "Clothing") {
-          await clothingSchema.parseAsync({
-            size: formData.size,
-            color: formData.color,
-            gender: formData.gender,
-          });
+        // Log the form data to check values
+        console.log("Step 2 validation - Form data:", formData);
+
+        if (!formData.name?.trim()) {
+          toast.error("Please enter a product name");
+          return false;
         }
+        if (!formData.description?.trim()) {
+          toast.error("Please enter a product description");
+          return false;
+        }
+        if (typeof formData.price !== "string") {
+          toast.error("Please enter a valid price");
+          return false;
+        }
+        if (!formData.features?.trim()) {
+          toast.error("Please enter at least one feature");
+          return false;
+        }
+
+        // Log successful validation
+        console.log("Step 2 validation passed");
         return true;
       }
 
       return true;
     } catch (error: any) {
+      console.error("Validation error:", error);
       const errorMessage =
         error.errors?.[0]?.message || "Please fill in all required fields";
-      toast("Validation Error", errorMessage);
+      toast.error(errorMessage);
       return false;
     }
   };
@@ -90,7 +113,10 @@ export function ProductForm() {
   const handleNext = async () => {
     const isValid = await validateStep(currentStep);
     if (isValid && currentStep < TOTAL_STEPS) {
-      setCurrentStep((prev) => prev + 1);
+      setCurrentStep((prev) => {
+        console.log(prev);
+        return prev + 1;
+      });
     }
   };
 
@@ -105,13 +131,33 @@ export function ProductForm() {
   };
 
   const onSubmit = async (data: ProductFormData) => {
-    console.log("[v0] Form submitted:", data);
+    try {
+      console.log("[v0] Form submitted:", data);
 
-    toast("Product Submitted Successfully!");
+      const result = await createProduct({
+        name: data.name,
+        description: data.description,
+        price: data.price,
+        images: data.images,
+        category: data.category,
+        location: data.location,
+        features: data.features,
+        priceType: data.priceType,
+        priceNegotiable: data.priceNegotiable,
+      });
 
-    // Reset form after successful submission
-    form.reset();
-    setCurrentStep(1);
+      if (result.success) {
+        toast.success("Product created successfully!");
+        // Reset form after successful submission
+        form.reset();
+        setCurrentStep(1);
+      } else {
+        toast.error(result.error || "Failed to create product");
+      }
+    } catch (error) {
+      console.error("Error submitting product:", error);
+      toast.error("Failed to create product. Please try again.");
+    }
   };
 
   const slideVariants = {
@@ -185,12 +231,13 @@ export function ProductForm() {
                   Back
                 </Button>
 
-                {currentStep < TOTAL_STEPS ? (
+                {currentStep < TOTAL_STEPS && (
                   <Button type="button" onClick={handleNext}>
                     Next
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
-                ) : (
+                )}
+                {currentStep === TOTAL_STEPS && (
                   <Button type="submit">
                     <CheckCircle className="w-4 h-4 mr-2" />
                     Submit Product

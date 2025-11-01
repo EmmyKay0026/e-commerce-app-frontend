@@ -1,5 +1,6 @@
 import api from "@/config/api";
-import { BusinessProfile, ServiceResult, User } from "@/types/models";
+import { supabase } from "@/config/supabase";
+import { BusinessProfile, Product, ServiceResult, User } from "@/types/models";
 import { redirect } from "next/navigation";
 
 export const getInitials = (name: string) => {
@@ -101,12 +102,40 @@ export async function updateProfile(
       | "phone_number"
       | "whatsapp_number"
       | "email"
-      | "saved_items"
     >
   >
 ): Promise<ServiceResult<User>> {
   try {
     const res = await api.patch("/users/me", payload);
+    if (res.status === 200) {
+      return { success: true, status: res.status, data: res.data.data as User };
+    }
+
+    return {
+      success: false,
+      status: res.status,
+      data: null,
+      error: res.data?.error || `Unexpected status ${res.status}`,
+    };
+  } catch (err: any) {
+    const status = err?.response?.status;
+    const msg =
+      // backend might return { success:false, error: '...' }
+      err?.response?.data?.error ||
+      (Array.isArray(err?.response?.data?.errors)
+        ? err.response.data.errors.join(", ")
+        : null) ||
+      err?.response?.data?.message ||
+      err?.message ||
+      "Network error";
+    return { success: false, status, data: null, error: msg };
+  }
+}
+export async function updateSavedItems(
+  product_id: string
+): Promise<ServiceResult<User>> {
+  try {
+    const res = await api.patch("/users/me/saved", { productId: product_id });
     if (res.status === 200) {
       return { success: true, status: res.status, data: res.data.data as User };
     }
@@ -160,4 +189,43 @@ export async function deactivateProfile(): Promise<
   }
 }
 
-export default api;
+// type Product = { id: string; [key: string]: any };
+
+export async function fetchProductsByIds(
+  ids: string[]
+): Promise<ServiceResult<Product[]>> {
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return { success: true, status: 200, data: [] };
+  }
+
+  try {
+    const { data, error, status } = await supabase
+      .from("products")
+      .select("*")
+      .in("id", ids);
+
+    if (error) {
+      return {
+        success: false,
+        status: status ?? 500,
+        data: null,
+        error: error.message,
+      };
+    }
+
+    return {
+      success: true,
+      status: status ?? 200,
+      data: data ?? [],
+    };
+  } catch (err: any) {
+    return {
+      success: false,
+      status: 500,
+      data: null,
+      error: err?.message || "Unexpected error fetching products from Supabase",
+    };
+  }
+}
+
+// export default api;

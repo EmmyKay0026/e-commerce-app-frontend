@@ -30,7 +30,7 @@ const LeftBar = () => {
 
   useEffect(() => {
     if (!userId) return;
-    const result = updateIsOwner(userId.toString());
+    updateIsOwner(userId.toString());
   }, []);
 
   // ✅ Logged-in user
