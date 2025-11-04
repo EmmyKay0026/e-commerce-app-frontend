@@ -1,11 +1,12 @@
 export interface State {
-  id: number;
+  state_id: string;
   name: string;
-  capital: string;
+  slug: string;
 }
 
 export interface LGA {
-  id: number;
   name: string;
-  state_id: number;
+  state_id: string;
+  lga_id: string;
+  slug: string;
 }

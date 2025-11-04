@@ -542,7 +542,7 @@ export default function Navbar() {
               >
                 <Link
                   className="flex gap-2"
-                  href={user ? `/user/settings` : "#"}
+                  href={user ? `/settings` : "#"}
                 >
                   <Settings className="w-5 h-5" />
                   Settings

@@ -181,7 +181,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
 
       <div className="flex gap-4">
         {isOwner === true ? (
-          <Link href={"/user/settings"}>
+          <Link href={"/settings"}>
             <Button variant="outline">
               <Edit className="mr-2 h-4 w-4" />
               Edit Profile

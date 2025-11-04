@@ -88,7 +88,7 @@ export function Step3({ form, onEdit }: Step3Props) {
               <h4 className="text-sm font-medium text-muted-foreground">
                 Location
               </h4>
-              <p className="mt-1">{formData.location}</p>
+              <p className="mt-1 capitalize">{formData.location}</p>
             </div>
           </div>
         </CardContent>

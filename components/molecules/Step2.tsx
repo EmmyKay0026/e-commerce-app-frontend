@@ -85,20 +85,20 @@ export function Step2({ form }: Step2Props) {
             <label className="flex items-center space-x-2">
               <input
                 type="radio"
-                value="wholesale"
+                value="fixed"
                 {...form.register("priceType")}
                 className="w-4 h-4 text-primary border-muted"
               />
-              <span>Wholesale</span>
+              <span>Fixed price</span>
             </label>
             <label className="flex items-center space-x-2">
               <input
                 type="radio"
-                value="retail"
+                value="negotiable"
                 {...form.register("priceType")}
                 className="w-4 h-4 text-primary border-muted"
               />
-              <span>Retail</span>
+              <span>Negotiable price</span>
             </label>
           </div>
           {form.formState.errors.priceType && (
@@ -110,30 +110,30 @@ export function Step2({ form }: Step2Props) {
 
         {/* Price Negotiability Radio Buttons */}
         <div className="space-y-2">
-          <Label>Price Negotiability *</Label>
+          <Label>Sale type</Label>
           <div className="flex gap-4 mt-1">
             <label className="flex items-center space-x-2">
               <input
                 type="radio"
-                value="fixed"
-                {...form.register("priceNegotiable")}
+                value="wholesale"
+                {...form.register("saleType")}
                 className="w-4 h-4 text-primary border-muted"
               />
-              <span>Fixed Price</span>
+              <span>Wholesale</span>
             </label>
             <label className="flex items-center space-x-2">
               <input
                 type="radio"
-                value="negotiable"
-                {...form.register("priceNegotiable")}
+                value="retail"
+                {...form.register("saleType")}
                 className="w-4 h-4 text-primary border-muted"
               />
-              <span>Negotiable</span>
+              <span>Retail</span>
             </label>
           </div>
-          {form.formState.errors.priceNegotiable && (
+          {form.formState.errors.saleType && (
             <p className="text-sm text-destructive">
-              {form.formState.errors.priceNegotiable.message}
+              {form.formState.errors.saleType.message}
             </p>
           )}
         </div>
@@ -163,7 +163,7 @@ export function Step2({ form }: Step2Props) {
           <p className="text-sm text-muted-foreground">
             This information will be displayed on your product page. You can
             update it later in your business profile{" "}
-            <Link className="underline text-primary" href={"/user/settings"}>
+            <Link className="underline text-primary" href={"/settings"}>
               {" "}
               settings
             </Link>

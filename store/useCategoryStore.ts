@@ -1,6 +1,7 @@
 import { create } from "zustand";
-import { categoryService } from "@/services/categoryService";
+// import { categoryService } from "@/services/categoryService";
 import { Category } from "@/types/models";
+import { getAllCategories } from "@/services/categoryService";
 
 interface CategoryState {
   categories: Category[];
@@ -17,8 +18,10 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
     if (get().categories.length === 0 && !get().loading) {
       set({ loading: true, error: null });
       try {
-        const categories = await categoryService.getAllCategories();
-        set({ categories, loading: false });
+        const categories = await getAllCategories();
+        // if (categories.data) {
+        set({ categories: categories, loading: false });
+        // }
       } catch (error) {
         set({ loading: false, error: "Failed to fetch categories" });
       }

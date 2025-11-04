@@ -4,10 +4,8 @@ import SidebarFilter from "@/components/molecules/SidebarFilter";
 import ProductCards from "@/components/molecules/ProductCards";
 import { Filter, X } from "lucide-react";
 import type { Product, Category } from "@/types/models";
-import {
-  getAllCategories,
-  getProductsByCategory,
-} from "@/services/categoryService";
+import { listProducts } from "@/services/productService";
+import { useCategoryStore } from "@/store/useCategoryStore";
 
 export default function CategoryPage({
   params,
@@ -15,11 +13,10 @@ export default function CategoryPage({
   params: Promise<{ category: string }>;
 }) {
   const { category } = use(params);
+  const { categories, fetchCategories, loading: loadingCats } = useCategoryStore();
 
-  const [categories, setCategories] = useState<Category[]>([]);
   const [activeCategory, setActiveCategory] = useState<Category | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
-  const [loadingCats, setLoadingCats] = useState(false);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,22 +35,8 @@ export default function CategoryPage({
   }, []);
 
   useEffect(() => {
-    let mounted = true;
-    setLoadingCats(true);
-    (async () => {
-      try {
-        const cats = await getAllCategories();
-        if (mounted) setCategories(cats);
-      } catch (err: any) {
-        if (mounted) setError(err?.message ?? "Failed to fetch categories");
-      } finally {
-        if (mounted) setLoadingCats(false);
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+    fetchCategories();
+  }, [fetchCategories]);
 
   // Set active category based on slug
   useEffect(() => {
@@ -61,7 +44,7 @@ export default function CategoryPage({
     setActiveCategory(cat ?? null);
   }, [categories, category]);
 
-  // Fetch products for the active category
+  // Fetch products for the active category with filters
   useEffect(() => {
     if (!activeCategory?.id) {
       setProducts([]);
@@ -74,8 +57,17 @@ export default function CategoryPage({
 
     (async () => {
       try {
-        const list = await getProductsByCategory(activeCategory.id);
-        if (mounted) setProducts(list.data ?? []);
+        const list = await listProducts({
+          filters: {
+            category_id: activeCategory.id,
+            price_gte: filters.minPrice,
+            price_lte: filters.maxPrice,
+            brand: filters.brands.join(','),
+            location: filters.location,
+          },
+          sort: filters.sort,
+        });
+        if (mounted) setProducts(list.data?.products ?? []);
       } catch (err: any) {
         if (mounted) {
           setError(err?.message ?? "Failed to fetch products");
@@ -89,26 +81,7 @@ export default function CategoryPage({
     return () => {
       mounted = false;
     };
-  }, [activeCategory]);
-
-  // Apply filters and sorting
-  const filteredProducts = useMemo(() => {
-    let result = [...products];
-
-    if (filters.minPrice !== undefined) {
-      result = result.filter((p) => parseFloat(p.price) >= filters.minPrice!);
-    }
-    if (filters.maxPrice !== undefined) {
-      result = result.filter((p) => parseFloat(p.price) <= filters.maxPrice!);
-    }
-    if (filters.sort === "price-asc") {
-      result.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
-    } else if (filters.sort === "price-desc") {
-      result.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
-    }
-
-    return result;
-  }, [products, filters]);
+  }, [activeCategory, filters]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -168,18 +141,19 @@ export default function CategoryPage({
                 <span className="text-sm">Sort:</span>
                 <select
                   className="border rounded px-2 py-1 text-sm"
-                  value={filters.sort ?? "recommended"}
+                  value={filters.sort ?? "newest"}
                   onChange={(e) =>
                     setFilters((s) => ({ ...s, sort: e.target.value }))
                   }
                 >
-                  <option value="recommended">Recommended</option>
-                  <option value="price-asc">Price low-high</option>
-                  <option value="price-desc">Price high-low</option>
+                  <option value="newest">Newest</option>
+                  <option value="price_asc">Price low-high</option>
+                  <option value="price_desc">Price high-low</option>
+                  <option value="popular">Popular</option>
                 </select>
               </div>
               <div className="text-sm text-gray-500">
-                results ({filteredProducts.length})
+                results ({products.length})
               </div>
             </div>
 
@@ -194,13 +168,13 @@ export default function CategoryPage({
               </div>
             ) : error ? (
               <p className="text-red-600 text-sm mb-4">{error}</p>
-            ) : filteredProducts.length === 0 ? (
+            ) : products.length === 0 ? (
               <div className="text-gray-600 py-20 bg-white rounded-2xl p-6 border border-gray-100">
                 No products found with current filters.
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredProducts.map((p) => (
+                {products.map((p) => (
                   <ProductCards key={p.id} product={p} />
                 ))}
               </div>

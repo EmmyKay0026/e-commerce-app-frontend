@@ -60,7 +60,7 @@ export default function CreateBusinessAccountPage() {
     if (user?.role === "vendor") {
       // simple client-side redirect
       toast("You all ready have a business account");
-      window.location.href = "/user/settings";
+      window.location.href = "/settings";
       return;
     }
 

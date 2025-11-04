@@ -49,6 +49,7 @@ export interface Product {
   tags?: string[];
   status: "active" | "inactive" | "deleted" | "pending_review";
   created_at: string;
+  location?: string;
   metadata: Record<string, any>; // to contain more description of the item
   view_count?: string;
   business: {
@@ -72,6 +73,18 @@ export interface Category {
   image?: string;
   child_categories?: string[]; // Sub categories
 }
+
+export type State = {
+  state_id: string;
+  name: string;
+  slug: string;
+};
+export type LGA = {
+  lga_id: string;
+  name: string;
+  state_id: string;
+  slug: string;
+};
 
 export interface CategoryTree extends Category {
   children?: CategoryTree[];

@@ -54,7 +54,7 @@ const ProductList = ({ product }: { product: Product }) => {
           </span>
         </div>
         <div>
-          <h3 className="text-lg font-krub font-[500] ">{product.name}</h3>
+          <h3 className="text-lg font-krub font-medium ">{product.name}</h3>
           <p className="text-[15px] text-muted-foreground line-clamp-3">
             {product.description}
           </p>
@@ -74,14 +74,16 @@ const ProductList = ({ product }: { product: Product }) => {
           onClick={() => handleSaveItem()}
           className="w-8 h-8 lg:w-4 lg:h-4 text-muted-foreground absolute top-3 right-3 lg:static"
         />
-        <Link className="" href={`/products/${product.id}`}>
-          <Button
-            variant={"link"}
-            className="w-full mt-3 text-primary font-bold"
-          >
-            View Details &#8594;
-          </Button>
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link className="" href={`/products/${product.id}`}>
+            <Button
+              variant={"link"}
+              className="w-full mt-3 text-primary font-bold"
+            >
+              View Details &#8594;
+            </Button>
+          </Link>
+        </div>
       </div>
     </article>
   );

@@ -110,7 +110,7 @@ export default function UserSideBarMenu({
     { name: "My Products", href: `/user/${uid}/products`, icon: Store },
     { name: "Contact Info", href: `/user/${uid}/profile`, icon: Contact },
     { name: "Saved", href: `/user/${uid}/saved`, icon: Bookmark },
-    { name: "Settings", href: `/user/settings`, icon: Settings },
+    { name: "Settings", href: `/settings`, icon: Settings },
   ];
 
   const visitorItems = [

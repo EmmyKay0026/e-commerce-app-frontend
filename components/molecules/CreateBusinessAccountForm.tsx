@@ -92,7 +92,10 @@ export default function CreateBusinessAccountForm() {
         </p>
         <p className="">
           Need a guide creating your business, read the{" "}
-          <Link href={"#"} className="text-primary  italic underline ">
+          <Link
+            href={"/guide/creating-a-business-account"}
+            className="text-primary  italic underline "
+          >
             business guide.
           </Link>
         </p>

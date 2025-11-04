@@ -241,7 +241,7 @@ const HomeHeroSection = () => {
         </div>
 
         {/* Categories buttons */}
-        <div className="mt-5 text-left flex flex-wrap gap-6">
+        <div className="mt-5 text-left flex items-center flex-wrap gap-6">
           <Button
             onClick={() => setShowCategories(true)}
             className="cursor-pointer gap-1 hover:bg-white bg-transparent rounded-full hover:text-black text-white"
@@ -254,7 +254,7 @@ const HomeHeroSection = () => {
               key={i}
               // onClick={() => setShowCategories(true)}
               href={`/category/${cat.slug}`}
-              className="flex items-center justify-center cursor-pointer gap-1 hover:text-white  bg-transparent rounded-full  text-white/90"
+              className="flex items-center  justify-center cursor-pointer gap-1 hover:text-white  bg-transparent rounded-full  text-white/90"
             >
               <Image
                 src={cat.icon ?? cat.image ?? ""}

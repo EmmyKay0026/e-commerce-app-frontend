@@ -1,83 +1,74 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  type ProductFormData,
-  productFormSchema,
-  step1Schema,
-  electronicsSchema,
-  furnitureSchema,
-  clothingSchema,
-} from "@/types/productForm";
-// import { StepIndicator } from "./StepIndicator";
-// import { Step1 } from "./step1";
-// import { Step2 } from "./step2";
-// import { Step3 } from "./step3";
+import { type ProductFormData, productFormSchema } from "@/types/productForm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, ArrowRight, CheckCircle } from "lucide-react";
-// import { useToast } from "@/hooks/use-toast";
 import { Step1 } from "../molecules/Step1";
 import { Step2 } from "../molecules/Step2";
 import { Step3 } from "../molecules/Step3";
 import { StepIndicator } from "../molecules/StepIndicator";
 import { toast } from "sonner";
-import { createProduct } from "@/services/productService";
+import { Product } from "@/types/models";
+import { updateProduct } from "@/services/productService";
 
 const TOTAL_STEPS = 3;
 
-export function ProductForm() {
+interface EditProductFormProps {
+  product: Product;
+}
+
+export function EditProductForm({ product }: EditProductFormProps) {
   const [currentStep, setCurrentStep] = useState(1);
-  //   const { toast } = useToast();
 
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productFormSchema),
     mode: "onChange",
-    defaultValues: {
-      images: [],
-      category: undefined as any,
-      location: "",
-      name: "",
-      description: "",
-      price: "",
-      priceType: undefined,
-      saleType: undefined,
-      features: "",
-    },
   });
+
+  useEffect(() => {
+    if (product) {
+      form.reset({
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        images: product.images.map((image) => new File([], image)),
+        category: product.category_id
+          ? { id: product.category_id, name: "" }
+          : undefined,
+        location: product.metadata?.location || "",
+        features: Array.isArray(product.metadata?.features)
+          ? product.metadata?.features.join("|")
+          : "",
+        priceType: product.metadata?.price_type,
+        saleType: product.metadata?.sale_type,
+      });
+    }
+  }, [product, form]);
 
   const validateStep = async (step: number): Promise<boolean> => {
     const formData = form.getValues();
-    console.log("Validating step", step, "with data:", formData);
-
     try {
       if (step === 1) {
-        // Validate required fields for step 1
         if (!formData.images || formData.images.length === 0) {
           toast.error("Please upload at least one image");
           return false;
         }
-
         if (!formData.category) {
           toast.error("Please select a category");
           return false;
         }
-
         if (!formData.location) {
           toast.error("Please enter a location");
           return false;
         }
-
         return true;
       }
-
       if (step === 2) {
-        // Log the form data to check values
-        console.log("Step 2 validation - Form data:", formData);
-
         if (!formData.name?.trim()) {
           toast.error("Please enter a product name");
           return false;
@@ -94,15 +85,10 @@ export function ProductForm() {
           toast.error("Please enter at least one feature");
           return false;
         }
-
-        // Log successful validation
-        // console.log("Step 2 validation passed");
         return true;
       }
-
       return true;
     } catch (error: any) {
-      console.error("Validation error:", error);
       const errorMessage =
         error.errors?.[0]?.message || "Please fill in all required fields";
       toast.error(errorMessage);
@@ -113,10 +99,7 @@ export function ProductForm() {
   const handleNext = async () => {
     const isValid = await validateStep(currentStep);
     if (isValid && currentStep < TOTAL_STEPS) {
-      setCurrentStep((prev) => {
-        console.log(prev);
-        return prev + 1;
-      });
+      setCurrentStep((prev) => prev + 1);
     }
   };
 
@@ -132,9 +115,7 @@ export function ProductForm() {
 
   const onSubmit = async (data: ProductFormData) => {
     try {
-      // console.log("[v0] Form submitted:", data);
-
-      const result = await createProduct({
+      const result = await updateProduct(product.id, {
         name: data.name,
         description: data.description,
         price: data.price,
@@ -147,16 +128,13 @@ export function ProductForm() {
       });
 
       if (result.success) {
-        toast.success("Product created successfully!");
-        // Reset form after successful submission
-        form.reset();
-        setCurrentStep(1);
+        toast.success("Product updated successfully!");
       } else {
-        toast.error(result.error || "Failed to create product");
+        toast.error(result.error || "Failed to update product");
       }
     } catch (error) {
-      console.error("Error submitting product:", error);
-      toast.error("Failed to create product. Please try again.");
+      console.error("Error updating product:", error);
+      toast.error("Failed to update product. Please try again.");
     }
   };
 
@@ -177,18 +155,13 @@ export function ProductForm() {
 
   const [direction, setDirection] = useState(0);
 
-  const handleStepChange = (newStep: number) => {
-    setDirection(newStep > currentStep ? 1 : -1);
-    setCurrentStep(newStep);
-  };
-
   return (
     <div className="min-h-screen bg-background py-8 px-4">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2">Submit Your Product</h1>
+          <h1 className="text-3xl font-bold mb-2">Edit Your Product</h1>
           <p className="text-muted-foreground">
-            Fill in the details to list your product
+            Update the details of your product
           </p>
         </div>
 
@@ -211,7 +184,7 @@ export function ProductForm() {
                       opacity: { duration: 0.2 },
                     }}
                   >
-                    {currentStep === 1 && <Step1 form={form} />}
+                    {currentStep === 1 && <Step1 form={form} product={product} />}
                     {currentStep === 2 && <Step2 form={form} />}
                     {currentStep === 3 && (
                       <Step3 form={form} onEdit={handleEdit} />
@@ -240,7 +213,7 @@ export function ProductForm() {
                 {currentStep === TOTAL_STEPS && (
                   <Button type="submit">
                     <CheckCircle className="w-4 h-4 mr-2" />
-                    Submit Product
+                    Update Product
                   </Button>
                 )}
               </div>
