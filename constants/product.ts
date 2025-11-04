@@ -1,23 +1,23 @@
 // import { Product, Tag } from "./product";
 
-import { Category, Product, Tag, WishlistItem } from "@/types/models";
+import { Category, Product } from "@/types/models";
 
 // Demo tags
-const tagNew: Tag = {
+const tagNew = {
   id: "tag-1",
   name: "New Arrival",
   createdAt: "2024-06-01T10:00:00Z",
   updatedAt: "2024-06-01T10:00:00Z",
 };
 
-const tagSale: Tag = {
+const tagSale = {
   id: "tag-2",
   name: "On Sale",
   createdAt: "2024-06-02T10:00:00Z",
   updatedAt: "2024-06-02T10:00:00Z",
 };
 
-const tagPopular: Tag = {
+const tagPopular = {
   id: "tag-3",
   name: "Popular",
   createdAt: "2024-06-03T10:00:00Z",
@@ -29,46 +29,38 @@ export const demoCategories: Category[] = [
     id: "cat-electronics",
     name: "Electronics",
     slug: "electronics",
-    parentCategory: null,
+    parent_category_id: null,
     description: "Latest gadgets and electronic devices.",
-    createdAt: "2024-06-01T09:00:00Z",
-    updatedAt: "2024-06-01T09:00:00Z",
   },
   {
     id: "cat-home",
     name: "Home & Kitchen",
     slug: "home-kitchen",
-    parentCategory: ["cat-electronics"],
+    parent_category_id: ["cat-electronics"],
     description: "Essentials and accessories for your home.",
-    createdAt: "2024-06-01T09:10:00Z",
-    updatedAt: "2024-06-01T09:10:00Z",
   },
   {
     id: "cat-sports",
     name: "Sports & Outdoors",
     slug: "sports-outdoors",
-    parentCategory: ["cat-electronics", "cat-home"],
+    parent_category_id: ["cat-electronics", "cat-home"],
     description: "Gear and equipment for sports and outdoor activities.",
-    createdAt: "2024-06-01T09:20:00Z",
-    updatedAt: "2024-06-01T09:20:00Z",
   },
   {
     id: "cat-fashion",
     name: "Fashion",
     slug: "fashion",
-    parentCategory: ["cat-electronics", "cat-home", "cat-sports"],
+    parent_category_id: ["cat-electronics", "cat-home", "cat-sports"],
     description: "Trendy clothing and accessories.",
-    createdAt: "2024-06-01T09:30:00Z",
-    updatedAt: "2024-06-01T09:30:00Z",
   },
 ];
 
 // Demo products
 // export const demoProducts = [];
-export const demoProducts: Product[] = [
+export const demoProducts = [
   {
     id: "prod-4",
-    vendorId: "2",
+    product_owner_id: "2",
     name: "Smart LED Desk Lamp",
     description:
       "Adjustable LED desk lamp with touch controls and USB charging port.",
@@ -78,11 +70,10 @@ export const demoProducts: Product[] = [
       "https://industrialmartnigeria.com/wp-content/uploads/2024/09/12570_A_Conk-600x600.jpg",
       "https://industrialmartnigeria.com/wp-content/uploads/2024/09/hoist10500kg-1-600x600.webp",
     ],
-    categoryId: "cat-home",
-    tags: [tagNew],
+    category_id: "cat-home",
+    tags: [],
     status: "active",
-    createdAt: "2024-06-04T11:00:00Z",
-    updatedAt: "2024-06-04T11:00:00Z",
+    created_at: "2024-06-04T11:00:00Z",
     metadata: {
       color: "White",
       brightnessLevels: 5,
@@ -91,7 +82,7 @@ export const demoProducts: Product[] = [
   },
   {
     id: "prod-5",
-    vendorId: "3",
+    product_owner_id: "3",
     name: "Bluetooth Fitness Tracker",
     description:
       "Track your steps, heart rate, and sleep with this stylish fitness tracker.",
@@ -101,11 +92,10 @@ export const demoProducts: Product[] = [
       "https://industrialmartnigeria.com/wp-content/uploads/2024/09/Tagline_grande.webp",
       "https://industrialmartnigeria.com/wp-content/uploads/2024/09/enerpac-h700-series-high-pressure-hydraulic-hoses-600x600.jpg",
     ],
-    categoryId: "cat-sports",
-    tags: [tagSale, tagPopular],
+    category_id: "cat-sports",
+    tags: [],
     status: "active",
-    createdAt: "2024-06-05T09:00:00Z",
-    updatedAt: "2024-06-05T09:00:00Z",
+    created_at: "2024-06-05T09:00:00Z",
     metadata: {
       batteryLife: "7 days",
       waterproof: true,
@@ -114,7 +104,7 @@ export const demoProducts: Product[] = [
   },
   {
     id: "prod-6",
-    vendorId: "3",
+    product_owner_id: "3",
     name: "Minimalist Analog Watch",
     description:
       "Elegant analog watch with a minimalist design and leather strap.",
@@ -122,11 +112,10 @@ export const demoProducts: Product[] = [
     images: [
       "https://industrialmartnigeria.com/wp-content/uploads/2024/09/bosch-twist-drill-bits-co14b-64_1000-600x600.webp",
     ],
-    categoryId: "cat-fashion",
-    tags: [tagPopular],
+    category_id: "cat-fashion",
+    tags: [],
     status: "active",
-    createdAt: "2024-06-06T10:30:00Z",
-    updatedAt: "2024-06-06T10:30:00Z",
+    created_at: "2024-06-06T10:30:00Z",
     metadata: {
       strapMaterial: "Leather",
       waterResistant: true,
@@ -135,7 +124,7 @@ export const demoProducts: Product[] = [
   },
   {
     id: "prod-7",
-    vendorId: "4",
+    product_owner_id: "4",
     name: "Portable Bluetooth Speaker",
     description: "Compact speaker with powerful sound and long battery life.",
     price: "59.99",
@@ -143,11 +132,10 @@ export const demoProducts: Product[] = [
       "https://industrialmartnigeria.com/wp-content/uploads/2024/09/aodd-pump-1-2-bsp-15mm--300x300.jpg",
       "https://industrialmartnigeria.com/wp-content/uploads/2024/09/ofite-machined-metal-mud-balance-500x500-1.jpg",
     ],
-    categoryId: "cat-electronics",
-    tags: [tagSale],
+    category_id: "cat-electronics",
+    tags: [],
     status: "active",
-    createdAt: "2024-06-07T14:00:00Z",
-    updatedAt: "2024-06-07T14:00:00Z",
+    created_at: "2024-06-07T14:00:00Z",
     metadata: {
       batteryLife: "12 hours",
       waterproof: false,
@@ -156,7 +144,7 @@ export const demoProducts: Product[] = [
   },
   {
     id: "prod-8",
-    vendorId: "4",
+    product_owner_id: "4",
     name: "Classic Canvas Backpack",
     description: "Durable canvas backpack perfect for school, work, or travel.",
     price: "34.99",
@@ -167,11 +155,10 @@ export const demoProducts: Product[] = [
       "https://industrialmartnigeria.com/wp-content/uploads/2024/09/electrical-lights-1499158560-3102793-fotor-202409040737.png",
       "https://industrialmartnigeria.com/wp-content/uploads/2024/09/1-fotor-202409040615.png",
     ],
-    categoryId: "cat-fashion",
-    tags: [tagNew],
+    category_id: "cat-fashion",
+    tags: [],
     status: "active",
-    createdAt: "2024-06-08T08:45:00Z",
-    updatedAt: "2024-06-08T08:45:00Z",
+    created_at: "2024-06-08T08:45:00Z",
     metadata: {
       capacity: "20L",
       color: "Green",
@@ -180,16 +167,15 @@ export const demoProducts: Product[] = [
   },
   {
     id: "prod-1",
-    vendorId: "1",
+    product_owner_id: "1",
     name: "Wireless Headphones",
     description: "High-quality wireless headphones with noise cancellation.",
     price: "99.99",
     images: ["/wireless-headphones.png", "/usb-c-cable.png"],
-    categoryId: "cat-electronics",
-    tags: [tagNew, tagPopular],
+    category_id: "cat-electronics",
+    tags: [],
     status: "active",
-    createdAt: "2024-06-01T12:00:00Z",
-    updatedAt: "2024-06-01T12:00:00Z",
+    created_at: "2024-06-01T12:00:00Z",
     metadata: {
       color: "Black",
       batteryLife: "20 hours",
@@ -198,7 +184,7 @@ export const demoProducts: Product[] = [
   },
   {
     id: "prod-2",
-    vendorId: "1",
+    product_owner_id: "1",
     name: "Eco-Friendly Water Bottle",
     description: "Reusable water bottle made from sustainable materials.",
     price: "19.99",
@@ -213,11 +199,10 @@ export const demoProducts: Product[] = [
       "/laptop-stand.png",
       "/wireless-headphones.png",
     ],
-    categoryId: "cat-home",
-    tags: [tagSale],
+    category_id: "cat-home",
+    tags: [],
     status: "active",
-    createdAt: "2024-06-02T09:30:00Z",
-    updatedAt: "2024-06-02T09:30:00Z",
+    created_at: "2024-06-02T09:30:00Z",
     metadata: {
       material: "Stainless Steel",
       capacity: "750ml",
@@ -226,16 +211,15 @@ export const demoProducts: Product[] = [
   },
   {
     id: "prod-3",
-    vendorId: "2",
+    product_owner_id: "2",
     name: "Yoga Mat",
     description: "Non-slip yoga mat for all types of exercises.",
     price: "29.99",
     images: ["/bluetooth-speaker.jpg", "/laptop-stand.png"],
-    categoryId: "cat-sports",
-    tags: [tagPopular],
+    category_id: "cat-sports",
+    tags: [],
     status: "active",
-    createdAt: "2024-06-03T08:15:00Z",
-    updatedAt: "2024-06-03T08:15:00Z",
+    created_at: "2024-06-03T08:15:00Z",
     metadata: {
       thickness: "6mm",
       color: "Purple",
@@ -244,7 +228,7 @@ export const demoProducts: Product[] = [
   },
 ];
 
-export const demoWishlist: WishlistItem[] = [
+export const demoWishlist = [
   {
     id: "wishlist-1",
     userId: "user-1",

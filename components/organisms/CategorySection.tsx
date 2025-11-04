@@ -1,207 +1,285 @@
 "use client";
-import React, { useState } from "react";
-import Image from "next/image";
+
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { CategoryName } from "@/types/models";
 import { slugify } from "@/lib/utils";
+import ProductCards from "../molecules/ProductCards";
+// import {
+//   getChildCategories,
+//   getProductsByCategory,
+//   getRootCategories,
+//   hasChildren,
+// } from "@/services/categoryService";
+import { Category, Product } from "@/types/models";
+import { transformProduct } from "@/services/productService";
+import { useCategoryStore } from "@/store/useCategoryStore";
+import {
+  getChildCategories,
+  getProductsByCategory,
+  getRootCategories,
+  hasChildren,
+} from "@/services/categoryService";
 
-interface Product {
-  name: string;
-  price: string;
-  img: string;
-}
-
-const categories: CategoryName[] = [
-  "Environment",
-  "Consumer Electronics",
-  "Home & Garden",
-  "Commercial Equipment",
-  "Beauty",
-  "Jewelry",
-  "Industrial Machinery",
-  "Business Services",
-  "Apparel & Accessories",
-  "Sports",
-  "Vehicle Parts",
-  "Packaging",
-  "Tools & Hardware",
-  "Toys",
-];
-
-const sampleProducts: Partial<Record<CategoryName, Product[]>> = {
-  Environment: [
-    {
-      name: "Solar Panel Kit",
-      price: "$300",
-      img: "https://industrialmartnigeria.com/wp-content/uploads/2024/09/hoist10500kg-1-600x600.webp",
-    },
-    {
-      name: "Air Purifier",
-      price: "$150",
-      img: "https://industrialmartnigeria.com/wp-content/uploads/2024/09/bosch-twist-drill-bits-co14b-64_1000-600x600.webp",
-    },
-  ],
-  "Consumer Electronics": [
-    {
-      name: "Industrial Drone",
-      price: "$1,200",
-      img: "https://industrialmartnigeria.com/wp-content/uploads/2024/09/ofite-machined-metal-mud-balance-500x500-1.jpg",
-    },
-    {
-      name: "Smart Controller",
-      price: "$250",
-      img: "https://industrialmartnigeria.com/wp-content/uploads/2024/09/1-fotor-202409040615.png",
-    },
-  ],
-  "Industrial Machinery": [
-    {
-      name: "Hydraulic Press",
-      price: "$2,500",
-      img: "https://industrialmartnigeria.com/wp-content/uploads/2024/09/main-qimg-aa51dc1a730d035fc7e3fb3e5311bab0-lq-fotor-202409040919.png",
-    },
-    {
-      name: "Lathe Machine",
-      price: "$1,800",
-      img: "https://industrialmartnigeria.com/wp-content/uploads/2024/09/aodd-pump-1-2-bsp-15mm--300x300.jpg",
-    },
-  ],
-};
-
-const CategorySection = () => {
-  const [selectedCategory, setSelectedCategory] = useState<CategoryName>(
-    "Industrial Machinery"
+const CategorySection: React.FC = () => {
+  const {
+    categories: allCategories,
+    loading: loadingCats,
+    fetchCategories,
+  } = useCategoryStore();
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
+    "5d7b7aff-f70b-4c18-b560-efa468844a09"
   );
-  const [showCategories, setShowCategories] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showMobile, setShowMobile] = useState(false);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
-  const products = sampleProducts[selectedCategory] ?? [];
+  /** Fetch all categories once */
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
+  /** Root categories for sidebar and dropdown */
+  const rootCategories = useMemo(() => {
+    return getRootCategories(allCategories);
+  }, [allCategories]);
+
+  /** Fetch products when a category is selected */
+  useEffect(() => {
+    if (!selectedCategoryId) {
+      setProducts([]);
+      return;
+    }
+    (async () => {
+      try {
+        setLoadingProducts(true);
+        setError(null);
+        const prods = await getProductsByCategory(selectedCategoryId);
+        if (prods.status) {
+          setProducts(prods?.data ?? []);
+        }
+      } catch (e: any) {
+        console.error("getProductsByCategory error:", e);
+        setError(e.message ?? "Failed to load products");
+      } finally {
+        setLoadingProducts(false);
+      }
+    })();
+  }, [selectedCategoryId]);
+
+  /** Selected category info */
+  const selectedCategory = useMemo(() => {
+    if (!selectedCategoryId) return null;
+    return allCategories.find((c) => c.id === selectedCategoryId) ?? null;
+  }, [selectedCategoryId, allCategories]);
+
+  /** Get child categories */
+  const getCategoryChildren = useCallback(
+    async (categoryId: string): Promise<Category[]> => {
+      const childrenCat = await getChildCategories(categoryId);
+
+      return childrenCat.data!;
+    },
+    [allCategories]
+  );
+
+  /** Desktop item (recursive) */
+  const DesktopItem = useCallback(
+    (cat: Category, depth = 0) => {
+      const categoryHasChildren = hasChildren(cat);
+      const isHover = hoveredId === cat.id;
+      const isSel = selectedCategoryId === cat.id;
+      const children = categoryHasChildren ? getCategoryChildren(cat.id) : [];
+
+      return (
+        <li
+          key={cat.id}
+          className="relative"
+          onMouseEnter={() => setHoveredId(cat.id)}
+          onMouseLeave={() => setHoveredId(null)}
+        >
+          <div
+            onClick={() => {
+              setSelectedCategoryId(cat.id);
+              setShowMobile(false);
+            }}
+            className={`flex cursor-pointer items-center justify-between rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+              isSel
+                ? "bg-blue-100 text-blue-700"
+                : "hover:bg-gray-100 text-gray-700"
+            }`}
+            style={{ paddingLeft: `${16 + depth * 12}px` }}
+          >
+            <span>{cat.name}</span>
+            {categoryHasChildren &&
+              (isHover ? (
+                <ChevronUp className="ml-1 h-4 w-4" />
+              ) : (
+                <ChevronDown className="ml-1 h-4 w-4" />
+              ))}
+          </div>
+          {/* 
+          {categoryHasChildren && isHover && children.length > 0 && (
+            <ul
+              className="absolute left-0 top-0 ml-1 min-w-[200px] rounded-lg border border-gray-200 bg-white shadow-lg z-20"
+              onMouseEnter={() => setHoveredId(cat.id)}
+              onMouseLeave={() => setHoveredId(null)}
+            >
+              {children.map((child) => DesktopItem(child, depth + 1))}
+            </ul>
+          )} */}
+        </li>
+      );
+    },
+    [hoveredId, selectedCategoryId, getCategoryChildren]
+  );
+
+  /** Mobile item (recursive expandable) */
+  const MobileItem = useCallback(
+    (cat: Category, depth = 0) => {
+      const categoryHasChildren = hasChildren(cat);
+      const children = categoryHasChildren ? getCategoryChildren(cat.id) : [];
+      const [expanded, setExpanded] = useState(false);
+
+      return (
+        <li key={cat.id}>
+          <div
+            className="flex items-center justify-between"
+            style={{ paddingLeft: `${depth * 16}px` }}
+          >
+            <div
+              onClick={() => {
+                setSelectedCategoryId(cat.id);
+                setShowMobile(false);
+              }}
+              className={`flex-1 cursor-pointer rounded-lg px-4 py-3 text-sm font-medium transition-all ${
+                selectedCategoryId === cat.id
+                  ? "bg-blue-100 text-blue-700"
+                  : "hover:bg-gray-100 text-gray-700"
+              }`}
+            >
+              {cat.name}
+            </div>
+
+            {categoryHasChildren && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setExpanded(!expanded);
+                }}
+                className="p-2"
+              >
+                {expanded ? (
+                  <ChevronUp className="h-4 w-4 text-gray-500" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-gray-500" />
+                )}
+              </button>
+            )}
+          </div>
+
+          {/* {categoryHasChildren && expanded && children.length > 0 && (
+            <ul className="mt-1 space-y-1">
+              {children.map((child) => MobileItem(child, depth + 1))}
+            </ul>
+          )} */}
+        </li>
+      );
+    },
+    [selectedCategoryId, getCategoryChildren]
+  );
 
   return (
-    <section className="bg-gray-50 w-full py-16">
+    <section className="bg-gray-50 w-full max-w-[100dvw] py-16">
       {/* Header */}
       <div className="text-center mb-10 px-5 md:px-10">
-        <h3 className="font-bold text-gray-900 text-3xl md:text-4xl">
+        <h3 className="text-3xl font-bold text-gray-900 md:text-4xl">
           Our Product Categories
         </h3>
-        <p className="text-gray-600 mt-4 max-w-2xl mx-auto">
-          Explore our wide range of high-quality industrial equipment and tools,
-          designed to meet the needs of various sectors.
+        <p className="mt-4 max-w-2xl mx-auto text-gray-600">
+          Explore our range of high-quality products, designed to meet your
+          needs across various categories.
         </p>
       </div>
 
-      <div className="w-full mx-auto grid grid-cols-1 lg:grid-cols-4 gap-8 px-5 md:px-10 lg:px-20">
-        {/* Sidebar (desktop) */}
-        <aside
-          className="
-            hidden lg:block
-            bg-white shadow-md rounded-2xl
-            sticky top-20
-            p-4 border border-gray-100
-            max-h-[calc(100vh-5rem)]
-            overflow-y-auto
-            scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent
-          "
-        >
-          <h4 className="font-semibold text-lg mb-4 text-gray-800">
+      <div className="mx-auto grid w-full grid-cols-1 gap-8 px-5 md:px-10 lg:grid-cols-4 lg:px-20">
+        {/* Desktop Sidebar */}
+        <aside className="hidden lg:block sticky top-20 max-h-[calc(100vh-5rem)] overflow-y-auto rounded-2xl border border-gray-100 bg-white p-4 shadow-md scrollbar-thin">
+          <h4 className="mb-4 text-lg font-semibold text-gray-800">
             Categories
           </h4>
-          <ul className="space-y-2">
-            {categories.map((cat) => (
-              <li
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  selectedCategory === cat
-                    ? "bg-blue-100 text-blue-700"
-                    : "hover:bg-gray-100 text-gray-700"
-                }`}
-              >
-                {cat}
-              </li>
-            ))}
-          </ul>
+
+          {loadingCats ? (
+            <div className="space-y-2">
+              <div className="h-3 w-3/4 animate-pulse rounded bg-gray-200" />
+              <div className="h-3 w-2/3 animate-pulse rounded bg-gray-200" />
+              <div className="h-3 w-1/2 animate-pulse rounded bg-gray-200" />
+            </div>
+          ) : (
+            <ul className="space-y-1">
+              {rootCategories.map((cat) => DesktopItem(cat))}
+            </ul>
+          )}
         </aside>
 
-        {/* Mobile Dropdown for Categories */}
-        <div className="block lg:hidden w-full">
+        {/* Mobile Dropdown */}
+        <div className="block lg:hidden w-full relative">
           <button
-            onClick={() => setShowCategories(!showCategories)}
-            className="w-full flex items-center justify-between bg-white border border-gray-200 rounded-xl p-3 font-medium text-gray-800 shadow-sm"
+            onClick={() => setShowMobile((v) => !v)}
+            className="flex w-full items-center justify-between rounded-xl border border-gray-200 bg-white p-3 font-medium text-gray-800 shadow-sm"
           >
-            <span>{selectedCategory}</span>
-            {showCategories ? (
-              <ChevronUp className="w-5 h-5" />
+            <span>{selectedCategory?.name ?? "Select category"}</span>
+            {showMobile ? (
+              <ChevronUp className="h-5 w-5" />
             ) : (
-              <ChevronDown className="w-5 h-5" />
+              <ChevronDown className="h-5 w-5" />
             )}
           </button>
 
-          {showCategories && (
-            <ul className="mt-3 bg-white border border-gray-200 rounded-xl absolute py-3 z-10 px-5 shadow-md max-h-[300px] overflow-y-auto">
-              {categories.map((cat) => (
-                <li
-                  key={cat}
-                  onClick={() => {
-                    setSelectedCategory(cat);
-                    setShowCategories(false);
-                  }}
-                  className={`cursor-pointer px-4 py-3 text-sm font-medium transition-all ${
-                    selectedCategory === cat
-                      ? "bg-blue-100 rounded-full text-blue-700"
-                      : "hover:bg-gray-100 text-gray-700"
-                  }`}
-                >
-                  {cat}
-                </li>
-              ))}
+          {showMobile && (
+            <ul className="absolute mt-3 w-full max-h-[300px] overflow-y-auto rounded-xl border border-gray-200 bg-white px-3 py-3 shadow-md z-10 space-y-1">
+              {rootCategories.map((cat) => MobileItem(cat))}
             </ul>
           )}
         </div>
 
         {/* Product Grid */}
-        <div className="md:col-span-3">
-          {/* Category title with "See more" link */}
-          <div className="flex justify-between items-center mb-6">
+        <div className="lg:col-span-3">
+          <div className="mb-6 flex items-center justify-between">
             <h4 className="text-xl font-bold text-gray-900">
-              {selectedCategory}
+              {selectedCategory?.name ?? "Products"}
             </h4>
-            <Link
-              href={`/category/${slugify(selectedCategory)}`}
-              className="text-sm text-blue-600 hover:underline font-medium"
-            >
-              See more →
-            </Link>
+            {selectedCategory && (
+              <Link
+                href={`/category/${selectedCategory.slug}`}
+                className="text-sm font-medium text-blue-600 hover:underline"
+              >
+                See more
+              </Link>
+            )}
           </div>
 
-          {products.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              {products.map((product, index) => (
-                <Link
-                  href={"/product/prod-5"}
-                  key={index}
-                  className="bg-white shadow-sm border border-gray-100 rounded-2xl overflow-hidden hover:shadow-lg transition-all"
-                >
-                  <div className="relative w-full h-36 sm:h-40">
-                    <Image
-                      src={product.img}
-                      alt={product.name}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="p-3 sm:p-4">
-                    <h5 className="font-semibold text-gray-900 text-sm">
-                      {product.name}
-                    </h5>
-                    <p className="text-blue-600 text-sm font-medium mt-1 sm:mt-2">
-                      {product.price}
-                    </p>
-                  </div>
-                </Link>
+          {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
+
+          {loadingProducts ? (
+            <div className="grid grid-cols-2 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="h-48 animate-pulse rounded-xl bg-white shadow"
+                />
+              ))}
+            </div>
+          ) : products.length ? (
+            <div className="grid grid-cols-2 gap-6 sm:grid-cols-2 lg:grid-.cols-3">
+              {products.map((p) => (
+                <ProductCards key={p.id} product={p} />
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-sm">
+            <p className="text-sm text-gray-500">
               No products found for this category.
             </p>
           )}

@@ -29,30 +29,6 @@ export function Step3({ form, onEdit }: Step3Props) {
     }
   }, [formData.images]);
 
-  const getCategorySpecificFields = () => {
-    switch (formData.category) {
-      case "Electronics":
-        return [
-          { label: "Brand", value: formData.brand },
-          { label: "Model", value: formData.model },
-          { label: "Condition", value: formData.condition },
-        ];
-      case "Furniture":
-        return [
-          { label: "Material", value: formData.material },
-          { label: "Dimensions", value: formData.dimensions },
-        ];
-      case "Clothing":
-        return [
-          { label: "Size", value: formData.size },
-          { label: "Color", value: formData.color },
-          { label: "Gender", value: formData.gender },
-        ];
-      default:
-        return [];
-    }
-  };
-
   return (
     <div className="space-y-6">
       <div className="text-center mb-6">
@@ -62,6 +38,7 @@ export function Step3({ form, onEdit }: Step3Props) {
         </p>
       </div>
 
+      {/* Basic Information Card */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Basic Information</CardTitle>
@@ -104,22 +81,23 @@ export function Step3({ form, onEdit }: Step3Props) {
                 Category
               </h4>
               <Badge variant="secondary" className="mt-1">
-                {formData.category}
+                {formData.category?.name}
               </Badge>
             </div>
             <div>
               <h4 className="text-sm font-medium text-muted-foreground">
                 Location
               </h4>
-              <p className="mt-1">{formData.location}</p>
+              <p className="mt-1 capitalize">{formData.location}</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
+      {/* Product Details Card */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>{formData.category} Details</CardTitle>
+          <CardTitle>Product Details</CardTitle>
           <Button
             type="button"
             variant="ghost"
@@ -130,16 +108,43 @@ export function Step3({ form, onEdit }: Step3Props) {
             Edit
           </Button>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
+          {/* Name and Price */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {getCategorySpecificFields().map((field) => (
-              <div key={field.label}>
-                <h4 className="text-sm font-medium text-muted-foreground">
-                  {field.label}
-                </h4>
-                <p className="mt-1 capitalize">{field.value || "N/A"}</p>
-              </div>
-            ))}
+            <div>
+              <h4 className="text-sm font-medium text-muted-foreground">
+                Product Name
+              </h4>
+              <p className="mt-1 font-medium text-lg">{formData.name}</p>
+            </div>
+            <div>
+              <h4 className="text-sm font-medium text-muted-foreground">
+                Price
+              </h4>
+              <p className="mt-1 font-medium text-lg">₦{formData.price}</p>
+            </div>
+          </div>
+
+          {/* Description */}
+          <div>
+            <h4 className="text-sm font-medium text-muted-foreground">
+              Description
+            </h4>
+            <p className="mt-1 whitespace-pre-wrap">{formData.description}</p>
+          </div>
+
+          {/* Features */}
+          <div>
+            <h4 className="text-sm font-medium text-muted-foreground">
+              Features
+            </h4>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {formData.features?.split("|").map((feature, index) => (
+                <Badge key={index} variant="secondary">
+                  {feature.trim()}
+                </Badge>
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>

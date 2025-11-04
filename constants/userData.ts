@@ -1,7 +1,7 @@
-import { Product, User, WishlistItem } from "@/types/models";
+import { Product, User } from "@/types/models";
 
 // Example data - replace with actual data fetching
-export const mockUser: User = {
+export const mockUser = {
   id: "1",
   fullName: "John Doe",
   email: "john@example.com",
@@ -16,7 +16,7 @@ export const mockUser: User = {
     description: "Your trusted source for quality electronics and gadgets",
   },
 };
-export const mockUser2: User = {
+export const mockUser2 = {
   id: "2",
   fullName: "Jane Doe",
   email: "jane@example.com",
@@ -31,7 +31,7 @@ export const mockUser2: User = {
     description: "Your trusted source for quality electronics and gadgets",
   },
 };
-export const mockUser3: User = {
+export const mockUser3 = {
   id: "3",
   fullName: "Joke Doe",
   email: "joke@example.com",
@@ -47,7 +47,7 @@ export const mockUser3: User = {
   },
 };
 
-export const userDB: User[] = [mockUser, mockUser2, mockUser3];
+export const userDB = [mockUser, mockUser2, mockUser3];
 
 // const mockProducts: Product[] = [
 //   {
@@ -88,7 +88,7 @@ export const userDB: User[] = [mockUser, mockUser2, mockUser3];
 //   },
 // ];
 
-export const mockWishlist: WishlistItem[] = [
+export const mockWishlist = [
   {
     id: "1",
     userId: "1",

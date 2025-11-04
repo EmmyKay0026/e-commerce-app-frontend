@@ -34,7 +34,6 @@
   animation: slideInLeft 0.3s ease-out;
 }
 
-
 @theme inline {
   --color-primary: #0861c1;
   --color-secondary: #c68311;
@@ -152,4 +151,9 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.color {
+  color: #0852a2;
+  background: #c0ab87;
 }

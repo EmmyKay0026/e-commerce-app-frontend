@@ -23,10 +23,11 @@ import {
   Search,
   X,
   ArrowUpDown,
+  Store,
 } from "lucide-react";
-import { User, Product, WishlistItem } from "@/types/models";
-import { getInitials } from "@/services/user";
-import { useEffect, useState } from "react";
+import { User, Product, BusinessProfile } from "@/types/models";
+import { getInitials } from "@/services/userService";
+import { use, useEffect, useState } from "react";
 import Image from "next/image";
 import {
   Popover,
@@ -42,22 +43,58 @@ import { ProductCardListViewSkeleton } from "../molecules/ProductCardListViewSke
 import { ProductCardList } from "../molecules/ProductCardListView";
 import GridListProductList from "./GridListProductList";
 import { EditProfile } from "./EditUserProfile";
+import { useUserStore } from "@/store/useUserStore";
+import { getBusinessProducts } from "@/services/productService";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "../ui/empty";
+import Link from "next/link";
 
 interface UserDashboardProps {
-  user: User;
-  isOwner: boolean;
-  products: Product[];
-  wishlist: WishlistItem[];
+  viewedUser: User;
+  currentUser?: User;
+  products?: Product[];
   isLoggedIn?: boolean;
 }
 
 export function UserDashboard({
-  user,
-  isOwner,
+  viewedUser,
+  currentUser,
   products,
-  wishlist,
   isLoggedIn = false,
 }: UserDashboardProps) {
+  const [remoteProducts, setRemoteProducts] = useState<Product[]>(
+    products ?? []
+  );
+  const [remoteLoading, setRemoteLoading] = useState(false);
+  const [remoteError, setRemoteError] = useState<string | null>(null);
+  const isOwner = useUserStore((state) => state.isOwner);
+
+  useEffect(() => {
+    const getBusniessProducts = async () => {
+      if (!viewedUser.business_profile_id || !viewedUser.id) return;
+      setIsPageLoading(true);
+
+      const res = await getBusinessProducts(viewedUser.business_profile_id);
+      if (res.success && res.data) {
+        console.log("get business ", res.data);
+
+        setBusinessProducts(res.data.data);
+      }
+      // console.log(res);
+      setIsPageLoading(false);
+    };
+
+    getBusniessProducts();
+  }, []);
+
+  // const isOwner = currentUser && currentUser.id === viewedUser.id;
+  // const isOwner = currentUser?.id === user.id;
   const [isActive, setIsActive] = useState<"grid" | "list">("list");
   const [searchValue, setSearchValue] = useState<string>("");
   const [showSearch, setShowSearch] = useState<boolean>(false);
@@ -70,88 +107,13 @@ export function UserDashboard({
     { icon: Headphones, label: "Support", href: "/support" },
   ];
 
-  const renderStars = (rating: number) => {
-    return (
-      <div className="flex gap-1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star
-            key={star}
-            className={`h-4 w-4 ${
-              star <= rating
-                ? "fill-yellow-400 text-yellow-400"
-                : "text-gray-300"
-            }`}
-          />
-        ))}
-      </div>
-    );
-  };
-
   if (isOwner) {
-    // const [fullWishlist, setFullWishlist] = useState<WishlistItem[]>(wishlist);
-
-    // useEffect(() => {
-    //   // Populate wishlist items with their corresponding product objects
-    //   const populatedWishlist = wishlist.map((item) => {
-    //     const product = products.find((p) => p.id === item.productId);
-    //     return product ? { ...item, product } : item;
-    //   });
-    //   setFullWishlist(populatedWishlist as any); // 'as any' if WishlistItem doesn't have 'product' field
-    // }, [wishlist, products]);
-
     // Private View
     return (
-      <div className="min-h-screen bg-background py-6">
-        <div className="mx-auto  space-y-8">
-          {/* Profile Header */}
-          <Card
-            className="rounded-none w-full shadow-none"
-            style={{
-              background: `linear-gradient(8deg,rgba(0, 0, 0, 0.47) 0%, rgba(0, 0, 0, 0) 100%), url('${user.vendorProfile?.coverImage}')`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-            }}
-          >
-            <CardContent className="p-2 pt-44 px-6 shadow-0">
-              <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
-                <Avatar className="h-24 w-24">
-                  <AvatarImage
-                    src={user.profilePicture || "/placeholder.svg"}
-                    alt={user.fullName}
-                    className="object-cover"
-                  />
-                  <AvatarFallback className="text-xl font-bold">
-                    {getInitials(user.fullName)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 space-y-2">
-                  <h1 className="text-3xl  font-bold text-background">
-                    {user.fullName}
-                  </h1>
-                  <div className="space-y-1 text-sm text-gray-300">
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4" />
-                      <span>{user.email}</span>
-                    </div>
-                    {user.phoneNumber && (
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4" />
-                        <span>{user.phoneNumber}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <EditProfile />
-                {/* <Button className="rounded-lg bg-primary px-4 py-2 text-white hover:bg-secondary hover:text-secondary-foreground">
-                  Edit Profile
-                </Button> */}
-              </div>
-            </CardContent>
-          </Card>
-
+      <div className="min-h-screen bg-background lg:py-6 lg:my-0 rounded">
+        <div className="lg:mx-auto py-8">
           {/* Quick Links */}
-          <div className="px-6">
+          <div className="px-6 mb-6">
             <Card className="rounded-xl shadow-sm">
               <CardContent className="py-3 px-6 text-sm text-muted-foreground ">
                 <div className="flex justify-between">
@@ -168,13 +130,17 @@ export function UserDashboard({
                       <h4 className="font-bold text-muted-foreground">
                         Full name:
                       </h4>
-                      <p className="text-muted-foreground">{user.fullName}</p>
+                      <p className="text-muted-foreground">
+                        {viewedUser.last_name} {viewedUser.first_name}
+                      </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <h4 className="font-bold text-muted-foreground">
                         Email:
                       </h4>
-                      <p className="text-muted-foreground">{user.email}</p>
+                      <p className="text-muted-foreground">
+                        {viewedUser.email}
+                      </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <h4 className="font-bold text-muted-foreground">
@@ -190,41 +156,26 @@ export function UserDashboard({
                         WhatsApp contact:
                       </h4>
                       <p className="text-muted-foreground"></p>{" "}
-                      {user.phoneNumber}
+                      {viewedUser.whatsapp_number}
                     </div>
                     <div className="flex items-center gap-2">
                       <h4 className="font-bold text-muted-foreground">
                         Phone number:
                       </h4>
                       <p className="text-muted-foreground"></p>{" "}
-                      {user.phoneNumber}
+                      {viewedUser.phone_number}
                     </div>
                   </article>
                 </div>
               </CardContent>
             </Card>
-            {/* <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-              {quickLinks.map((link) => (
-                <Card
-                  key={link.label}
-                  className="cursor-pointer rounded-xl shadow-sm transition-shadow hover:shadow-md"
-                >
-                  <CardContent className="flex flex-col items-center justify-center gap-3 p-6">
-                    <link.icon className="h-8 w-8 text-primary" />
-                    <span className="text-center text-sm font-medium text-foreground">
-                      {link.label}
-                    </span>
-                  </CardContent>
-                </Card>
-              ))}
-            </div> */}
           </div>
           <div className="px-6">
             <Card className="rounded-xl shadow-sm">
               <CardContent className="py-3 px-6 text-sm text-muted-foreground ">
                 <div className="flex justify-between">
                   <h2 className="mb-4 text-lg font-bold text-foreground">
-                    Store Information
+                    Business Information
                   </h2>
                   {/* <Button variant="outline" size="sm" className="rounded-lg">
                     <PenSquareIcon />
@@ -234,19 +185,21 @@ export function UserDashboard({
                   <article className="space-y-2 ">
                     <div className="flex items-center gap-2">
                       <h4 className="font-bold text-muted-foreground">
-                        Store name:
+                        Business name:
                       </h4>
                       <p className="text-muted-foreground">
-                        {user?.vendorProfile?.businessName ?? "none"}
+                        {viewedUser?.business_profile?.business_name ??
+                          "No business name added"}
                       </p>
                     </div>
 
                     <div className="flex items-center gap-2">
                       <h4 className="font-bold text-muted-foreground">
-                        Store address:
+                        Business address:
                       </h4>
                       <p className="text-muted-foreground">
-                        {user?.vendorProfile?.address ?? "none"}
+                        {viewedUser?.business_profile?.address ??
+                          "No business address added"}
                       </p>
                     </div>
                   </article>
@@ -254,10 +207,11 @@ export function UserDashboard({
                   <article className="space-y-2 ">
                     <div className="flex  gap-2">
                       <h4 className="font-bold whitespace-nowrap text-muted-foreground">
-                        Store description:
+                        Business description:
                       </h4>
                       <p className="text-muted-foreground">
-                        {user?.vendorProfile?.description ?? "none"}
+                        {viewedUser?.business_profile?.description ??
+                          "No business description added"}
                       </p>
                     </div>
                   </article>
@@ -286,19 +240,43 @@ export function UserDashboard({
   }
 
   // Public View (Vendor Profile)
-  const isVendor = user.role === "vendor";
-  const displayName = isVendor
-    ? user.vendorProfile?.businessName || user.fullName
-    : user.fullName;
+  const isVendor = viewedUser.role === "vendor";
+  const displayName =
+    viewedUser.business_profile?.business_name ??
+    `${viewedUser.first_name}'s business`;
+  const [businessProducts, setBusinessProducts] = useState<Product[] | null>(
+    null
+  );
+  // console.log(viewedUser.first_name);
+
+  useEffect(() => {
+    console.log("Herre");
+
+    const getBusniessProducts = async () => {
+      if (!viewedUser.business_profile?.id || !viewedUser.id) return;
+      setIsPageLoading(true);
+
+      const res = await getBusinessProducts(viewedUser.business_profile.id);
+      if (res.success && res.data) {
+        console.log("get business ", res.data);
+
+        setBusinessProducts(res.data.data);
+      }
+      // console.log(res);
+      setIsPageLoading(false);
+    };
+
+    getBusniessProducts();
+  }, []);
 
   return (
     <div className="min-h-screen w-full bg-background">
       {/* Cover Image */}
-      {isVendor && user.vendorProfile?.coverImage && (
+      {isVendor && viewedUser.business_profile?.cover_image && (
         <Card
           className="rounded-none w-full shadow-none"
           style={{
-            background: `linear-gradient(8deg,rgba(0, 0, 0, 0.47) 0%, rgba(0, 0, 0, 0) 100%), url('${user.vendorProfile?.coverImage}')`,
+            background: `linear-gradient(8deg,rgba(0, 0, 0, 0.47) 0%, rgba(0, 0, 0, 0) 100%), url('${viewedUser.business_profile?.cover_image}')`,
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
@@ -308,29 +286,37 @@ export function UserDashboard({
             <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
               <Avatar className="h-24 w-24">
                 <AvatarImage
-                  src={user.profilePicture || "/placeholder.svg"}
-                  alt={user.fullName}
+                  src={viewedUser.profile_picture || "/placeholder.svg"}
+                  alt={viewedUser.first_name + " " + viewedUser.last_name}
                   className="object-cover"
                 />
                 <AvatarFallback className="text-xl font-bold">
-                  {getInitials(user.fullName)}
+                  {getInitials(
+                    viewedUser.first_name + " " + viewedUser.last_name
+                  )}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 space-y-2">
+                <h2 className=""></h2>
                 <h1 className="text-3xl  font-bold text-background">
-                  {displayName}
+                  {viewedUser.first_name} owns{" "}
+                  {viewedUser.business_profile.business_name}
                 </h1>
+                <Link href={`/shop/${viewedUser.shop_link}`}>
+                  <Button>Visit business page</Button>
+                </Link>
+
                 <div className="space-y-1 text-sm text-gray-300">
-                  <div className="flex items-center gap-2">
+                  {/* <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4" />
-                    <span>{user.email}</span>
-                  </div>
-                  {user.phoneNumber && (
+                    <span>{viewedUser.email}</span>
+                  </div> */}
+                  {/* {viewedUser.phone_number && (
                     <div className="flex items-center gap-2">
                       <Phone className="h-4 w-4" />
-                      <span>{user.phoneNumber}</span>
+                      <span>{viewedUser.phone_number}</span>
                     </div>
-                  )}
+                  )} */}
                 </div>
               </div>
             </div>
@@ -338,7 +324,70 @@ export function UserDashboard({
         </Card>
       )}
       <h5 className="font-bold text-2xl p-6 pb-2">Shop from {displayName}</h5>
-      <GridListProductList products={demoProducts} />
+
+      {/* <section className="">
+          {businessProducts?.length === 0 && (
+            <Empty className="border border-dashed">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Store />
+                </EmptyMedia>
+                <EmptyTitle>
+                  {`
+                      ${
+                        vendor?.business_name || vendor?.user.first_name
+                      }'s store is empty`}
+                </EmptyTitle>
+                <EmptyDescription>
+                  Add products to your store to start selling.
+                </EmptyDescription>
+              </EmptyHeader>
+              <EmptyContent>
+                <Button variant="outline" size="sm">
+                  Continue shopping
+                </Button>
+              </EmptyContent>
+            </Empty>
+          )} */}
+
+      {remoteLoading ? (
+        // show skeleton while loading
+        <div className="p-6">
+          <ProductCardGridViewSkeleton />
+        </div>
+      ) : businessProducts === null ? (
+        <Empty className="border border-dashed">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Store />
+            </EmptyMedia>
+            <EmptyTitle>
+              {`
+                      ${
+                        viewedUser?.business_profile?.business_name ||
+                        viewedUser.first_name
+                      }'s store is empty`}
+            </EmptyTitle>
+            <EmptyDescription>
+              Add products to your store to start selling.
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button variant="outline" size="sm">
+              Continue shopping
+            </Button>
+          </EmptyContent>
+        </Empty>
+      ) : (
+        // render fetched products (falls back to initial props if provided)
+        <GridListProductList products={businessProducts} />
+      )}
+
+      {remoteError && (
+        <div className="p-4 text-sm text-red-600">
+          Error loading products: {remoteError}
+        </div>
+      )}
     </div>
   );
 }

@@ -15,21 +15,105 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Upload, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
+import { Category, Product } from "@/types/models";
+import { State, LGA } from "@/types/location";
+import { toast } from "sonner";
+import { getAllCategories } from "@/services/categoryService";
+import { listStates, listLgas, getLga } from "@/services/locationService";
 
 interface Step1Props {
   form: UseFormReturn<ProductFormData>;
+  product?: Product;
 }
 
-const categories = ["Electronics", "Furniture", "Clothing"];
-
-export function Step1({ form }: Step1Props) {
+export function Step1({ form, product }: Step1Props) {
   const [imagePreviews, setImagePreviews] = useState<ImagePreview[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [states, setStates] = useState<State[]>([]);
+  const [lgas, setLgas] = useState<LGA[]>([]);
+  const [selectedState, setSelectedState] = useState<string | null>(null);
+  const [isLoadingStates, setIsLoadingStates] = useState(true);
+  const [isLoadingLgas, setIsLoadingLgas] = useState(false);
+
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        const categoriesResult = await getAllCategories();
+        if (Array.isArray(categoriesResult)) {
+          setCategories(categoriesResult);
+        } else {
+          toast.error("Failed to load categories");
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        toast.error("Could not load categories. Please try again.");
+      } finally {
+        setIsLoadingCategories(false);
+      }
+
+      const statesResult = await listStates();
+      if (statesResult.success) {
+        setStates(statesResult.data || []);
+      }
+      setIsLoadingStates(false);
+    };
+
+    fetchInitialData();
+  }, []);
+
+  useEffect(() => {
+    if (product && states.length > 0) {
+      const locationId = product?.location;
+
+      if (locationId) {
+        const lgaId = locationId; // Parse to number for getLga
+        if (lgaId) {
+          getLga(lgaId).then((lgaResult) => {
+            if (lgaResult.success && lgaResult.data) {
+              setSelectedState(lgaResult.data.state_id); // Convert to string for selectedState
+            }
+          });
+        }
+      }
+    }
+  }, [product, states]);
+
+  useEffect(() => {
+    if (selectedState && lgas.length > 0 && product?.location) {
+      form.setValue("location", product.location);
+    }
+  }, [lgas, product, selectedState, form]);
+
+  useEffect(() => {
+    if (!selectedState) {
+      setLgas([]);
+      return;
+    }
+    const fetchLgas = async () => {
+      setIsLoadingLgas(true);
+      const result = await listLgas(selectedState);
+      if (result.success) {
+        setLgas(result.data || []);
+      }
+      setIsLoadingLgas(false);
+    };
+    fetchLgas();
+  }, [selectedState]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
+
+    const currentImages = form.getValues("images") || [];
+    const totalImages = currentImages.length + files.length;
+
+    if (totalImages > 15) {
+      toast.error("Maximum 15 images allowed");
+      return;
+    }
 
     const newPreviews: ImagePreview[] = files.map((file) => ({
       file,
@@ -38,7 +122,6 @@ export function Step1({ form }: Step1Props) {
 
     setImagePreviews((prev) => [...prev, ...newPreviews]);
 
-    const currentImages = form.getValues("images") || [];
     form.setValue("images", [...currentImages, ...files], {
       shouldValidate: true,
     });
@@ -119,20 +202,42 @@ export function Step1({ form }: Step1Props) {
       <div className="space-y-2">
         <Label htmlFor="category">Category *</Label>
         <Select
-          value={form.watch("category")}
-          onValueChange={(value) =>
-            form.setValue("category", value as any, { shouldValidate: true })
-          }
+          value={form.watch("category")?.id || ""}
+          onValueChange={(value) => {
+            const selectedCategory = categories.find((cat) => cat.id === value);
+            if (selectedCategory) {
+              form.setValue(
+                "category",
+                {
+                  id: selectedCategory.id,
+                  name: selectedCategory.name,
+                },
+                { shouldValidate: true }
+              );
+            }
+          }}
         >
-          <SelectTrigger id="category">
-            <SelectValue placeholder="Select a category" />
+          <SelectTrigger id="category" disabled={isLoadingCategories}>
+            <SelectValue
+              placeholder={
+                isLoadingCategories
+                  ? "Loading categories..."
+                  : "Select a category"
+              }
+            />
           </SelectTrigger>
           <SelectContent>
-            {categories.map((category) => (
-              <SelectItem key={category} value={category}>
-                {category}
-              </SelectItem>
-            ))}
+            {categories.length === 0 && !isLoadingCategories ? (
+              <div className="p-2 text-sm text-muted-foreground text-center">
+                No categories found
+              </div>
+            ) : (
+              categories.map((category) => (
+                <SelectItem key={category.id} value={category.id}>
+                  {category.name}
+                </SelectItem>
+              ))
+            )}
           </SelectContent>
         </Select>
         {form.formState.errors.category && (
@@ -143,12 +248,85 @@ export function Step1({ form }: Step1Props) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="location">Location *</Label>
-        <Input
-          id="location"
-          placeholder="e.g., New York, USA"
-          {...form.register("location")}
-        />
+        <Label>Location *</Label>
+        <div className="grid grid-cols-2 gap-4">
+          <Select
+            onValueChange={(value) => {
+              setSelectedState(value);
+            }}
+            value={selectedState || ""}
+            defaultValue={selectedState || ""}
+            disabled={isLoadingStates}
+          >
+            <SelectTrigger className="capitalize">
+              <SelectValue
+                className="capitalize"
+                placeholder={
+                  isLoadingStates ? "Loading states..." : "Select state"
+                }
+              />
+            </SelectTrigger>
+            <SelectContent className="capitalize">
+              {states.filter(
+                (state) => state && typeof state.state_id === "string"
+              ).length > 0 ? (
+                states
+                  .filter(
+                    (state) => state && typeof state.state_id === "string"
+                  )
+                  .map((state, index) => (
+                    <SelectItem
+                      className="capitalize"
+                      key={state.state_id}
+                      value={state.state_id}
+                    >
+                      {state.name}
+                    </SelectItem>
+                  ))
+              ) : (
+                <div className="p-2 text-sm text-muted-foreground text-center">
+                  No states found
+                </div>
+              )}
+            </SelectContent>
+          </Select>
+          <Select
+            onValueChange={(value) => {
+              const selectedLga = lgas.find((lga) => lga.lga_id === value);
+              if (selectedLga) {
+                form.setValue("location", selectedLga.lga_id);
+              }
+            }}
+            value={form.watch("location") || ""}
+            disabled={!selectedState || isLoadingLgas}
+          >
+            <SelectTrigger className="capitalize">
+              <SelectValue
+                placeholder={isLoadingLgas ? "Loading LGAs..." : "Select LGA"}
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {lgas.filter((lga) => lga && typeof lga.lga_id === "string")
+                .length > 0 ? (
+                lgas
+                  .filter((lga) => lga && typeof lga.lga_id === "string")
+                  .map((lga, index) => (
+                    <SelectItem
+                      className="capitalize"
+                      key={lga.lga_id}
+                      value={lga.lga_id}
+                    >
+                      {lga.name}
+                    </SelectItem>
+                  ))
+              ) : (
+                <div className="p-2 text-sm text-muted-foreground text-center">
+                  No LGAs found
+                </div>
+              )}
+            </SelectContent>
+          </Select>
+        </div>
         {form.formState.errors.location && (
           <p className="text-sm text-destructive">
             {form.formState.errors.location.message}

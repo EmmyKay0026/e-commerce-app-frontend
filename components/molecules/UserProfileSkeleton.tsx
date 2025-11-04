@@ -6,7 +6,6 @@ export function UserProfileSkeleton() {
   return (
     <div className="min-h-screen bg-background" aria-hidden="true">
       {/* Cover */}
-      <div className="relative h-48 w-full overflow-hidden bg-gray-200 dark:bg-gray-700 animate-pulse md:h-64" />
 
       <div className="mx-auto max-w-7xl space-y-8 p-6">
         {/* Profile Header */}

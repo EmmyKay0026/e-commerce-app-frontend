@@ -30,7 +30,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { getInitials } from "@/services/user";
+import { getInitials } from "@/services/userService";
 
 export function NavUser({
   user,

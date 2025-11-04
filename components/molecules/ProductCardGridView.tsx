@@ -114,7 +114,7 @@ export function ProductCardGrid({
 
         {/* Price */}
         <div className="text-2xl font-bold text-foreground">
-          {currency}
+          
           {price}
         </div>
 

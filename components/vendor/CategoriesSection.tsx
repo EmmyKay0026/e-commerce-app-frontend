@@ -1,4 +1,4 @@
-import { Card } from "@/components/ui/card";
+// import { Card } from "@/components/ui/card";
 import {
   Smartphone,
   Laptop,
@@ -7,6 +7,7 @@ import {
   Camera,
   Gamepad,
 } from "lucide-react";
+import { Card } from "../ui/card";
 
 const categories = [
   {
