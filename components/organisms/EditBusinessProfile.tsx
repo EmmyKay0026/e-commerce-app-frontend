@@ -84,6 +84,8 @@ function BusinessForm({ className }: React.ComponentProps<"form">) {
   // const rawUser = useUserStore((s) => s.user) as any;
   const setUser = useUserStore((s) => s.setUser);
   const user = useUserStore((s) => s.user);
+  console.log(user);
+
   const altBusName = user?.first_name + "'s business";
   // const user = React.useMemo(
   //   () => (rawUser ? normalizeToUser(rawUser) : null),
@@ -94,7 +96,7 @@ function BusinessForm({ className }: React.ComponentProps<"form">) {
     user?.business_profile?.business_name ?? altBusName ?? "none"
   );
   const [slug, setSlug] = useState<string>(
-    user?.business_profile?.slug ?? "none"
+    user?.business_profile?.slug ?? user?.shop_link ?? "none"
   );
   const [desc, setDesc] = useState<string>(
     user?.business_profile?.description ?? "none"

@@ -5,19 +5,28 @@ import Link from "next/link";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { slugify } from "@/lib/utils";
 import ProductCards from "../molecules/ProductCards";
+// import {
+//   getChildCategories,
+//   getProductsByCategory,
+//   getRootCategories,
+//   hasChildren,
+// } from "@/services/categoryService";
+import { Category, Product } from "@/types/models";
+import { transformProduct } from "@/services/productService";
+import { useCategoryStore } from "@/store/useCategoryStore";
 import {
-  getAllCategories,
   getChildCategories,
   getProductsByCategory,
   getRootCategories,
   hasChildren,
 } from "@/services/categoryService";
-import { Category, Product } from "@/types/models";
-import { transformProduct } from "@/services/productService";
 
 const CategorySection: React.FC = () => {
-  const [allCategories, setAllCategories] = useState<Category[]>([]);
-  const [loadingCats, setLoadingCats] = useState(true);
+  const {
+    categories: allCategories,
+    loading: loadingCats,
+    fetchCategories,
+  } = useCategoryStore();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
     "5d7b7aff-f70b-4c18-b560-efa468844a09"
   );
@@ -29,19 +38,8 @@ const CategorySection: React.FC = () => {
 
   /** Fetch all categories once */
   useEffect(() => {
-    (async () => {
-      try {
-        setLoadingCats(true);
-        const data = await getAllCategories();
-        setAllCategories(data);
-      } catch (e: any) {
-        console.error("getAllCategories error:", e);
-        setError("Failed to load categories");
-      } finally {
-        setLoadingCats(false);
-      }
-    })();
-  }, []);
+    fetchCategories();
+  }, [fetchCategories]);
 
   /** Root categories for sidebar and dropdown */
   const rootCategories = useMemo(() => {
@@ -275,7 +273,7 @@ const CategorySection: React.FC = () => {
               ))}
             </div>
           ) : products.length ? (
-            <div className="grid grid-cols-2 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-2 gap-6 sm:grid-cols-2 lg:grid-.cols-3">
               {products.map((p) => (
                 <ProductCards key={p.id} product={p} />
               ))}

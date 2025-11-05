@@ -111,7 +111,7 @@ const UserProductList = () => {
   // }, [demoWishlist, demoProducts]);
 
   return (
-    <div className="py-[16px] w-full">
+    <div className="py-4 w-full">
       <section className="">
         {/* <article className="flex flex-wrap justify-center lg:justify-start gap-3 px-6">
           <CategoryCardsWithIcon category={demoCategories[0]} />

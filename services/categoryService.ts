@@ -1,5 +1,5 @@
-import type { Category, Product, ServiceResult } from "@/types/models";
 import api from "@/config/api";
+import { Category, Product, ServiceResult } from "@/types/models";
 
 // Extended category type with children for tree structure
 export interface CategoryTree extends Category {

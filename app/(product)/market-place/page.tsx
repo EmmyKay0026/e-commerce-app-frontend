@@ -281,26 +281,24 @@ const MarketPlace = () => {
       </div>
 
       {/* Categories buttons */}
-      <div className="mt-5 text-left flex flex-wrap gap-6">
+      {/* <div className="mt-5 text-left flex flex-wrap gap-6">
         {quickCatList.splice(0, 3).map((cat, i) => (
           <Link
             key={i}
-            // onClick={() => setShowCategories(true)}
             href={`/category/${cat.slug}`}
-            className="flex items-center justify-center cursor-pointer gap-1 hover:text-white  bg-transparent rounded-full  text-white/90"
+            className="flex items-center justify-center cursor-pointer gap-1 hover:text-black  bg-transparent rounded-full  text-black/90"
           >
             <Image
               src={cat.icon ?? cat.image ?? ""}
               alt={cat.name}
               width={20}
               height={20}
-              className="object-cover invert"
+              className="object-cover "
             />
-            {/* <List /> */}
             {cat.name}
           </Link>
         ))}
-      </div>
+      </div> */}
 
       {categories.map((cat) => (
         <div key={cat.id} className="mb-8">

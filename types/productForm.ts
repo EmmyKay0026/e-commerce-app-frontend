@@ -49,11 +49,13 @@ export const productFormSchema = z.object({
   description: z.string().min(10, "Description must be at least 10 characters"),
   price: z.string().min(1, "Price is required"),
   priceType: z
-    .enum(["wholesale", "retail"])
-    .describe("Please select a price type"),
-  priceNegotiable: z
     .enum(["fixed", "negotiable"])
-    .describe("Please indicate if the price is negotiable"),
+    .describe("Please select a price type")
+    .optional(),
+  saleType: z
+    .enum(["wholesale", "retail"])
+    .describe("Please indicate if the price is negotiable")
+    .optional(),
   features: z.string().min(1, "At least one feature is required"),
 });
 

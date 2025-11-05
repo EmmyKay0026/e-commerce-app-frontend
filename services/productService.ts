@@ -383,6 +383,84 @@ export async function listProducts(
   }
 }
 
+/**
+ * Update an existing product for the authenticated vendor
+ */
+export async function updateProduct(
+  productId: string,
+  data: {
+    name: string;
+    description: string;
+    price: string;
+    images: File[];
+    category: {
+      id: string;
+      name: string;
+    };
+    location: string;
+    features: string;
+    price_type: "fixed" | "negotiable" | null;
+    sale_type: "wholesale" | "retail" | null;
+  }
+): Promise<ServiceResult<Product>> {
+  try {
+    // TODO: Handle image uploads if new images are added.
+    // This example assumes image URLs are handled or unchanged.
+    const imageUrls: string[] = [];
+    for (const image of data.images) {
+      if (typeof image === 'string') {
+        imageUrls.push(image);
+      } else {
+        // TODO: Implement image upload to your storage service
+        // const uploadedUrl = await uploadImage(image);
+        // imageUrls.push(uploadedUrl);
+      }
+    }
+
+    const featuresList = data.features
+      .split("|")
+      .map((feature) => feature.trim())
+      .filter(Boolean);
+
+    const productData = {
+      name: data.name,
+      description: data.description,
+      price: data.price,
+      images: imageUrls,
+      category_id: data.category.id,
+      location: data.location,
+      features: featuresList,
+      price_type: data.price_type,
+      sale_type: data.sale_type,
+    };
+
+    const response = await api.patch(`/products/${productId}`, productData);
+
+    if (response.status === 200) {
+      return {
+        success: true,
+        status: response.status,
+        data: response.data,
+      };
+    }
+
+    return {
+      success: false,
+      status: response.status,
+      error: response.data?.message || "Failed to update product",
+      data: null,
+    };
+  } catch (err: any) {
+    console.error("Error updating product:", err);
+    return {
+      success: false,
+      status: err.response?.status || 500,
+      error: err.response?.data?.message || "Failed to update product",
+      data: null,
+    };
+  }
+}
+
 export function transformProduct(product: any): TransformedProduct {
   // Category fallback (to avoid missing fields)
   const category = product.category || {
@@ -432,12 +510,14 @@ export async function createProduct(data: {
   };
   location: string;
   features: string;
-  priceType: "wholesale" | "retail";
-  priceNegotiable: "fixed" | "negotiable";
+  price_type: "fixed" | "negotiable" | null;
+  sale_type: "wholesale" | "retail" | null;
 }): Promise<ServiceResult<Product>> {
   try {
     // First, upload all images and get their URLs
-    const imageUrls: string[] = [];
+    const imageUrls: string[] = [
+      "https://cdn.pixabay.com/photo/2014/09/13/21/46/milling-444493_1280.jpg",
+    ];
     for (const image of data.images) {
       // TODO: Implement image upload to your storage service
       // const uploadedUrl = await uploadImage(image);
@@ -459,10 +539,8 @@ export async function createProduct(data: {
       category_id: data.category.id,
       location: data.location,
       features: featuresList,
-      metadata: {
-        priceType: data.priceType,
-        priceNegotiable: data.priceNegotiable,
-      },
+      price_type: data.price_type,
+      sale_type: data.sale_type,
     };
 
     const response = await api.post("/products", productData);
