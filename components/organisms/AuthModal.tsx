@@ -39,34 +39,6 @@ const AuthModal = () => {
     setLoading(false);
   };
 
-  // async function signUpWithPassword(email, password, firstName, lastName) {
-  //   const { data, error } = await supabase.auth.signUp({
-  //     email: email,
-  //     password: password,
-  //     options: {
-  //       // 💡 Crucial: Pass the name data here!
-  //       data: {
-  //         first_name: firstName,
-  //         last_name: lastName,
-  //         // We can also combine these into a full_name for consistency
-  //         full_name: `${firstName} ${lastName}`,
-  //       },
-  //       // Specify the URL the user is redirected to after email confirmation
-  //       emailRedirectTo: 'http://localhost:3000/welcome'
-  //     }
-  //   });
-
-  //   if (error) {
-  //     console.error('Sign-Up Error:', error.message);
-  //     return { success: false, error };
-  //   }
-
-  //   // NOTE: If you have email confirmation enabled, the user is created
-  //   // but they won't have a session until they click the link in their email.
-  //   console.log('User created successfully. Check email for confirmation link.');
-  //   return { success: true, data };
-  // }
-
   const handleGoogleLogin = async () => {
     setLoading(true);
     setMessage("");
@@ -110,7 +82,6 @@ const AuthModal = () => {
       <div className=" bg-white overflow-y-auto  max-h-screen shadow-xl rounded-2xl  ">
         <div className="w-full min-w-md  p-8">
           <span className="flex justify-between items-center mb-4">
-            <span></span>
             <X onClick={() => toogle()} className="cursor-pointer text-right" />
           </span>
           <h2 className="text-2xl font-semibold text-center mb-6">

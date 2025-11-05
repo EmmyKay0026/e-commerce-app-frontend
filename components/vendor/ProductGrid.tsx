@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ProductCardCompact } from "../templates/ProductCardCompact";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowUpDown,
   List,
@@ -29,16 +29,43 @@ import { ProductCardGridViewSkeleton } from "../molecules/ProductCardGridViewSke
 import { ProductCardGrid } from "../molecules/ProductCardGridView";
 import { ProductCardListViewSkeleton } from "../molecules/ProductCardListViewSkeleton";
 import { ProductCardList } from "../molecules/ProductCardListView";
-import { User } from "@/types/models";
+import { BusinessProfile, Product, User } from "@/types/models";
 import ProductCards from "../molecules/ProductCards";
 import ProductList from "../molecules/ProductList";
+import { getBusinessProducts } from "@/services/productService";
 // import { ProductCardCompact } from "@/components/product-card-compact";
 
-export function ProductsGrid({ vendor }: { vendor: User }) {
+export function ProductsGrid({
+  vendor,
+}: {
+  vendor: BusinessProfile & { user: User };
+}) {
   const [isActive, setIsActive] = useState<"grid" | "list">("list");
   const [showSearch, setShowSearch] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>("");
   const [isPageLoading, setIsPageLoading] = useState<boolean>(false);
+  const [businessProducts, setBusinessProducts] = useState<Product[] | null>(
+    null
+  );
+
+  useEffect(() => {
+    const getBusniessProducts = async () => {
+      if (!vendor || !vendor.id) return;
+      setIsPageLoading(true);
+
+      const res = await getBusinessProducts(vendor.id);
+      if (res.success && res.data) {
+        // console.log(res.data);
+
+        setBusinessProducts(res.data.data);
+      }
+      // console.log(res);
+      setIsPageLoading(false);
+    };
+
+    getBusniessProducts();
+  }, []);
+
   return (
     <section id="products" className="px-2 lg:px-8 py-16 md:py-24">
       <div className="container mx-auto px-4">
@@ -50,20 +77,6 @@ export function ProductsGrid({ vendor }: { vendor: User }) {
             Explore our complete catalog of premium electronics and gadgets
           </p>
         </div>
-
-        {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {products.map((product) => (
-            <ProductCardCompact
-              title={""}
-              estimatedDelivery={""}
-              soldCount={0}
-              key={product.id}
-              {...product}
-              id={product.id.toString()}
-              price={product.price.replace("₦", "") as unknown as number}
-            />
-          ))}
-        </div> */}
 
         <article className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -135,7 +148,7 @@ export function ProductsGrid({ vendor }: { vendor: User }) {
         </article>
 
         <section className="">
-          {demoProducts.length === 0 && (
+          {businessProducts?.length === 0 && (
             <Empty className="border border-dashed">
               <EmptyHeader>
                 <EmptyMedia variant="icon">
@@ -144,7 +157,7 @@ export function ProductsGrid({ vendor }: { vendor: User }) {
                 <EmptyTitle>
                   {`
                       ${
-                        vendor?.vendorProfile?.businessName || vendor?.fullName
+                        vendor?.business_name || vendor?.user.first_name
                       }'s store is empty`}
                 </EmptyTitle>
                 <EmptyDescription>
@@ -160,38 +173,23 @@ export function ProductsGrid({ vendor }: { vendor: User }) {
           )}
           {isActive === "grid" ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-6">
-              {demoProducts.length > 0 &&
-                demoProducts.map((product) =>
+              {businessProducts &&
+                businessProducts?.length > 0 &&
+                businessProducts?.map((product) =>
                   isPageLoading ? (
-                    <ProductCardGridViewSkeleton />
+                    <ProductCardGridViewSkeleton key={product.id} />
                   ) : (
                     <ProductCards key={product.id} product={product} />
-                    // <ProductCardGrid
-                    //   id={product.id}
-                    //   key={product.id}
-                    //   name={product?.name!}
-                    //   description={product?.description!}
-                    //   price={product?.price!}
-                    //   image={product?.images[0]!}
-                    //   estimatedDelivery={""}
-                    //   minOrder={0}
-                    //   soldCount={0}
-                    //   supplier={{
-                    //     name: "",
-                    //     yearsActive: 0,
-                    //     country: "",
-                    //     countryCode: "",
-                    //   }}
-                    // />
                   )
                 )}
             </div>
           ) : (
             <div className="flex flex-col gap-4 p-6">
-              {demoProducts.length > 0 &&
-                demoProducts.map((product) =>
+              {businessProducts &&
+                businessProducts?.length > 0 &&
+                businessProducts.map((product) =>
                   isPageLoading ? (
-                    <ProductCardListViewSkeleton />
+                    <ProductCardListViewSkeleton key={product.id} />
                   ) : (
                     <ProductList key={product.id} product={product} />
                     // <ProductCardList

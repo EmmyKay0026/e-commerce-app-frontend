@@ -1,14 +1,31 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { listProducts } from "@/services/productService";
+import type { Product } from "@/types/models";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, User, List, Menu } from "lucide-react";
+import {
+  Search,
+  User,
+  List,
+  Menu,
+  Accessibility,
+  Store,
+  Bookmark,
+  Settings,
+  LogOut,
+} from "lucide-react";
 import CategoriesModal from "./CategoriesModal";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import MobileBottomNav from "./SubNav";
+import { useUserStore } from "@/store/useUserStore";
+import { useAuthModal } from "@/store/useAuthModal";
+import { toast } from "sonner";
+import { supabase } from "@/config/supabase";
 
 export default function Navbar() {
   const [showSearch, setShowSearch] = useState(false);
@@ -20,6 +37,15 @@ export default function Navbar() {
   const [showSecondaryNav, setShowSecondaryNav] = useState(true);
   const isMobile = useIsMobile();
   const listRef = useRef<HTMLDivElement | null>(null);
+  const debounceRef = useRef<number | null>(null);
+  const searchRef = useRef<HTMLDivElement | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const user = useUserStore((state) => state.user);
+  const setIsOpen = useAuthModal((state) => state.setIsOpen);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const router = useRouter();
+  const [searchResults, setSearchResults] = useState<Product[] | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -34,6 +60,43 @@ export default function Navbar() {
     }
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showList]);
+
+  // cleanup debounce on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) window.clearTimeout(debounceRef.current);
+      if (abortControllerRef.current) abortControllerRef.current.abort();
+    };
+  }, []);
+
+  // logout handler
+  const handleLogout = async () => {
+    toast("");
+
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      toast(error.message);
+    } else {
+      toast("✅ Logged out successfully!");
+      setIsOpen(true);
+      // optional: close modal (if this modal is open) or redirect
+      // toogle(); // uncomment to close the modal
+      window.location.href = "/"; // uncomment to redirect after logout
+    }
+  };
+  // close search results when clicking outside the search area
+  useEffect(() => {
+    const handleOutside = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setSearchResults(null);
+      }
+    };
+    if (searchResults && searchResults.length > 0) {
+      document.addEventListener("mousedown", handleOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, [searchResults]);
 
   useEffect(() => {
     if (isMobile) return;
@@ -67,6 +130,63 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const handleDebouncedSearch = (query: string) => {
+    // clear previous debounce
+    if (debounceRef.current) {
+      window.clearTimeout(debounceRef.current);
+    }
+
+    // short-circuit empty queries
+    if (!query || query.trim().length === 0) {
+      setSearchResults(null);
+      setIsSearching(false);
+      return;
+    }
+
+    // debounce network requests
+    // using window.setTimeout so it returns number
+    debounceRef.current = window.setTimeout(async () => {
+      // abort previous request if any
+      if (abortControllerRef.current) {
+        try {
+          abortControllerRef.current.abort();
+        } catch {}
+        abortControllerRef.current = null;
+      }
+
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
+      setIsSearching(true);
+      try {
+        const res = await listProducts({
+          q: query,
+          perPage: 8,
+          signal: controller.signal,
+        });
+        if (res.success && res.data) {
+          setSearchResults(res.data.products || []);
+        } else {
+          // no results or error - clear results and optionally log
+          setSearchResults([]);
+          console.warn("Search error:", res.error);
+        }
+      } catch (err: any) {
+        if (err.name === "CanceledError" || err.name === "AbortError") {
+          // request was aborted — ignore
+          return;
+        }
+        console.error("Search request failed:", err);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+        // clear controller if it's still the same
+        if (abortControllerRef.current === controller)
+          abortControllerRef.current = null;
+      }
+    }, 350);
+  };
+
   return (
     <nav className="sticky top-0 left-0 w-full border-b bg-transparent px-0 mx-0 border-none z-50 shadow-sm transition-colors">
       <div className="w-full">
@@ -76,14 +196,15 @@ export default function Navbar() {
             {/* Top Bar */}
             <div className="w-full bg-white flex justify-between z-50 py-2 px-16">
               {/* Logo */}
-              <div className="relative w-32 h-10 cursor-pointer">
+              <Link href={"/"} className="relative w-40 h-15 cursor-pointer">
                 <Image
                   src="/ind_logo.png"
                   alt="IndustrialMart"
-                  fill
-                  className="object-cover"
+                  width={100}
+                  height={100}
+                  className="object-cover w-full h-full"
                 />
-              </div>
+              </Link>
 
               {/* Search Bar (shows on scroll) */}
               <div className="flex items-center gap-3">
@@ -96,13 +217,107 @@ export default function Navbar() {
                     }}
                     exit={{ opacity: 0, y: -5 }}
                     transition={{ duration: 0.3, ease: "easeOut" }}
-                    className="hidden md:flex items-center bg-white rounded-full overflow-hidden shadow-sm border border-gray-200 pl-2 pr-0 w-[300px]"
+                    className="hidden md:flex items-center bg-white rounded-full overflow-hidden  border-[0.5px] border-[#007bff] pl-2 pr-0 w-[300px] "
+                    ref={searchRef}
                   >
                     <Input
+                      value={searchQuery}
+                      onChange={(e) => {
+                        const q = e.target.value;
+                        setSearchQuery(q);
+                        handleDebouncedSearch(q);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          const q = (e.currentTarget as HTMLInputElement).value;
+                          router.push(
+                            `/market-place?q=${encodeURIComponent(q)}`
+                          );
+                          setSearchResults(null);
+                        }
+                      }}
                       placeholder="Search industrial products..."
                       className="border-none outline-none shadow-none focus:ring-0 focus-visible:ring-0"
                     />
-                    <Search className="text-white bg-secondary ml-2 h-9 p-2 w-10 rounded-full" />
+                    <Search className="text-[#c0ab87] sbg-secondary ml-2 h-9 p-2 w-10 rounded-full" />
+
+                    {/* Results dropdown (desktop) */}
+                    {searchResults !== null && (
+                      <div className="absolute left-0 top-[10vh] mt-2 w-full bg-white rounded-b-lg shadow-lg z-50 max-h-64 overflow-auto">
+                        {isSearching ? (
+                          <div className="p-3">
+                            <ul className="divide-y">
+                              {Array.from({ length: 4 }).map((_, i) => (
+                                <li key={i} className="px-3 py-2">
+                                  <div className="flex items-center gap-3">
+                                    <div className="h-10 w-10 bg-gray-200 rounded overflow-hidden flex-shrink-0 animate-pulse" />
+                                    <div className="flex-1">
+                                      <div className="h-3 bg-gray-200 rounded w-2/3 mb-2 animate-pulse" />
+                                      <div className="h-2 bg-gray-200 rounded w-1/3 animate-pulse" />
+                                    </div>
+                                  </div>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ) : searchResults.length === 0 ? (
+                          <div className="p-3 text-sm text-muted-foreground">
+                            No results
+                          </div>
+                        ) : (
+                          <>
+                            <ul className="divide-y">
+                              {searchResults.slice(0, 6).map((p) => (
+                                <li
+                                  key={p.id}
+                                  className="px-3 py-2 hover:bg-gray-50"
+                                >
+                                  <Link
+                                    href={`/products/${p.id}`}
+                                    className="flex items-center gap-3"
+                                  >
+                                    <div className="h-10 w-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                                      {p.images && p.images[0] ? (
+                                        <Image
+                                          src={p.images[0]}
+                                          alt={p.name}
+                                          width={40}
+                                          height={40}
+                                          className="h-full w-full object-cover"
+                                        />
+                                      ) : (
+                                        <div className="h-full w-full flex items-center justify-center text-xs text-muted-foreground">
+                                          No image
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="flex-1 text-sm">
+                                      <div className="font-medium text-foreground">
+                                        {p.name}
+                                      </div>
+                                      <div className="text-xs text-muted-foreground">
+                                        {p.price} Lagos, Nigeria
+                                      </div>
+                                    </div>
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
+
+                            <div className="p-2 border-t text-center">
+                              <Link
+                                href={`/products?q=${encodeURIComponent(
+                                  searchQuery || ""
+                                )}`}
+                                className="text-sm font-medium text-primary"
+                              >
+                                See all results
+                              </Link>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </motion.div>
                 )}
               </div>
@@ -111,13 +326,18 @@ export default function Navbar() {
               <div className="flex justify-between items-center gap-6 relative">
                 <ul className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-700">
                   <li className="hover:text-secondary transition-colors cursor-pointer">
-                    About us
+                    <Link href="/about-us">About us</Link>
                   </li>
                   <li className="hover:text-secondary transition-colors cursor-pointer">
-                    <Link href="/market-place">Market Place</Link>
+                    <Link href="/market-place">Marketplace</Link>
                   </li>
                   <li className="hover:text-secondary transition-colors cursor-pointer">
-                    Contact Us
+                    <Link
+                      onClick={user ? () => {} : () => setIsOpen(true)}
+                      href={user ? "/sell" : "#"}
+                    >
+                      Start selling
+                    </Link>
                   </li>
                 </ul>
 
@@ -126,7 +346,7 @@ export default function Navbar() {
                   className="relative"
                 >
                   <Button className="bg-white hover:bg-gray-200 cursor-pointer text-black px-5 rounded-full transition-all flex items-center gap-2">
-                    <User /> Sign in/Register
+                    <User /> {user ? "Account" : "Sign in/Register"}
                   </Button>
                 </div>
               </div>
@@ -153,7 +373,7 @@ export default function Navbar() {
                     href="/market-place"
                     className="cursor-pointer hover:text-gray-200"
                   >
-                    Market Place
+                    Marketplace
                   </Link>
                 </motion.div>
               )}
@@ -208,7 +428,7 @@ export default function Navbar() {
                     <List className="w-4 h-4" />
                     <span>Categories</span>
                   </div>
-                  <span className="cursor-pointer">Market Place</span>
+                  <span className="cursor-pointer">Marketplace</span>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -234,26 +454,110 @@ export default function Navbar() {
             >
               ✕
             </Button>
-            <div className="flex items-center px-4 pt-4">
-              <User className="text-gray-900 bg-gray-300 h-10 p-2 mr-2 w-10 rounded-full" />
-              <Button
-                onClick={() => {
-                  // close dropdown and open global sign-in modal
-                  setShowList(false);
-                  if (typeof window !== "undefined") {
-                    window.dispatchEvent(new CustomEvent("open-signin-modal"));
-                  }
-                }}
-                className="bg-white hover:bg-gray-200 cursor-pointer text-black px-3 rounded-full transition-all"
+            {user ? (
+              <div className="relative w-full">
+                <Button className="bg-white hover:bg-transparent   cursor-pointer text-black px-5 rounded mx-2 transition-all flex items-center gap-2">
+                  <Image
+                    alt={user.first_name}
+                    src={user.profile_picture ?? "/user.png"}
+                    width={50}
+                    height={50}
+                    className="object-cover rounded-full w-10 h-10"
+                  />{" "}
+                  {user.first_name}
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center px-4 pt-4">
+                <User className="text-gray-900 bg-gray-300 h-10 p-2 mr-2 w-10 rounded-full" />
+                <Button
+                  onClick={() => {
+                    // close dropdown and open global sign-in modal
+                    setShowList(false);
+                    setIsOpen(true);
+                  }}
+                  className="bg-white hover:bg-gray-200 cursor-pointer text-black px-3 rounded-full transition-all"
+                >
+                  Sign in/Register
+                </Button>
+              </div>
+            )}
+            <ul className="flex flex-col text-sm text-gray-800 p-4 mt-3 space-y-6">
+              <li
+                onClick={user ? () => {} : () => setIsOpen(true)}
+                className="hover:text-secondary cursor-pointer"
               >
-                Sign in/Register
-              </Button>
-            </div>
-            <div className="flex flex-col text-sm text-gray-800 p-4 space-y-3">
-              <p className="hover:text-secondary cursor-pointer">My account</p>
-              <p className="hover:text-secondary cursor-pointer">Saved items</p>
-              <p className="hover:text-secondary cursor-pointer">Settings</p>
-            </div>
+                <Link
+                  className="flex gap-2"
+                  href={user ? `/user/${user.id}/profile` : "#"}
+                >
+                  <User className="w-5 h-5" />
+                  My account
+                </Link>
+              </li>
+              {!user || user.role === "user" ? (
+                <li
+                  onClick={user ? () => {} : () => setIsOpen(true)}
+                  className="hover:text-secondary cursor-pointer"
+                >
+                  <Link
+                    className="flex gap-2"
+                    onClick={user ? () => {} : () => setIsOpen(true)}
+                    href={user ? "/sell" : "#"}
+                  >
+                    <Store className="w-5 h-5" />
+                    Start selling
+                  </Link>
+                </li>
+              ) : (
+                <li
+                  onClick={user ? () => {} : () => setIsOpen(true)}
+                  className="hover:text-secondary cursor-pointer"
+                >
+                  <Link
+                    className="flex gap-2"
+                    href={user ? `/shop/${user.shop_link}` : "#"}
+                  >
+                    <Store className="w-5 h-5" />
+                    My shop
+                  </Link>
+                </li>
+              )}
+
+              <li
+                onClick={user ? () => {} : () => setIsOpen(true)}
+                className="hover:text-secondary cursor-pointer"
+              >
+                <Link
+                  className="flex gap-2"
+                  href={user ? `/user/${user.id}/saved` : "#"}
+                >
+                  <Bookmark className="w-5 h-5" />
+                  Saved items
+                </Link>
+              </li>
+              <li
+                onClick={user ? () => {} : () => setIsOpen(true)}
+                className="hover:text-secondary cursor-pointer"
+              >
+                <Link
+                  className="flex gap-2"
+                  href={user ? `/user/settings` : "#"}
+                >
+                  <Settings className="w-5 h-5" />
+                  Settings
+                </Link>
+              </li>
+              {user && (
+                <li
+                  onClick={() => handleLogout()}
+                  className="hover:text-secondary cursor-pointer flex gap-2"
+                >
+                  <LogOut className="w-5 h-5" />
+                  Logout
+                </li>
+              )}
+            </ul>
           </motion.div>
         )}
       </AnimatePresence>
@@ -272,15 +576,19 @@ export default function Navbar() {
             <Button
               variant="ghost"
               onClick={() => setShowMenu(false)}
-              className="text-gray-700 w-full text-xl font-bold"
+              className="flex justify-end text-gray-700 w-full text-xl font-bold"
             >
               ✕
             </Button>
-            <div className="flex flex-col text-sm text-gray-800 p-4 space-y-3">
-              <p className="hover:text-secondary cursor-pointer">ABOUT US</p>
-              <p className="hover:text-secondary cursor-pointer">PRODUCTS</p>
-              <p className="hover:text-secondary cursor-pointer">CONTACT US</p>
-            </div>
+            <ul className="flex flex-col text-sm text-gray-800 p-4 space-y-3">
+              <li className="hover:text-secondary cursor-pointer">About us</li>
+              <li className="hover:text-secondary cursor-pointer">
+                Marketplace
+              </li>
+              <li className="hover:text-secondary cursor-pointer">
+                Start selling
+              </li>
+            </ul>
           </motion.div>
         )}
       </AnimatePresence>
@@ -297,6 +605,20 @@ export default function Navbar() {
           >
             <Search className="text-gray-800 w-5 h-5" />
             <Input
+              value={searchQuery}
+              onChange={(e) => {
+                const q = e.target.value;
+                setSearchQuery(q);
+                handleDebouncedSearch(q);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  const q = (e.currentTarget as HTMLInputElement).value;
+                  router.push(`/market-place?q=${encodeURIComponent(q)}`);
+                  setSearchResults(null);
+                  setMobileSearch(false);
+                }
+              }}
               placeholder="Search industrial products..."
               className="border-none outline-none shadow-none focus:ring-0 flex-1"
             />
@@ -307,6 +629,79 @@ export default function Navbar() {
             >
               ✕
             </Button>
+            {searchResults !== null && (
+              <div className="absolute left-0 top-[6vh] mt-2 w-full bg-white rounded-b-lg shadow-lg z-50 max-h-64 overflow-auto">
+                {isSearching ? (
+                  <div className="p-3">
+                    <ul className="divide-y">
+                      {Array.from({ length: 4 }).map((_, i) => (
+                        <li key={i} className="px-3 py-2">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 bg-gray-200 rounded overflow-hidden flex-shrink-0 animate-pulse" />
+                            <div className="flex-1">
+                              <div className="h-3 bg-gray-200 rounded w-2/3 mb-2 animate-pulse" />
+                              <div className="h-2 bg-gray-200 rounded w-1/3 animate-pulse" />
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : searchResults.length === 0 ? (
+                  <div className="p-3 text-sm text-muted-foreground">
+                    No results
+                  </div>
+                ) : (
+                  <>
+                    <ul className="divide-y">
+                      {searchResults.slice(0, 6).map((p) => (
+                        <li key={p.id} className="px-3 py-2 hover:bg-gray-50">
+                          <Link
+                            href={`/products/${p.id}`}
+                            className="flex items-center gap-3"
+                          >
+                            <div className="h-10 w-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                              {p.images && p.images[0] ? (
+                                <Image
+                                  src={p.images[0]}
+                                  alt={p.name}
+                                  width={40}
+                                  height={40}
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                <div className="h-full w-full flex items-center justify-center text-xs text-muted-foreground">
+                                  No image
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex-1 text-sm">
+                              <div className="font-medium text-foreground">
+                                {p.name}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {p.price} Lagos, Nigeria
+                              </div>
+                            </div>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <div className="p-2 border-t text-center">
+                      <Link
+                        href={`/products?q=${encodeURIComponent(
+                          searchQuery || ""
+                        )}`}
+                        className="text-sm font-medium text-primary"
+                      >
+                        See all results
+                      </Link>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

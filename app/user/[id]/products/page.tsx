@@ -28,7 +28,10 @@ import {
   demoProducts,
   demoWishlist,
 } from "@/constants/product";
+import { getBusinessProducts } from "@/services/productService";
+import { getPublicProfile } from "@/services/userService";
 import { useUserStore } from "@/store/useUserStore";
+import { Product } from "@/types/models";
 import { PopoverClose } from "@radix-ui/react-popover";
 import {
   ArrowUpDown,
@@ -55,6 +58,9 @@ const UserProductList = () => {
   const [showSearch, setShowSearch] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>("");
   const [isPageLoading, setIsPageLoading] = useState<boolean>(false);
+  const [businessProducts, setBusinessProducts] = useState<Product[] | null>(
+    null
+  );
 
   useEffect(() => {
     if (!id) {
@@ -62,10 +68,33 @@ const UserProductList = () => {
       return;
     }
 
-    if (!isOwner) {
-      router.push(`/user/${id}/profile`);
-      return;
-    }
+    // if (!isOwner) {
+    //   router.push(`/user/${id}/profile`);
+    //   return;
+    // }
+  }, []);
+  useEffect(() => {
+    const getBusniessProducts = async () => {
+      if (!id) return;
+      setIsPageLoading(true);
+
+      const userRes = await getPublicProfile(id?.toString());
+      const userDetails = userRes.data;
+
+      if (!userDetails || !userDetails?.business_profile) return;
+      console.log(userDetails?.business_profile);
+
+      const res = await getBusinessProducts(userDetails?.business_profile?.id!);
+      if (res.success && res.data) {
+        // console.log(res.data);
+
+        setBusinessProducts(res.data.data);
+      }
+      // console.log(res);
+      setIsPageLoading(false);
+    };
+
+    getBusniessProducts();
   }, []);
 
   // const [fullWishlist, setFullWishlist] =
@@ -84,11 +113,11 @@ const UserProductList = () => {
   return (
     <div className="py-[16px] w-full">
       <section className="">
-        <article className="flex flex-wrap justify-center lg:justify-start gap-3 px-6">
+        {/* <article className="flex flex-wrap justify-center lg:justify-start gap-3 px-6">
           <CategoryCardsWithIcon category={demoCategories[0]} />
           <CategoryCardsWithIcon category={demoCategories[1]} />
           <CategoryCardsWithIcon category={demoCategories[2]} />
-        </article>
+        </article> */}
         {/* <article className="flex items-center gap-2 pt-2 justify-between px-6">
           <h1 className="text-2xl font-bold">Products on sale</h1>
           <Settings className="mt-1 cursor-pointer" />
@@ -170,7 +199,7 @@ const UserProductList = () => {
                   value={searchValue}
                   onChange={(e) => setSearchValue(e.target.value)}
                 />
-                <button
+                {/* <button
                   type="button"
                   className="p-2"
                   onClick={() => setShowSearch((prev) => !prev)}
@@ -180,10 +209,10 @@ const UserProductList = () => {
                   ) : (
                     <Search className="h-5 w-5 text-gray-500 cursor-pointer hover:text-black" />
                   )}
-                </button>
+                </button> */}
               </div>
 
-              <Popover>
+              {/* <Popover>
                 <PopoverTrigger className="flex items-center gap-2 border rounded px-3 py-2 cursor-pointer">
                   Sort <ArrowUpDown className="text-md" />
                 </PopoverTrigger>
@@ -203,14 +232,14 @@ const UserProductList = () => {
                     )}
                   </div>
                 </PopoverContent>
-              </Popover>
+              </Popover> */}
             </article>
             {/* <div className=""></div> */}
           </article>
         </div>
       </section>
       <section className="">
-        {demoProducts.length === 0 && (
+        {businessProducts?.length === 0 && (
           <Empty className="border border-dashed">
             <EmptyHeader>
               <EmptyMedia variant="icon">
@@ -236,8 +265,9 @@ const UserProductList = () => {
         )}
         {isActive === "grid" ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-6">
-            {demoProducts.length > 0 &&
-              demoProducts.map((product) =>
+            {businessProducts &&
+              businessProducts?.length > 0 &&
+              businessProducts?.map((product) =>
                 isPageLoading ? (
                   <ProductCardGridViewSkeleton />
                 ) : (
@@ -247,8 +277,9 @@ const UserProductList = () => {
           </div>
         ) : (
           <div className="flex flex-col gap-4 p-6">
-            {demoProducts.length > 0 &&
-              demoProducts.map((product) =>
+            {businessProducts &&
+              businessProducts?.length > 0 &&
+              businessProducts?.map((product) =>
                 isPageLoading ? (
                   <ProductCardListViewSkeleton />
                 ) : (

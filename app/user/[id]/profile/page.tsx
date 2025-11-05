@@ -34,25 +34,32 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!id) return;
 
-    let cancelled = false;
+    const result = updateIsOwner(id.toString());
 
-    const ensureOwner = async () => {
-      // updateIsOwner may be sync or return a promise; handle both safely
-      const result = updateIsOwner(id.toString());
-      // treat result as any to safely check for a thenable without incorrect type comparisons
-      if (result != null && typeof (result as any).then === "function") {
-        await (result as unknown as Promise<unknown>);
-      }
-      if (cancelled) return;
-      // no further action needed — the store updateIsOwner handles state
-    };
+    console.log("Result of ownership check:", result);
+  }, []);
+  // useEffect(() => {
+  //   if (!id) return;
 
-    ensureOwner();
+  //   let cancelled = false;
 
-    return () => {
-      cancelled = true;
-    };
-  }, [id, updateIsOwner]);
+  //   const ensureOwner = async () => {
+  //     // updateIsOwner may be sync or return a promise; handle both safely
+  //     const result = updateIsOwner(id.toString());
+  //     // treat result as any to safely check for a thenable without incorrect type comparisons
+  //     if (result != null && typeof (result as any).then === "function") {
+  //       await (result as unknown as Promise<unknown>);
+  //     }
+  //     if (cancelled) return;
+  //     // no further action needed — the store updateIsOwner handles state
+  //   };
+
+  //   ensureOwner();
+
+  //   return () => {
+  //     cancelled = true;
+  //   };
+  // }, [id, updateIsOwner]);
 
   useEffect(() => {
     const fetchViewedUser = async () => {
@@ -61,6 +68,8 @@ export default function DashboardPage() {
         router.push("/404");
         return;
       }
+      console.log("fetch user:", user);
+
       setViewedUser(user.data ?? null);
     };
 
@@ -68,7 +77,7 @@ export default function DashboardPage() {
   }, []);
 
   // Loading or unknown ownership state
-  if (isOwner === "unknown" || viewedUser === null) {
+  if (isOwner === "unknown" || viewedUser == null) {
     return <UserProfileSkeleton />;
   }
 
@@ -97,7 +106,7 @@ export default function DashboardPage() {
       <UserDashboard
         viewedUser={viewedUser}
         currentUser={currentUser ?? undefined}
-        products={demoProducts}
+        // products={demoProducts}
         isLoggedIn={!!currentUser}
       />
     </main>

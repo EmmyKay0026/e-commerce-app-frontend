@@ -11,8 +11,22 @@ export const slugify = (str: string) => {
 };
 
 export const convertToCustomFormat = (dateString: string | any) => {
-  const date = new Date(dateString);
+  // Normalize string like "2025-10-16T21:32:06.754701+00:00" to milliseconds precision
+
+  let ds = dateString;
+
+  if (typeof ds === "string") {
+    // Replace fractional seconds longer than 3 digits with only 3 digits (milliseconds)
+    ds = ds.replace(/\.(\d{3})\d+/, ".$1");
+  }
+
+  const date = new Date(ds);
+
+  if (isNaN(date.getTime())) return null; // invalid date input
+
   const day = String(date.getDate()).padStart(2, "0");
+  // console.log(day);
+
   const dayNumber = date.getDate();
   const suffix =
     dayNumber === 1 || dayNumber === 21 || dayNumber === 31
@@ -31,9 +45,10 @@ export const convertToCustomFormat = (dateString: string | any) => {
   const period = Number(hours) >= 12 ? "PM" : "AM";
   const hour12 = Number(hours) % 12 || 12; // Convert to 12-hour format, with 12 instead of 0
   const dayOfWeek = date.toLocaleDateString("en-US", { weekday: "long" }); // Get day of the week
-  const shortDayOfWeek = date.toLocaleDateString("en-US", { weekday: "short" }); // Get day of the week
+  const shortDayOfWeek = date.toLocaleDateString("en-US", { weekday: "short" }); // Get short day of week
   const monthOfYear = date.toLocaleDateString("en-US", { month: "long" }); // Get full month name
-  const shortMonthOfYear = date.toLocaleDateString("en-US", { month: "short" }); // Get full month name
+  const shortMonthOfYear = date.toLocaleDateString("en-US", { month: "short" }); // Get short month name
+  // console.log(shortMonthOfYear);
 
   return {
     day,

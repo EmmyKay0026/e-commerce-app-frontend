@@ -18,18 +18,28 @@ export default function ProductCard({ product }: { product: Product }) {
 
       <div className="p-3 sm:p-4">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-gray-500">Listed {product.listedDaysAgo ?? 0} days ago</span>
+          <span className="text-sm text-gray-500">
+            Listed {product.listedDaysAgo ?? 0} days ago
+          </span>
           {product.tags?.length ? (
-            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">{product.tags[0]}</span>
+            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+              {product.tags[0]}
+            </span>
           ) : null}
         </div>
 
-        <h3 className="text-sm font-semibold text-gray-900 line-clamp-2">{product.title}</h3>
+        <h3 className="text-sm font-semibold text-gray-900 line-clamp-2">
+          {product.title}
+        </h3>
 
         <div className="mt-3 flex items-center justify-between">
           <div>
-            <div className="text-green-700 font-bold">{product.priceLabel ?? `₦${product.price.toLocaleString()}`}</div>
-            <div className="text-xs text-gray-500 mt-1">{product.location ?? "Unknown"}</div>
+            <div className="text-green-700 font-bold">
+              {product.priceLabel ?? `${product.price.toLocaleString()}`}
+            </div>
+            <div className="text-xs text-gray-500 mt-1">
+              {product.location ?? "Unknown"}
+            </div>
           </div>
         </div>
       </div>

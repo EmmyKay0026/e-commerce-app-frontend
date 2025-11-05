@@ -15,21 +15,52 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Upload, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
+import { Category } from "@/types/models";
+import { toast } from "sonner";
+import { getAllCategories } from "@/services/categoryService";
 
 interface Step1Props {
   form: UseFormReturn<ProductFormData>;
 }
 
-const categories = ["Electronics", "Furniture", "Clothing"];
-
 export function Step1({ form }: Step1Props) {
   const [imagePreviews, setImagePreviews] = useState<ImagePreview[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const result = await getAllCategories();
+        if (Array.isArray(result)) {
+          setCategories(result);
+        } else {
+          toast.error("Failed to load categories");
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        toast.error("Could not load categories. Please try again.");
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
+
+    const currentImages = form.getValues("images") || [];
+    const totalImages = currentImages.length + files.length;
+
+    if (totalImages > 15) {
+      toast.error("Maximum 15 images allowed");
+      return;
+    }
 
     const newPreviews: ImagePreview[] = files.map((file) => ({
       file,
@@ -38,7 +69,6 @@ export function Step1({ form }: Step1Props) {
 
     setImagePreviews((prev) => [...prev, ...newPreviews]);
 
-    const currentImages = form.getValues("images") || [];
     form.setValue("images", [...currentImages, ...files], {
       shouldValidate: true,
     });
@@ -119,20 +149,42 @@ export function Step1({ form }: Step1Props) {
       <div className="space-y-2">
         <Label htmlFor="category">Category *</Label>
         <Select
-          value={form.watch("category")}
-          onValueChange={(value) =>
-            form.setValue("category", value as any, { shouldValidate: true })
-          }
+          value={form.watch("category")?.id || ""}
+          onValueChange={(value) => {
+            const selectedCategory = categories.find((cat) => cat.id === value);
+            if (selectedCategory) {
+              form.setValue(
+                "category",
+                {
+                  id: selectedCategory.id,
+                  name: selectedCategory.name,
+                },
+                { shouldValidate: true }
+              );
+            }
+          }}
         >
-          <SelectTrigger id="category">
-            <SelectValue placeholder="Select a category" />
+          <SelectTrigger id="category" disabled={isLoadingCategories}>
+            <SelectValue
+              placeholder={
+                isLoadingCategories
+                  ? "Loading categories..."
+                  : "Select a category"
+              }
+            />
           </SelectTrigger>
           <SelectContent>
-            {categories.map((category) => (
-              <SelectItem key={category} value={category}>
-                {category}
-              </SelectItem>
-            ))}
+            {categories.length === 0 && !isLoadingCategories ? (
+              <div className="p-2 text-sm text-muted-foreground text-center">
+                No categories found
+              </div>
+            ) : (
+              categories.map((category) => (
+                <SelectItem key={category.id} value={category.id}>
+                  {category.name}
+                </SelectItem>
+              ))
+            )}
           </SelectContent>
         </Select>
         {form.formState.errors.category && (

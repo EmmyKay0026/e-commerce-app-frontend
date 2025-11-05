@@ -10,7 +10,7 @@ export default function AboutPage() {
   );
 }
 
-/* Hero section */
+/* Hero section — fixed height at top (not full screen) */
 function HeroSection() {
   return (
     <section

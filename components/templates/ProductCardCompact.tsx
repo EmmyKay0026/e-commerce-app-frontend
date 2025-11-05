@@ -109,7 +109,7 @@ export function ProductCardCompact({
 
         {/* Price */}
         <div className="text-2xl font-bold text-foreground">
-          {currency}
+          
           {price.toLocaleString("en-US", {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,

@@ -23,7 +23,7 @@ export default function NewArrivals() {
         {items.map((it) => (
           <Link
             key={it.id}
-            href={`/product/${it.id}`}
+            href={`/products/${it.id}`}
             className="block rounded-md overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500"
             aria-label={`Open new arrival ${it.id}`}
           >

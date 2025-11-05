@@ -11,18 +11,18 @@ import { getMyProfile } from "@/services/userService";
 import { useEffect } from "react";
 
 export default function Home() {
-  useEffect(() => {
-    const getMe = async () => {
-      console.log(await getMyProfile());
-    };
-    getMe();
-  }, []);
+  // useEffect(() => {
+  //   const getMe = async () => {
+  //     console.log(await getMyProfile());
+  //   };
+  //   getMe();
+  // }, []);
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center m-0 p-0">
       <HomeHeroSection />
-      <BusinessOpportunities />
-      {/* <CategorySection /> */}
+      {/* <BusinessOpportunities /> */}
+      <CategorySection />
       <FeatureSection />
       <CtaSection />
       {/* <Testimonial/> */}

@@ -5,6 +5,7 @@ import Link from "next/link";
 import ProductCards from "@/components/molecules/ProductCards";
 import type { Product as DataProduct } from "@/types/models";
 import { getProductsByCategory } from "@/services/categoryService";
+import { transformProduct } from "@/services/productService";
 
 interface SimpleProduct {
   id: string;
@@ -63,7 +64,8 @@ export default function CategorySection({
       raw?.vendor?.id ??
       "";
     const category = raw?.category ?? raw?.categorySlug ?? fallbackCategory;
-    const createdAt = raw?.created_at ?? raw?.createdAt ?? new Date().toISOString();
+    const createdAt =
+      raw?.created_at ?? raw?.createdAt ?? new Date().toISOString();
     const updatedAt = raw?.updated_at ?? raw?.updatedAt ?? createdAt;
     const status = (raw?.status as any) ?? "active";
     const metadata = raw?.metadata ?? {};
@@ -99,7 +101,7 @@ export default function CategorySection({
         setError(null);
 
         const list = await getProductsByCategory(categoryId);
-        if (mounted) setFetched(list.slice(0, limit));
+        if (mounted && list.data) setFetched(list?.data?.slice(0, limit));
       } catch (err: any) {
         if (mounted) {
           setError(err?.message ?? "Failed to load products");
@@ -115,8 +117,6 @@ export default function CategorySection({
       mounted = false;
     };
   }, [categoryId, limit]);
-
-
 
   const items = useMemo(
     () => (fetched ?? products.map((p) => toDataProduct(p))).slice(0, limit),
@@ -149,9 +149,9 @@ export default function CategorySection({
         <div className="text-red-600 text-sm">{error}</div>
       ) : items && items.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          {items.map((product) => (
-            <div key={product.id} className="p-2">
-              <ProductCards product={product} />
+          {items.map((p) => (
+            <div key={p.id} className="p-2">
+              <ProductCards key={p.id} product={p} />
             </div>
           ))}
         </div>

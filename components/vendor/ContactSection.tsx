@@ -1,9 +1,15 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Phone, Mail, MapPin, Clock, MessageCircle } from "lucide-react";
-import { User } from "@/types/models";
+import { BusinessProfile, User } from "@/types/models";
+import { FaWhatsapp } from "react-icons/fa";
+import ShowContactButton from "../atoms/ShowContactButton";
 
-export function ContactSection({ vendor }: { vendor: User }) {
+export function ContactSection({
+  vendor,
+}: {
+  vendor: BusinessProfile & { user: User };
+}) {
   return (
     <section id="contact" className="px-2 lg:px-8 py-16 md:py-24 bg-muted/30">
       <div className="container mx-auto px-4">
@@ -17,9 +23,9 @@ export function ContactSection({ vendor }: { vendor: User }) {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardContent className="p-6 text-center">
+        <div className="flex flex-col flex-wrap md:flex-row justify-center items-center gap-6 mb-12 ">
+          <Card className="hover:shadow-lg transition-shadow w-64 ">
+            <CardContent className="p-6 flex flex-col items-center text-center">
               <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4">
                 <Phone className="h-6 w-6 text-primary" />
               </div>
@@ -27,34 +33,31 @@ export function ContactSection({ vendor }: { vendor: User }) {
               <p className="text-sm text-muted-foreground mb-3">
                 Call us directly
               </p>
-              <a
-                href="tel:+2348012345678"
-                className="text-sm font-medium text-muted-foreground blur-sm hover:underline"
-              >
-                {vendor.phoneNumber}
-              </a>
+              <ShowContactButton
+                userPhoneNumber={vendor.user.phone_number ?? "No contact info"}
+              />
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardContent className="p-6 text-center">
-              <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4">
-                <Mail className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="font-semibold text-foreground mb-2">Email</h3>
-              <p className="text-sm text-muted-foreground mb-3">
-                Send us a message
-              </p>
-              <a
-                href="mailto:info@elitecommerce.ng"
-                className="text-sm font-medium text-muted-foreground blur-sm hover:underline"
-              >
-                info@elitecommerce.ng
-              </a>
-            </CardContent>
-          </Card>
+          {vendor.user.whatsapp_number && (
+            <Card className="hover:shadow-lg transition-shadow w-64">
+              <CardContent className="p-6 text-center">
+                <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4">
+                  <FaWhatsapp className="h-6 w-6 text-green-500" />
+                </div>
+                <h3 className="font-semibold text-foreground mb-2">WhatsApp</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Send us a message
+                </p>
+                <ShowContactButton
+                  userPhoneNumber={vendor.user.whatsapp_number}
+                  type="whatsapp"
+                />
+              </CardContent>
+            </Card>
+          )}
 
-          <Card className="hover:shadow-lg transition-shadow">
+          {/* <Card className="hover:shadow-lg transition-shadow">
             <CardContent className="p-6 text-center">
               <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4">
                 <MapPin className="h-6 w-6 text-primary" />
@@ -64,12 +67,12 @@ export function ContactSection({ vendor }: { vendor: User }) {
                 Visit our store
               </p>
               <p className="text-sm font-medium text-muted-foreground blur-sm">
-                {vendor?.vendorProfile?.address ?? ""}
+                {vendor?.user?.address ?? ""}
               </p>
             </CardContent>
-          </Card>
+          </Card> */}
 
-          <Card className="hover:shadow-lg transition-shadow">
+          {/* <Card className="hover:shadow-lg transition-shadow">
             <CardContent className="p-6 text-center">
               <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4">
                 <Clock className="h-6 w-6 text-primary" />
@@ -84,10 +87,10 @@ export function ContactSection({ vendor }: { vendor: User }) {
                 Sunday: 10AM - 5PM
               </p>
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
 
-        <Card className="max-w-2xl mx-auto">
+        {/* <Card className="max-w-2xl mx-auto">
           <CardContent className="p-8">
             <div className="text-center mb-6">
               <MessageCircle className="h-12 w-12 text-muted-foreground  mx-auto mb-4" />
@@ -103,17 +106,10 @@ export function ContactSection({ vendor }: { vendor: User }) {
                 <Phone className="h-4 w-4 mr-2" />
                 Show contact
               </Button>
-              {/* <Button
-                size="lg"
-                variant="outline"
-                className="flex-1 bg-transparent"
-              >
-                <MessageCircle className="h-4 w-4 mr-2" />
-                Send Message
-              </Button> */}
+         
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
     </section>
   );

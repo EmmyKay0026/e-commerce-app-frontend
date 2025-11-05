@@ -70,13 +70,17 @@ export async function getBusinessProfileById(
  */
 export async function getBusinessProfileBySlug(
   slug: string
-): Promise<ServiceResult<{ data: BusinessProfile }>> {
+): Promise<ServiceResult<{ data: BusinessProfile & { user: User } }>> {
+  console.log("Got here");
+
   try {
     // If your backend expects /vendors/:slug (same pattern as id) you can call /vendors/${slug}
     // If it expects /vendors/slug/:slug or /vendors/by-slug/:slug, update this path.
-    const res = await api.get(`/vendors/${encodeURIComponent(slug)}`);
+    const res = await api.get(`/businessProfile/${slug}`);
+    console.log("Service Res:", res);
+
     if (res.status === 200) {
-      return { success: true, status: res.status, data: res.data };
+      return { success: true, status: res.status, data: res.data.data };
     }
     return {
       success: false,

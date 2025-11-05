@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -11,16 +11,20 @@ import {
   MessageCircle,
   Share2,
   Phone,
+  Bookmark,
 } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
-import { User } from "@/types/models";
-import { convertToCustomFormat } from "@/lib/utils";
+import { BusinessProfile, User } from "@/types/models";
+import { cn, convertToCustomFormat } from "@/lib/utils";
 import Link from "next/link";
+import ShowContactButton from "../atoms/ShowContactButton";
+import { updateSavedItems } from "@/services/userService";
+import { useUserStore } from "@/store/useUserStore";
 
 interface ProductInfoProps {
   name: string;
-  price: number;
+  price: string;
   currency?: string;
   description?: string;
   category?: string;
@@ -29,7 +33,8 @@ interface ProductInfoProps {
   inStock?: number;
   dateOfPosting: string;
   metadata?: Record<string, any>;
-  vendor?: User;
+  vendor?: BusinessProfile;
+  product_id: string;
 }
 
 export function ProductInfo({
@@ -39,17 +44,38 @@ export function ProductInfo({
   description,
   category,
   minOrder = 1,
-  soldCount,
+  product_id,
   inStock,
   metadata,
   dateOfPosting,
   vendor,
 }: ProductInfoProps) {
   const [quantity, setQuantity] = useState(minOrder);
+  const [isSaved, setIsSaved] = useState<boolean>(false);
+  const user = useUserStore((state) => state.user);
   const convertedDate = convertToCustomFormat(dateOfPosting);
+  // console.log(convertedDate);
 
-  const handleChatNow = () => {
-    toast.info("Opening chat with supplier...");
+  useEffect(() => {
+    if (!user?.saved_items) return;
+    // console.log(user?.saved_items);
+
+    const checkSaved = user?.saved_items?.some(
+      (savedId) => savedId == product_id
+    );
+    // console.log(checkSaved);
+
+    setIsSaved(checkSaved ? true : false);
+
+    // Cleanup function
+    return () => {
+      setIsSaved(false);
+    };
+  }, [user, product_id]);
+
+  const handleSaveItem = async () => {
+    const res = await updateSavedItems(product_id);
+    // console.log(res);
   };
 
   const handleShare = () => {
@@ -61,10 +87,26 @@ export function ProductInfo({
       {/* Product Title */}
       <div>
         <span className="text-muted-foreground italic text-sm block mb-1">
-          Posted {convertedDate.dayWithSuffix}-{convertedDate.monthOfYear}-
-          {convertedDate.year}
+          Posted {convertedDate?.dayWithSuffix}-{convertedDate?.monthOfYear}-
+          {convertedDate?.year}
         </span>
-        <h1 className="text-3xl font-bold text-balance mb-2">{name}</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-balance mb-2">{name}</h1>
+
+          <span
+            onClick={handleSaveItem}
+            className="p-2 rounded-full hover:bg-primary cursor-pointer group transition-all duration-300"
+          >
+            <Bookmark
+              className={cn(
+                "transition-all duration-300",
+                isSaved
+                  ? "fill-black group-hover:fill-white group-hover:text-white "
+                  : "  group-hover:text-white "
+              )}
+            />
+          </span>
+        </div>
         {category && (
           <Badge variant="secondary" className="text-sm">
             {category}
@@ -84,11 +126,8 @@ export function ProductInfo({
       <div className="space-y-2">
         <div className="flex items-baseline gap-2">
           <span className="text-4xl font-bold text-foreground">
-            {currency}
-            {price.toLocaleString("en-US", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
+            {/* {currency} */}
+            {price}
           </span>
         </div>
       </div>
@@ -126,22 +165,21 @@ export function ProductInfo({
             <h3 className="font-semibold">Vendor Information</h3>
             <div className="flex flex-col  lg:items-center gap-2 lg:flex-row">
               <Image
-                src={vendor.vendorProfile?.coverImage || "/placeholder.svg"}
-                alt={vendor.fullName || "Vendor"}
+                src={vendor?.cover_image || "/placeholder.svg"}
+                alt={vendor.business_name || "Vendor"}
                 width={40}
                 height={40}
                 className="w-10 h-10 rounded-full object-cover"
               />
               <div className="">
                 <Link
-                  href={`/shop/${vendor.vendorProfile?.vendorId}`}
+                  href={`/shop/${vendor.slug}`}
                   className="hover:underline font-semibold text-foreground"
                 >
-                  {vendor.vendorProfile?.businessName}
+                  {vendor?.business_name}
                 </Link>
                 <p className="text-sm text-muted-foreground">
-                  {vendor.vendorProfile?.description ||
-                    "No description available."}
+                  {vendor?.description || "No description available."}
                 </p>
               </div>
 
@@ -149,7 +187,10 @@ export function ProductInfo({
             </div>
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 mt-5">
-              <Button
+              <ShowContactButton
+                userPhoneNumber={vendor.business_phone ?? "No contact"}
+              />
+              {/* <Button
                 size="lg"
                 variant="default"
                 className=""
@@ -157,7 +198,7 @@ export function ProductInfo({
               >
                 <Phone className="w-5 h-5 mr-2" />
                 Show contact
-              </Button>
+              </Button> */}
               <Button size="lg" variant="outline" onClick={handleShare}>
                 <Share2 className="w-5 h-5" />
               </Button>
