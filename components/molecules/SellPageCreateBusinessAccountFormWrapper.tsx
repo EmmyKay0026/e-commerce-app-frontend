@@ -9,8 +9,9 @@ import { z } from "zod";
 import CreateBusinessAccountForm from "@/components/molecules/CreateBusinessAccountForm";
 import { uploadImageToCloudflare } from "@/lib/cloudflareImageUpload";
 import { constructImageUrl, formatPhoneNumber } from "@/lib/utils";
+import Link from "next/link";
 
-export default function CreateBusinessAccountPage() {
+export default function SellPageCreateBusinessAccountFormWrapper() {
   const [businessName, setBusinessName] = useState("");
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
@@ -22,7 +23,6 @@ export default function CreateBusinessAccountPage() {
   const [businessAddress, setBusinessAddress] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const user = useUserStore((state) => state.user);
   const router = useRouter();
@@ -46,7 +46,11 @@ export default function CreateBusinessAccountPage() {
         /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
         "Slug must be URL-friendly (lowercase letters, numbers and hyphens only)."
       ),
-    description: z.string().max(1000, "Description is too long.").optional(),
+    description: z
+      .string()
+      .min(10, "Description is too short")
+      .max(1000, "Description is too long.")
+      .optional(),
     cover_image: z.string().optional(),
     status: z.string().optional(),
     phone_number: z.string().optional(),
@@ -73,32 +77,6 @@ export default function CreateBusinessAccountPage() {
     reader.onload = () => setCoverPreview(String(reader.result));
     reader.readAsDataURL(file);
   };
-
-  useEffect(() => {
-    // If the logged-in user is already a vendor, redirect them to settings
-    if (user?.role === "vendor") {
-      // simple client-side redirect
-      toast("You all ready have a business account");
-      window.location.href = "/settings";
-      return;
-    }
-
-    if (user === null) {
-      import("@/store/useAuthModal").then((mod: any) => {
-        const authHook = mod?.useAuthModal;
-        // Zustand hooks expose getState on the hook function created by `create`.
-        if (authHook && typeof authHook.getState === "function") {
-          const state = authHook.getState();
-          if (typeof state.setIsOpen === "function") {
-            state.setIsOpen(true);
-          }
-        }
-      });
-    }
-    // If there's no user (not logged in), open the auth/signup modal.
-    // We dynamically import the auth modal store and call the stored setter.
-    // This avoids adding top-level imports here.
-  }, [user]);
 
   const sanitizeSlug = (s: string) =>
     s
@@ -138,7 +116,7 @@ export default function CreateBusinessAccountPage() {
         slug: finalSlug,
         description: description,
         cover_image: coverImageUrl,
-        status: "active",
+
         phone_number: formatPhoneNumber(phoneNumber),
         whatsapp_number: formatPhoneNumber(whatsappNumber),
         business_email: businessEmail,
@@ -163,7 +141,7 @@ export default function CreateBusinessAccountPage() {
       if (resp.success) {
         toast.success("Business profile created successfully.");
         setBusinessName("");
-        setSlug(finalSlug); // keep sanitized slug or change to "" if you prefer clearing
+        setSlug(resp.data?.slug!); // keep sanitized slug or change to "" if you prefer clearing
         setDescription("");
         setCoverFile(null);
         setCoverPreview(null);
@@ -183,6 +161,18 @@ export default function CreateBusinessAccountPage() {
     <div className="min-h-screen flex items-center justify-center py-12 px-4">
       <div className="w-full max-w-2xl bg-white rounded-lg shadow p-6">
         <h1 className="text-2xl font-semibold mb-4">Create Business Account</h1>
+        <p className="">
+          Before adding a product, you must create a business account.
+        </p>
+        <p className="">
+          Need a guide creating your business, read the{" "}
+          <Link
+            href={"/guide/creating-a-business-account"}
+            className="text-primary  italic underline "
+          >
+            business guide.
+          </Link>
+        </p>
 
         <CreateBusinessAccountForm
           businessName={businessName}

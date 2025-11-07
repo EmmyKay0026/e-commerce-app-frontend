@@ -1,8 +1,8 @@
 import api from "@/config/api";
-import { ServiceResult, User } from "@/types/models";
+import { ServiceResult, User, BusinessProfile } from "@/types/models";
 
 // Placeholder BusinessProfile type — replace with your concrete type when available
-export type BusinessProfile = any;
+// export type BusinessProfile = any;
 
 /**
  * Create Business Profile
@@ -10,11 +10,15 @@ export type BusinessProfile = any;
  */
 export async function createBusinessProfile(
   payload: Partial<BusinessProfile>
-): Promise<ServiceResult<{ businessProfile: BusinessProfile }>> {
+): Promise<ServiceResult<BusinessProfile>> {
   try {
     const res = await api.post("/businessProfile", payload);
     if (res.status === 201) {
-      return { success: true, status: res.status, data: res.data };
+      return {
+        success: true,
+        status: res.status,
+        data: res.data.businessProfile as BusinessProfile,
+      };
     }
     return {
       success: false,
@@ -120,7 +124,7 @@ export async function updateBusinessProfile(
   >
 ): Promise<ServiceResult<{ vendor: User }>> {
   try {
-    const res = await api.patch(`/vendors/me`, payload);
+    const res = await api.patch(`/businessProfile/me`, payload);
     if (res.status === 200) {
       return { success: true, status: res.status, data: res.data.data };
     }

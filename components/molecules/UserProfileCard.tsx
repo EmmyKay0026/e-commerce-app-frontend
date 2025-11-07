@@ -12,6 +12,7 @@ import useApi from "@/hooks/useApi";
 import { useUserStore } from "@/store/useUserStore";
 import ShowContactButton from "../atoms/ShowContactButton";
 import Link from "next/link";
+import { constructImageUrl } from "@/lib/utils";
 
 interface UserProfileCardProps {
   // currentUser: User | null;
@@ -19,72 +20,11 @@ interface UserProfileCardProps {
   userId?: string; // optional id to fetch when profileUser not provided
 }
 
-// function normalizeUser(data: any): User {
-//   const id = data?.id ?? data?.user_id ?? "";
-//   const first = data?.first_name ?? data?.firstName ?? data?.first ?? undefined;
-//   const last = data?.last_name ?? data?.lastName ?? data?.last ?? undefined;
-//   const fullName =
-//     (data?.fullName ?? [first, last].filter(Boolean).join(" ")) ||
-//     data?.full_name ||
-//     data?.name ||
-//     "";
-//   const email = data?.email ?? "";
-//   const profilePicture =
-//     data?.profile_picture ?? data?.profilePicture ?? data?.profileImage ?? null;
-//   const role =
-//     data?.role ?? (data?.vendor || data?.business_profile ? "vendor" : "user");
-
-//   const vendorProfileSource =
-//     data?.business_profile ??
-//     data?.vendor ??
-//     data?.vendorProfile ??
-//     data?.user?.vendor;
-//   const vendorProfile = vendorProfileSource
-//     ? {
-//         id:
-//           vendorProfileSource.id ??
-//           vendorProfileSource.vendorId ??
-//           vendorProfileSource.owner_id ??
-//           undefined,
-//         businessName:
-//           vendorProfileSource.business_name ??
-//           vendorProfileSource.businessName ??
-//           vendorProfileSource.user?.first_name ??
-//           "",
-//         coverImage:
-//           vendorProfileSource.cover_image ??
-//           vendorProfileSource.coverImage ??
-//           vendorProfileSource.profileImage ??
-//           undefined,
-//         address: vendorProfileSource.address ?? undefined,
-//         description: vendorProfileSource.description ?? undefined,
-//         vendorId: vendorProfileSource.vendorId ?? undefined,
-//       }
-//     : undefined;
-
-//   return {
-//     id,
-//     fullName,
-//     email,
-//     phoneNumber: data?.phone_number ?? data?.phoneNumber ?? undefined,
-//     profilePicture,
-//     role,
-//     vendorProfile,
-//     business_profile_id: data?.business_profile_id ?? undefined,
-//     business_profile: data?.business_profile ?? undefined,
-//     vendor: data?.vendor ? { id: data.vendor.id } : undefined,
-//   } as User;
-// }
-
 const UserProfileCard: React.FC<UserProfileCardProps> = ({
   // currentUser,
   profileDetails,
   userId,
 }) => {
-  // const api = useApi();
-  // const [profileUser, setProfileUser] = useState<User | null | undefined>(
-  //   profileUserProp === undefined ? undefined : profileUserProp
-  // );
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const isOwner = useUserStore((state) => state.isOwner);
@@ -161,7 +101,11 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
 
       <Avatar className="h-20 w-20">
         <AvatarImage
-          src={profileDetails?.profile_picture || "/placeholder.svg"}
+          src={
+            (profileDetails?.profile_picture &&
+              constructImageUrl(profileDetails?.profile_picture)) ||
+            "/placeholder.svg"
+          }
           alt={profileDetails.first_name}
           className="object-cover"
         />

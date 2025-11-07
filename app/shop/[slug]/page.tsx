@@ -15,12 +15,9 @@ import { HeroSection } from "@/components/vendor/HeroSection";
 import { ProductsGrid } from "@/components/vendor/ProductGrid";
 import { VendorHeader } from "@/components/vendor/VendorHeader";
 import { userDB } from "@/constants/userData";
-import {
-  BusinessProfile,
-  getBusinessProfileBySlug,
-} from "@/services/businessProfileService";
+import { getBusinessProfileBySlug } from "@/services/businessProfileService";
 import { useUserStore } from "@/store/useUserStore";
-import { User } from "@/types/models";
+import { BusinessProfile, User } from "@/types/models";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { set } from "zod";
@@ -28,7 +25,9 @@ import { set } from "zod";
 export default function VendorShopPage() {
   const { slug } = useParams();
   const user = useUserStore((state) => state.user);
-  const [vendor, setVendor] = useState<BusinessProfile & { user: User }>(null);
+  const [vendor, setVendor] = useState<
+    (BusinessProfile & { user: User }) | null
+  >(null);
   const [pageIsLoading, setPageIsLoading] = useState<boolean>(true);
   const router = useRouter();
   useEffect(() => {
@@ -42,7 +41,7 @@ export default function VendorShopPage() {
       // console.log(res);
 
       if (res.success && res.data) {
-        setVendor(res.data as BusinessProfile & { user: User });
+        setVendor(res.data as unknown as BusinessProfile & { user: User });
         setPageIsLoading(false);
       }
       // if (res.status === 404) {
@@ -55,6 +54,10 @@ export default function VendorShopPage() {
 
   if (pageIsLoading) {
     return <VendorHeroSkeleton />;
+  }
+  if (!vendor) {
+    router.push("/404");
+    return <div>Vendor not found.</div>;
   }
   return (
     <div className="min-h-screen bg-background">

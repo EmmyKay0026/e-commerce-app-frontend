@@ -40,7 +40,8 @@ export const useUserStore = create<UserStore>((set, get) => ({
       // set({ isOwner: "unknown" });
       // return "unknown";
     }
-    const owner = viewedUserId === current.id;
+    const owner =
+      viewedUserId === current.profile_link || viewedUserId === current.id;
     set({ isOwner: owner });
     return owner;
   },
@@ -79,7 +80,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
 
         const id = extractUserIdRegex(window.location.pathname);
         if (id) {
-          console.log("User params:", id);
+          // console.log("User params:", id);
 
           get().updateIsOwner(id as string);
           console.log("User params updated isOwner:", get().isOwner);

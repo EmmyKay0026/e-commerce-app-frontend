@@ -1,3 +1,4 @@
+import { uploadImagesToCloudflare } from "@/lib/cloudflareImageUpload";
 import api from "@/config/api";
 
 import {
@@ -54,11 +55,11 @@ export interface TransformedProduct {
  * Fetch a single product by ID and transform it into a frontend-friendly format
  */
 // :Promise<ServiceResult<Product>>
-export async function getProductById(id: string) {
+export async function getProductBySlug(slug: string) {
   try {
     const res = await api.get<{ success: boolean; product: Product }>(
       // const { data } = await api.get<{ success: boolean; product: any }>(
-      `/products/${id}`
+      `/products/slug/${slug}`
     );
 
     if (res.status === 200) {
@@ -392,12 +393,11 @@ export async function updateProduct(
     name: string;
     description: string;
     price: string;
-    images: File[];
-    category: {
-      id: string;
-      name: string;
-    };
-    location: string;
+    images: string[];
+    category: string;
+    location_lga: string;
+    location_state?: string;
+    price_input_mode?: "enter" | "quote" | undefined;
     features: string;
     price_type: "fixed" | "negotiable" | null;
     sale_type: "wholesale" | "retail" | null;
@@ -408,7 +408,7 @@ export async function updateProduct(
     // This example assumes image URLs are handled or unchanged.
     const imageUrls: string[] = [];
     for (const image of data.images) {
-      if (typeof image === 'string') {
+      if (typeof image === "string") {
         imageUrls.push(image);
       } else {
         // TODO: Implement image upload to your storage service
@@ -427,9 +427,11 @@ export async function updateProduct(
       description: data.description,
       price: data.price,
       images: imageUrls,
-      category_id: data.category.id,
-      location: data.location,
+      category_id: data.category,
+      location_lga: data.location_lga,
+      location_state: data.location_state,
       features: featuresList,
+      price_input_mode: data.price_input_mode,
       price_type: data.price_type,
       sale_type: data.sale_type,
     };
@@ -503,26 +505,21 @@ export async function createProduct(data: {
   name: string;
   description: string;
   price: string;
-  images: File[];
+  images: string[]; // Changed from File[] to string[]
   category: {
     id: string;
     name: string;
   };
-  location: string;
+  location_lga: string;
+  location_state: string;
   features: string;
+  price_input_mode: "enter" | "quote";
   price_type: "fixed" | "negotiable" | null;
   sale_type: "wholesale" | "retail" | null;
 }): Promise<ServiceResult<Product>> {
   try {
-    // First, upload all images and get their URLs
-    const imageUrls: string[] = [
-      "https://cdn.pixabay.com/photo/2014/09/13/21/46/milling-444493_1280.jpg",
-    ];
-    for (const image of data.images) {
-      // TODO: Implement image upload to your storage service
-      // const uploadedUrl = await uploadImage(image);
-      // imageUrls.push(uploadedUrl);
-    }
+    // The images are now pre-uploaded; the 'images' prop contains the keys.
+    const imageKeys = data.images;
 
     // Prepare the features as an array
     const featuresList = data.features
@@ -535,10 +532,12 @@ export async function createProduct(data: {
       name: data.name,
       description: data.description,
       price: data.price,
-      images: imageUrls,
+      images: imageKeys,
       category_id: data.category.id,
-      location: data.location,
+      location_lga: data.location_lga,
+      location_state: data.location_state,
       features: featuresList,
+      price_input_mode: data.price_input_mode,
       price_type: data.price_type,
       sale_type: data.sale_type,
     };
@@ -549,7 +548,7 @@ export async function createProduct(data: {
       return {
         success: true,
         status: response.status,
-        data: response.data,
+        data: response.data.product, // Correctly extract the product object
       };
     }
 

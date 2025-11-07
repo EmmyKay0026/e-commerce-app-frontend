@@ -1,9 +1,6 @@
-"use client";
-
 import type React from "react";
-
 import type { UseFormReturn } from "react-hook-form";
-import type { ProductFormData, ImagePreview } from "@/types/productForm";
+import type { ProductFormData } from "@/types/productForm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,15 +18,21 @@ import { Category, Product } from "@/types/models";
 import { State, LGA } from "@/types/location";
 import { toast } from "sonner";
 import { getAllCategories } from "@/services/categoryService";
-import { listStates, listLgas, getLga } from "@/services/locationService";
+import { listStates, listLgas } from "@/services/locationService";
 
 interface Step1Props {
   form: UseFormReturn<ProductFormData>;
+  imagePreviews: string[];
+  setImagePreviews: React.Dispatch<React.SetStateAction<string[]>>;
   product?: Product;
 }
 
-export function Step1({ form, product }: Step1Props) {
-  const [imagePreviews, setImagePreviews] = useState<ImagePreview[]>([]);
+export function Step1({
+  form,
+  imagePreviews,
+  setImagePreviews,
+  product,
+}: Step1Props) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [states, setStates] = useState<State[]>([]);
@@ -66,24 +69,19 @@ export function Step1({ form, product }: Step1Props) {
 
   useEffect(() => {
     if (product && states.length > 0) {
-      const locationId = product?.location;
-
-      if (locationId) {
-        const lgaId = locationId; // Parse to number for getLga
-        if (lgaId) {
-          getLga(lgaId).then((lgaResult) => {
-            if (lgaResult.success && lgaResult.data) {
-              setSelectedState(lgaResult.data.state_id); // Convert to string for selectedState
-            }
-          });
-        }
+      const stateId = product?.location_state;
+      if (stateId) {
+        setSelectedState(stateId);
       }
     }
   }, [product, states]);
 
   useEffect(() => {
-    if (selectedState && lgas.length > 0 && product?.location) {
-      form.setValue("location", product.location);
+    if (selectedState && lgas.length > 0 && product?.location_lga) {
+      form.setValue("location_lga", product.location_lga);
+    }
+    if (selectedState) {
+      form.setValue("location_state", selectedState);
     }
   }, [lgas, product, selectedState, form]);
 
@@ -103,40 +101,33 @@ export function Step1({ form, product }: Step1Props) {
     fetchLgas();
   }, [selectedState]);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+ const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    const currentImages = form.getValues("images") || [];
-    const totalImages = currentImages.length + files.length;
+    const currentFiles = form.getValues("images") || [];
+    const totalImages = currentFiles.length + files.length;
 
     if (totalImages > 15) {
       toast.error("Maximum 15 images allowed");
       return;
     }
 
-    const newPreviews: ImagePreview[] = files.map((file) => ({
-      file,
-      preview: URL.createObjectURL(file),
-    }));
+    form.setValue("images", [...currentFiles, ...files], { shouldValidate: true });
 
-    setImagePreviews((prev) => [...prev, ...newPreviews]);
-
-    form.setValue("images", [...currentImages, ...files], {
-      shouldValidate: true,
-    });
+    const newPreviews = files.map(file => URL.createObjectURL(file));
+    setImagePreviews(prev => [...prev, ...newPreviews]);
   };
 
-  const removeImage = (index: number) => {
-    const newPreviews = imagePreviews.filter((_, i) => i !== index);
+  const handleRemoveImage = (indexToRemove: number) => {
+    const currentFiles = form.getValues("images") || [];
+    const newFiles = currentFiles.filter((_, i) => i !== indexToRemove);
+    form.setValue("images", newFiles, { shouldValidate: true });
+
+    // Revoke the object URL to prevent memory leaks
+    URL.revokeObjectURL(imagePreviews[indexToRemove]); 
+    const newPreviews = imagePreviews.filter((_, i) => i !== indexToRemove);
     setImagePreviews(newPreviews);
-
-    const currentImages = form.getValues("images") || [];
-    const newImages = currentImages.filter((_, i) => i !== index);
-    form.setValue("images", newImages, { shouldValidate: true });
-
-    // Revoke object URL to prevent memory leaks
-    URL.revokeObjectURL(imagePreviews[index].preview);
   };
 
   return (
@@ -149,7 +140,7 @@ export function Step1({ form, product }: Step1Props) {
             type="file"
             accept="image/*"
             multiple
-            onChange={handleImageUpload}
+            onChange={handleImageChange}
             className="hidden"
           />
           <label
@@ -174,11 +165,11 @@ export function Step1({ form, product }: Step1Props) {
 
       {imagePreviews.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {imagePreviews.map((preview, index) => (
+          {imagePreviews.map((previewUrl, index) => (
             <div key={index} className="relative group">
               <div className="aspect-square rounded-lg overflow-hidden border border-border">
                 <Image
-                  src={preview.preview || "/placeholder.svg"}
+                  src={previewUrl}
                   alt={`Preview ${index + 1}`}
                   width={200}
                   height={200}
@@ -190,7 +181,7 @@ export function Step1({ form, product }: Step1Props) {
                 variant="destructive"
                 size="icon"
                 className="absolute top-2 right-2 w-6 h-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={() => removeImage(index)}
+                onClick={() => handleRemoveImage(index)}
               >
                 <X className="w-4 h-4" />
               </Button>
@@ -253,6 +244,7 @@ export function Step1({ form, product }: Step1Props) {
           <Select
             onValueChange={(value) => {
               setSelectedState(value);
+              form.setValue("location_state", value);
             }}
             value={selectedState || ""}
             defaultValue={selectedState || ""}
@@ -294,10 +286,10 @@ export function Step1({ form, product }: Step1Props) {
             onValueChange={(value) => {
               const selectedLga = lgas.find((lga) => lga.lga_id === value);
               if (selectedLga) {
-                form.setValue("location", selectedLga.lga_id);
+                form.setValue("location_lga", selectedLga.lga_id);
               }
             }}
-            value={form.watch("location") || ""}
+            value={form.watch("location_lga") || ""}
             disabled={!selectedState || isLoadingLgas}
           >
             <SelectTrigger className="capitalize">
@@ -327,9 +319,9 @@ export function Step1({ form, product }: Step1Props) {
             </SelectContent>
           </Select>
         </div>
-        {form.formState.errors.location && (
+        {form.formState.errors.location_lga && (
           <p className="text-sm text-destructive">
-            {form.formState.errors.location.message}
+            {form.formState.errors.location_lga.message}
           </p>
         )}
       </div>

@@ -28,16 +28,14 @@ import {
   demoProducts,
   demoWishlist,
 } from "@/constants/product";
-import { getProductById } from "@/services/productService";
 import { fetchProductsByIds, getPublicProfile } from "@/services/userService";
 import { useUserStore } from "@/store/useUserStore";
 import { Product } from "@/types/models";
-import { PopoverClose } from "@radix-ui/react-popover";
 import {
-  ArrowUpDown,
   Bookmark,
   Grid,
   IndentIncrease,
+  // Link,
   List,
   LucideGrid3X3,
   Search,
@@ -45,9 +43,11 @@ import {
   Store,
   X,
 } from "lucide-react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { is } from "zod/v4/locales";
 
 const SaveForLaterPage = () => {
   const [isActive, setIsActive] = useState<"grid" | "list">("list");
@@ -57,15 +57,28 @@ const SaveForLaterPage = () => {
     null
   );
   const { id } = useParams();
+
   const [isPageLoading, setIsPageLoading] = useState<boolean>(false);
   const isOwner = useUserStore((state) => state.isOwner);
+  const updateIsOwner = useUserStore((state) => state.updateIsOwner);
   const user = useUserStore((state) => state.user);
 
+  // useEffect(() => {
+  //   if (!id) return;
+  //   if (isOwner === false) {
+  //     window.location.href = `/user/${id}/profile`;
+  //   }
+  //   updateIsOwner(id.toString());
+  // }, []);
   useEffect(() => {
     const getBusniessProducts = async () => {
       // if (!id) return;
       setIsPageLoading(true);
-      if (!user || !user?.saved_items) return;
+      if (!user) return;
+      if (!user?.saved_items) {
+        setBusinessProducts([]);
+        return;
+      }
 
       const res = await fetchProductsByIds(user?.saved_items);
       if (res.success && res.data) {
@@ -81,7 +94,7 @@ const SaveForLaterPage = () => {
   }, [user]);
 
   return (
-    <div className="py-[16px] w-full">
+    <div className="py-4 w-full">
       <section className="">
         <article className="flex items-center gap-2 pt-2 px-6">
           <Bookmark className="mt-1" />
@@ -103,21 +116,17 @@ const SaveForLaterPage = () => {
               <EmptyMedia variant="icon">
                 <Store />
               </EmptyMedia>
-              <EmptyTitle>
-                {isOwner
-                  ? "Your store is empty"
-                  : `${
-                      user?.business_profile?.business_name || user?.first_name
-                    }'s store is empty`}
-              </EmptyTitle>
+              <EmptyTitle>No saved items</EmptyTitle>
               <EmptyDescription>
-                Add products to your store to start selling.
+                Visit the marketplace to start saving items for later!
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              <Button variant="outline" size="sm">
-                {isOwner ? "Start selling" : `Continue shopping`}{" "}
-              </Button>
+              <Link href="/marketplace">
+                <Button variant="default" size="lg">
+                  Visit Marketplace
+                </Button>
+              </Link>
             </EmptyContent>
           </Empty>
         )}

@@ -11,6 +11,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getAllParentCategories } from "@/services/categoryService";
+import { constructImageUrl } from "@/lib/utils";
 
 const HomeHeroSection = () => {
   const [showCategories, setShowCategories] = useState(false);
@@ -195,13 +196,13 @@ const HomeHeroSection = () => {
                     {searchResults.slice(0, 6).map((p) => (
                       <li key={p.id} className="px-3 py-2 hover:bg-gray-50">
                         <Link
-                          href={`/products/${p.id}`}
+                          href={`/products/${p.slug}`}
                           className="flex items-center gap-3"
                         >
                           <div className="h-10 w-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
                             {p.images && p.images[0] ? (
                               <Image
-                                src={p.images[0]}
+                                src={constructImageUrl(p.images[0])}
                                 alt={p.name}
                                 width={40}
                                 height={40}
@@ -257,7 +258,7 @@ const HomeHeroSection = () => {
               className="flex items-center  justify-center cursor-pointer gap-1 hover:text-white  bg-transparent rounded-full  text-white/90"
             >
               <Image
-                src={cat.icon ?? cat.image ?? ""}
+                src={constructImageUrl(cat.icon ?? cat.image ?? "")}
                 alt={cat.name}
                 width={20}
                 height={20}

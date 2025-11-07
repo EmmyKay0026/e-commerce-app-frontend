@@ -15,7 +15,10 @@ import { demoProducts } from "@/constants/product";
 import { mockUser, mockWishlist } from "@/constants/userData";
 import { useUserStore } from "@/store/useUserStore";
 import { User } from "@/types/models";
-import { getPublicProfile } from "@/services/userService";
+import {
+  getPublicProfile,
+  getPublicProfileByProfileLink,
+} from "@/services/userService";
 
 export default function DashboardPage() {
   const { id } = useParams();
@@ -36,7 +39,7 @@ export default function DashboardPage() {
 
     const result = updateIsOwner(id.toString());
 
-    console.log("Result of ownership check:", result);
+    // console.log("Result of ownership check:", result);
   }, []);
   // useEffect(() => {
   //   if (!id) return;
@@ -63,7 +66,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const fetchViewedUser = async () => {
-      const user = await getPublicProfile(id?.toString());
+      const user = await getPublicProfileByProfileLink(id?.toString());
       if (user.status === 404) {
         router.push("/404");
         return;

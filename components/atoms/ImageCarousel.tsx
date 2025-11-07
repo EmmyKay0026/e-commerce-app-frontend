@@ -1,4 +1,5 @@
 "use client";
+import { constructImageUrl } from "@/lib/utils";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import Lightbox from "yet-another-react-lightbox";
@@ -117,7 +118,7 @@ function ImageCarousel({
             }
           >
             <Image
-              src={src}
+              src={constructImageUrl(src)}
               alt={`Slide ${i + 1}`}
               fill
               className="object-cover w-full h-full transition-transform duration-300"
@@ -181,7 +182,7 @@ function ImageCarousel({
               aria-label={`Show image ${i + 1}`}
             >
               <Image
-                src={src}
+                src={constructImageUrl(src)}
                 alt={`thumb-${i + 1}`}
                 fill
                 sizes="96px"
@@ -196,7 +197,7 @@ function ImageCarousel({
         <Lightbox
           open={lightBoxIindex !== null}
           close={() => setLightBoxIindexIndex(null)}
-          slides={images.map((src) => ({ src }))}
+          slides={images.map((src) => ({ src: constructImageUrl(src) }))}
           index={lightBoxIindex ?? 0}
         />
       )}

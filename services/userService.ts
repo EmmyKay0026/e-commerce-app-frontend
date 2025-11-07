@@ -88,6 +88,39 @@ export async function getPublicProfile(
   }
 }
 
+export async function getPublicProfileByProfileLink(
+  profile_link: string
+): Promise<ServiceResult<User>> {
+  try {
+    const res = await api.get(
+      `/users/profile/${encodeURIComponent(profile_link)}`
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        status: res.status,
+        data: res.data.data as User,
+      };
+    }
+
+    return {
+      success: false,
+      status: res.status,
+      data: null,
+      error: `Unexpected status ${res.status}`,
+    };
+  } catch (err: any) {
+    const msg =
+      err?.response?.data?.error ||
+      err?.response?.data?.message ||
+      err?.message ||
+      "Network error";
+    const status = err?.response?.status;
+    return { success: false, status, data: null, error: msg };
+  }
+}
+
 /**
  * PATCH /users/me — update profile (authenticated)
  * payload example: { first_name, last_name, phone_number }

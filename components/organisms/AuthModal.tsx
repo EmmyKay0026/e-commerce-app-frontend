@@ -3,11 +3,13 @@ import React, { useState } from "react";
 import { supabase } from "@/config/supabase";
 import { X } from "lucide-react";
 import { useAuthModal } from "@/store/useAuthModal";
+import { formatPhoneNumber } from "@/lib/utils";
+import { toast } from "sonner";
 
 const AuthModal = () => {
   const toogle = useAuthModal((s) => s.toggle);
   const isOpen = useAuthModal((s) => s.isOpen);
-
+  const setIsOpen = useAuthModal((s) => s.setIsOpen);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,8 +36,14 @@ const AuthModal = () => {
         password,
       });
 
-    if (error) setMessage(error.message);
-    else setMessage("✅ Logged in successfully!");
+    if (error) {
+      toast(error.message);
+      setMessage(error.message);
+    } else {
+      setIsOpen(false);
+      toast("✅ Logged in successfully!");
+      setMessage("✅ Logged in successfully!");
+    }
     setLoading(false);
   };
 
@@ -47,7 +55,7 @@ const AuthModal = () => {
       options: { redirectTo: window.location.origin },
     });
 
-    if (error) setMessage(error.message);
+    if (error) toast(error.message);
     setLoading(false);
   };
 
@@ -64,15 +72,20 @@ const AuthModal = () => {
           first_name: firstName,
           last_name: lastName,
           full_name: `${firstName} ${lastName}`,
-          phone_number: phoneNumber,
+          phone_number: formatPhoneNumber(phoneNumber),
         },
         emailRedirectTo: window.location.origin,
       },
     });
 
-    if (error) setMessage(error.message);
-    else setMessage("✅ Account created! Check your email for confirmation.");
+    if (error) {
+      toast(error.message);
+      setMessage(error.message);
+    } else toast("✅ Account created! Check your email for confirmation.");
+    setMessage("✅ Account created! Check your email for confirmation.");
     setLoading(false);
+    setIsSignUp(false);
+    setPassword("");
   };
 
   if (!isOpen) return null;
@@ -129,7 +142,9 @@ const AuthModal = () => {
                   <input
                     type="text"
                     value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    onChange={(e) =>
+                      setPhoneNumber(formatPhoneNumber(e.target.value))
+                    }
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Enter your phone number"
                     required

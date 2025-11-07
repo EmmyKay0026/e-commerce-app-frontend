@@ -91,3 +91,27 @@ export const timeSincePost = (postDate: Date): string => {
     return postDate.toISOString().split("T")[0];
   }
 };
+
+export const constructImageUrl = (key: string): string => {
+  if (key.includes("http") || key == "") return key; // already a full URL
+
+  const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_BASE_URL;
+
+  if (!BASE_URL) {
+    console.error("NEXT_PUBLIC_IMAGE_BASE_URL is not defined.");
+    return ""; // Or throw an error, depending on desired behavior
+  }
+  return `${BASE_URL}/${key}`;
+};
+
+export const formatPhoneNumber = (value: string) => {
+    const digits = value.replace(/\D/g, "");
+
+    // If starts with 0, convert to +234
+    if (digits.startsWith("0")) {
+      const rest = digits.slice(1);
+      return `234${rest}`;
+    }
+
+    return digits;
+  };

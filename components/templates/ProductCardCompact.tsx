@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
+import { constructImageUrl } from "@/lib/utils";
 
 interface ProductCardCompactProps {
   id: string;
@@ -54,7 +55,7 @@ export function ProductCardCompact({
       {/* Product Image */}
       <div className="relative aspect-square bg-muted group">
         <Image
-          src={image || "/placeholder.svg"}
+          src={constructImageUrl(image || "/placeholder.svg")}
           alt={title}
           fill
           className="object-cover"
@@ -109,7 +110,6 @@ export function ProductCardCompact({
 
         {/* Price */}
         <div className="text-2xl font-bold text-foreground">
-          
           {price.toLocaleString("en-US", {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,

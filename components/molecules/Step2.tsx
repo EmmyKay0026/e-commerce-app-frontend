@@ -62,51 +62,98 @@ export function Step2({ form }: Step2Props) {
         )}
       </div>
 
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="price">Price *</Label>
-          <Input
-            id="price"
-            type="text"
-            placeholder="Enter price"
-            {...form.register("price")}
-          />
-          {form.formState.errors.price && (
-            <p className="text-sm text-destructive">
-              {form.formState.errors.price.message}
-            </p>
-          )}
-        </div>
+      <div className="space-y-2">
+        <Label htmlFor="features">Features *</Label>
+        <Textarea
+          id="features"
+          placeholder="Enter features separated by | (e.g., Fast Charging | Water Resistant | 5G Compatible)"
+          className="min-h-[100px]"
+          {...form.register("features")}
+        />
+        <p className="text-sm text-muted-foreground">
+          Separate each feature with a | symbol
+        </p>
+        {form.formState.errors.features && (
+          <p className="text-sm text-destructive">
+            {form.formState.errors.features.message}
+          </p>
+        )}
+      </div>
 
-        {/* Price Type Radio Buttons */}
+      {/* Pricing Section */}
+      <div className="space-y-8">
         <div className="space-y-2">
-          <Label>Price Type *</Label>
+          <h3 className="text-lg font-semibold">Price option</h3>
+
           <div className="flex gap-4 mt-1">
             <label className="flex items-center space-x-2">
               <input
                 type="radio"
-                value="fixed"
-                {...form.register("priceType")}
+                value="enter"
+                {...form.register("price_input_mode")}
                 className="w-4 h-4 text-primary border-muted"
               />
-              <span>Fixed price</span>
+              <span>Enter price</span>
             </label>
             <label className="flex items-center space-x-2">
               <input
                 type="radio"
-                value="negotiable"
-                {...form.register("priceType")}
+                value="quote"
+                {...form.register("price_input_mode")}
                 className="w-4 h-4 text-primary border-muted"
               />
-              <span>Negotiable price</span>
+              <span>Request a quote</span>
             </label>
           </div>
-          {form.formState.errors.priceType && (
-            <p className="text-sm text-destructive">
-              {form.formState.errors.priceType.message}
-            </p>
-          )}
         </div>
+
+        {form.watch("price_input_mode") === "enter" && (
+          <>
+            <div className="space-y-2">
+              <Label htmlFor="price">Price *</Label>
+              <Input
+                id="price"
+                type="number"
+                placeholder="Enter price"
+                {...form.register("price")}
+              />
+              {form.formState.errors.price && (
+                <p className="text-sm text-destructive">
+                  {form.formState.errors.price.message}
+                </p>
+              )}
+            </div>
+            {/* Price Type Radio Buttons */}
+            <div className="space-y-2">
+              <Label>Price Type *</Label>
+              <div className="flex gap-4 mt-1">
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    value="fixed"
+                    {...form.register("priceType")}
+                    className="w-4 h-4 text-primary border-muted"
+                  />
+                  <span>Fixed price</span>
+                </label>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    value="negotiable"
+                    {...form.register("priceType")}
+                    className="w-4 h-4 text-primary border-muted"
+                  />
+                  <span>Negotiable price</span>
+                </label>
+              </div>
+              {form.formState.errors.priceType && (
+                <p className="text-sm text-destructive">
+                  {form.formState.errors.priceType.message}
+                </p>
+              )}
+            </div>
+          </>
+        )}
 
         {/* Price Negotiability Radio Buttons */}
         <div className="space-y-2">
@@ -137,24 +184,6 @@ export function Step2({ form }: Step2Props) {
             </p>
           )}
         </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="features">Features *</Label>
-        <Textarea
-          id="features"
-          placeholder="Enter features separated by | (e.g., Fast Charging | Water Resistant | 5G Compatible)"
-          className="min-h-[100px]"
-          {...form.register("features")}
-        />
-        <p className="text-sm text-muted-foreground">
-          Separate each feature with a | symbol
-        </p>
-        {form.formState.errors.features && (
-          <p className="text-sm text-destructive">
-            {form.formState.errors.features.message}
-          </p>
-        )}
       </div>
 
       <section className=" ">

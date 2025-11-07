@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import { toast } from "sonner";
+import { constructImageUrl } from "@/lib/utils";
 
 interface ImageGalleryProps {
   images: string[];
@@ -33,7 +34,7 @@ export function ImageGallery({
         className="relative w-full h-full aspect-square bg-muted rounded-lg overflow-hidden group"
       >
         <Image
-          src={images[selectedImage] || "/placeholder.svg"}
+          src={constructImageUrl(images[selectedImage] || "/placeholder.svg")}
           alt={`${productName} - Image ${selectedImage + 1}`}
           fill
           className="object-cover cursor-pointer"
@@ -73,7 +74,9 @@ export function ImageGallery({
             <DialogContent className="max-w-4xl">
               <div className="relative aspect-square w-full">
                 <Image
-                  src={images[selectedImage] || "/placeholder.svg"}
+                  src={constructImageUrl(
+                    images[selectedImage] || "/placeholder.svg"
+                  )}
                   alt={`${productName} - Zoomed`}
                   fill
                   className="object-contain"
@@ -87,7 +90,7 @@ export function ImageGallery({
       <Lightbox
         open={index !== null}
         close={() => setIndex(null)}
-        slides={images.map((src) => ({ src }))}
+        slides={images.map((src) => ({ src: constructImageUrl(src) }))}
         index={index ?? 0}
       />
       {/* Thumbnail Grid */}
@@ -104,7 +107,7 @@ export function ImageGallery({
               }`}
             >
               <Image
-                src={image || "/placeholder.svg"}
+                src={constructImageUrl(image || "/placeholder.svg")}
                 alt={`Thumbnail ${index + 1}`}
                 fill
                 className="object-cover w-full h-full"
