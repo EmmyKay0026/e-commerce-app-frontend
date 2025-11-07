@@ -8,7 +8,7 @@ import dynamic from "next/dynamic";
 
 // load the CreateBusinessAccountForm dynamically to avoid increasing bundle size
 const CreateBusinessAccountForm = dynamic(
-  () => import("@/components/molecules/CreateBusinessAccountForm"),
+  () => import("@/components/molecules/SellPageCreateBusinessAccountFormWrapper"),
   { ssr: false }
 );
 

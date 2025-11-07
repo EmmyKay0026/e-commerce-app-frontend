@@ -14,14 +14,17 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { getProductById, getRelatedProducts } from "@/services/productService";
+import {
+  getProductBySlug,
+  getRelatedProducts,
+} from "@/services/productService";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { Product } from "@/types/models";
+import { Product, CategoryInfo } from "@/types/models";
 
 export default function ProductDetailPage() {
-  const { id } = useParams();
-  const [productDetails, setProductDetails] = useState<any>(null);
+  const { productId: slug } = useParams();
+  const [productDetails, setProductDetails] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [relatedCategoryId, setRelatedCategoryId] = useState<
     string | undefined
@@ -29,14 +32,14 @@ export default function ProductDetailPage() {
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
 
   useEffect(() => {
-    if (!id) return;
+    if (!slug) return;
 
     async function fetchProduct() {
       try {
         setLoading(true);
 
         // 🔹 Fetch single product by ID
-        const res = await getProductById(id as string);
+        const res = await getProductBySlug(slug as string);
 
         if (res.success === true) {
           setProductDetails(res?.data);
@@ -57,7 +60,7 @@ export default function ProductDetailPage() {
     }
 
     fetchProduct();
-  }, [id]);
+  }, [slug]);
 
   useEffect(() => {
     // 🔹 Fetch related products by categoryId
@@ -67,7 +70,7 @@ export default function ProductDetailPage() {
     const handleRelatedProducFetch = async () => {
       const related = await getProductsByCategory(relatedCategoryId);
       if (related.status === 200) {
-        const filtered = related.data?.filter((p) => p.id !== id);
+        const filtered = related.data?.filter((p) => p.slug !== slug);
         setRelatedProducts(filtered ?? []);
       }
     };
@@ -77,6 +80,11 @@ export default function ProductDetailPage() {
   if (loading) return <ProductDetailSkeleton />;
   if (!productDetails)
     return <div className="text-center py-20">Product not found</div>;
+
+  const allCategories: CategoryInfo[] = [
+    ...(productDetails.parentCategories || []),
+    ...(productDetails.category ? [productDetails.category] : []),
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background">
@@ -97,72 +105,25 @@ export default function ProductDetailPage() {
 
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/market-place">
+                  <BreadcrumbLink href="/marketplace">
                     Market place
                   </BreadcrumbLink>
                 </BreadcrumbItem>
 
-                {productDetails.parentCategories?.map(
-                  (
-                    parentCat: { name: string; slug: string },
-                    index: number
-                  ) => (
-                    <React.Fragment key={index}>
+                {allCategories.map((cat, index) => {
+                  const href = `/category/${allCategories
+                    .slice(0, index + 1)
+                    .map((c) => c.slug)
+                    .join("/")}`;
+                  return (
+                    <React.Fragment key={cat.slug}>
                       <BreadcrumbSeparator />
                       <BreadcrumbItem>
-                        <BreadcrumbLink
-                          href={`/${productDetails.parentCategories
-                            .slice(0, index + 1)
-                            .map((cat: any) => cat.slug)
-                            .join("/")}`}
-                        >
-                          {parentCat.name}
-                        </BreadcrumbLink>
+                        <BreadcrumbLink href={href}>{cat.name}</BreadcrumbLink>
                       </BreadcrumbItem>
                     </React.Fragment>
-                  )
-                )}
-                {productDetails.parentCategories &&
-                  productDetails.parentCategories.length > 0 &&
-                  productDetails.parentCategories.map(
-                    (
-                      parentCat: { name: string; slug: string },
-                      index: number
-                    ) => (
-                      <React.Fragment key={index}>
-                        <BreadcrumbSeparator />
-                        <BreadcrumbItem>
-                          <BreadcrumbLink
-                            href={
-                              index === 0
-                                ? `/category/${parentCat.slug}`
-                                : `/category/${productDetails.parentCategories
-                                    .slice(0, index + 1)
-                                    .map((cat: any) => cat.slug)
-                                    .join("/")}`
-                            }
-                          >
-                            {parentCat.name}
-                          </BreadcrumbLink>
-                        </BreadcrumbItem>
-                      </React.Fragment>
-                    )
-                  )}
-
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbLink
-                    href={
-                      productDetails.parentCategories
-                        ? `/${productDetails.parentCategories
-                            .map((cat: any) => cat.slug)
-                            .join("/")}/${productDetails.category?.slug}`
-                        : `/${productDetails.category?.slug}`
-                    }
-                  >
-                    {productDetails.category?.name}
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
+                  );
+                })}
 
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
@@ -188,8 +149,9 @@ export default function ProductDetailPage() {
           {/* Right - Info */}
           <div className="w-full lg:w-[47%]">
             <ProductInfo
+              product={productDetails}
               name={productDetails.name}
-              price={productDetails.price}
+              price={productDetails.price ?? ""}
               description={productDetails.description}
               category={productDetails?.category?.name}
               metadata={productDetails.metadata}

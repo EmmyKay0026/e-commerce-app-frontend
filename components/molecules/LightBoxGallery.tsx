@@ -1,4 +1,5 @@
 "use client";
+import { constructImageUrl } from "@/lib/utils";
 import Image from "next/image";
 import React, { useState } from "react";
 import Lightbox from "yet-another-react-lightbox";
@@ -17,7 +18,7 @@ const LightboxGallery: React.FC<LightboxGalleryProps> = ({ images }) => {
         {images.map((img, i) => (
           <Image
             key={i}
-            src={img}
+            src={constructImageUrl(img)}
             alt={`Product ${i}`}
             width={96}
             height={96}

@@ -26,6 +26,7 @@ import { useUserStore } from "@/store/useUserStore";
 import { useAuthModal } from "@/store/useAuthModal";
 import { toast } from "sonner";
 import { supabase } from "@/config/supabase";
+import { constructImageUrl } from "@/lib/utils";
 
 export default function Navbar() {
   const [showSearch, setShowSearch] = useState(false);
@@ -231,7 +232,7 @@ export default function Navbar() {
                         if (e.key === "Enter") {
                           const q = (e.currentTarget as HTMLInputElement).value;
                           router.push(
-                            `/market-place?q=${encodeURIComponent(q)}`
+                            `/marketplace?q=${encodeURIComponent(q)}`
                           );
                           setSearchResults(null);
                         }
@@ -273,13 +274,13 @@ export default function Navbar() {
                                   className="px-3 py-2 hover:bg-gray-50"
                                 >
                                   <Link
-                                    href={`/products/${p.id}`}
+                                    href={`/products/${p.slug}`}
                                     className="flex items-center gap-3"
                                   >
                                     <div className="h-10 w-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
                                       {p.images && p.images[0] ? (
                                         <Image
-                                          src={p.images[0]}
+                                          src={constructImageUrl(p.images[0])}
                                           alt={p.name}
                                           width={40}
                                           height={40}
@@ -329,7 +330,7 @@ export default function Navbar() {
                     <Link href="/about-us">About us</Link>
                   </li>
                   <li className="hover:text-secondary transition-colors cursor-pointer">
-                    <Link href="/market-place">Marketplace</Link>
+                    <Link href="/marketplace">Marketplace</Link>
                   </li>
                   <li className="hover:text-secondary transition-colors cursor-pointer">
                     <Link
@@ -370,7 +371,7 @@ export default function Navbar() {
                     <span>Categories</span>
                   </div>
                   <Link
-                    href="/market-place"
+                    href="/marketplace"
                     className="cursor-pointer hover:text-gray-200"
                   >
                     Marketplace
@@ -459,7 +460,7 @@ export default function Navbar() {
                 <Button className="bg-white hover:bg-transparent   cursor-pointer text-black px-5 rounded mx-2 transition-all flex items-center gap-2">
                   <Image
                     alt={user.first_name}
-                    src={user.profile_picture ?? "/user.png"}
+                    src={constructImageUrl(user.profile_picture ?? "/user.png")}
                     width={50}
                     height={50}
                     className="object-cover rounded-full w-10 h-10"
@@ -489,7 +490,7 @@ export default function Navbar() {
               >
                 <Link
                   className="flex gap-2"
-                  href={user ? `/user/${user.id}/profile` : "#"}
+                  href={user ? `/user/${user.profile_link}/profile` : "#"}
                 >
                   <User className="w-5 h-5" />
                   My account
@@ -530,7 +531,7 @@ export default function Navbar() {
               >
                 <Link
                   className="flex gap-2"
-                  href={user ? `/user/${user.id}/saved` : "#"}
+                  href={user ? `/user/${user.profile_link}/saved` : "#"}
                 >
                   <Bookmark className="w-5 h-5" />
                   Saved items
@@ -540,10 +541,7 @@ export default function Navbar() {
                 onClick={user ? () => {} : () => setIsOpen(true)}
                 className="hover:text-secondary cursor-pointer"
               >
-                <Link
-                  className="flex gap-2"
-                  href={user ? `/settings` : "#"}
-                >
+                <Link className="flex gap-2" href={user ? `/settings` : "#"}>
                   <Settings className="w-5 h-5" />
                   Settings
                 </Link>
@@ -614,7 +612,7 @@ export default function Navbar() {
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   const q = (e.currentTarget as HTMLInputElement).value;
-                  router.push(`/market-place?q=${encodeURIComponent(q)}`);
+                  router.push(`/marketplace?q=${encodeURIComponent(q)}`);
                   setSearchResults(null);
                   setMobileSearch(false);
                 }
@@ -657,13 +655,13 @@ export default function Navbar() {
                       {searchResults.slice(0, 6).map((p) => (
                         <li key={p.id} className="px-3 py-2 hover:bg-gray-50">
                           <Link
-                            href={`/products/${p.id}`}
+                            href={`/products/${p.slug}`}
                             className="flex items-center gap-3"
                           >
                             <div className="h-10 w-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
                               {p.images && p.images[0] ? (
                                 <Image
-                                  src={p.images[0]}
+                                  src={constructImageUrl(p.images[0])}
                                   alt={p.name}
                                   width={40}
                                   height={40}

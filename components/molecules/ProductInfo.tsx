@@ -15,14 +15,15 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
-import { BusinessProfile, User } from "@/types/models";
-import { cn, convertToCustomFormat } from "@/lib/utils";
+import { BusinessProfile, Product, User } from "@/types/models";
+import { cn, constructImageUrl, convertToCustomFormat } from "@/lib/utils";
 import Link from "next/link";
 import ShowContactButton from "../atoms/ShowContactButton";
 import { updateSavedItems } from "@/services/userService";
 import { useUserStore } from "@/store/useUserStore";
 
 interface ProductInfoProps {
+  product: Product;
   name: string;
   price: string;
   currency?: string;
@@ -38,6 +39,7 @@ interface ProductInfoProps {
 }
 
 export function ProductInfo({
+  product,
   name,
   price,
   currency = "₦",
@@ -53,7 +55,7 @@ export function ProductInfo({
   const [quantity, setQuantity] = useState(minOrder);
   const [isSaved, setIsSaved] = useState<boolean>(false);
   const user = useUserStore((state) => state.user);
-  const convertedDate = convertToCustomFormat(dateOfPosting);
+  const convertedDate = convertToCustomFormat(product.created_at);
   // console.log(convertedDate);
 
   useEffect(() => {
@@ -61,7 +63,7 @@ export function ProductInfo({
     // console.log(user?.saved_items);
 
     const checkSaved = user?.saved_items?.some(
-      (savedId) => savedId == product_id
+      (savedId) => savedId == product.id
     );
     // console.log(checkSaved);
 
@@ -71,10 +73,10 @@ export function ProductInfo({
     return () => {
       setIsSaved(false);
     };
-  }, [user, product_id]);
+  }, [user, product.id]);
 
   const handleSaveItem = async () => {
-    const res = await updateSavedItems(product_id);
+    const res = await updateSavedItems(product.id);
     // console.log(res);
   };
 
@@ -91,7 +93,9 @@ export function ProductInfo({
           {convertedDate?.year}
         </span>
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-balance mb-2">{name}</h1>
+          <h1 className="text-3xl font-bold text-balance mb-2">
+            {product.name}
+          </h1>
 
           <span
             onClick={handleSaveItem}
@@ -115,26 +119,35 @@ export function ProductInfo({
       </div>
 
       {/* Description */}
-      {description && (
+      {product.description && (
         <div>
           <h3 className="font-semibold mb-2">Description</h3>
-          <p className="text-muted-foreground leading-relaxed">{description}</p>
+          <p className="text-muted-foreground leading-relaxed">
+            {product.description}
+          </p>
         </div>
       )}
 
       {/* Price Section */}
       <div className="space-y-2">
         <div className="flex items-baseline gap-2">
-          <span className="text-4xl font-bold text-foreground">
-            {/* {currency} */}
-            {price}
-          </span>
+          {product.price_input_mode == "enter" ? (
+            <span className="text-4xl font-bold text-foreground">
+              {currency}
+              {Number(product.price).toLocaleString()}
+            </span>
+          ) : (
+            <span className="text-4xl font-bold text-foreground">
+              Contact Seller for Price
+            </span>
+          )}
+          {/* <span className="text-2xl text-muted-foreground">/unit</span> */}
         </div>
       </div>
 
       <Separator />
       {/* Product Description */}
-      {metadata && (
+      {/* {metadata && (
         <>
           {" "}
           <article className="">
@@ -157,7 +170,7 @@ export function ProductInfo({
           </article>
           <Separator />
         </>
-      )}
+      )} */}
       {/* Supplier Info */}
       {vendor && (
         <>
@@ -165,7 +178,9 @@ export function ProductInfo({
             <h3 className="font-semibold">Vendor Information</h3>
             <div className="flex flex-col  lg:items-center gap-2 lg:flex-row">
               <Image
-                src={vendor?.cover_image || "/placeholder.svg"}
+                src={constructImageUrl(
+                  vendor?.cover_image || "/placeholder.svg"
+                )}
                 alt={vendor.business_name || "Vendor"}
                 width={40}
                 height={40}

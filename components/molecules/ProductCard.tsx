@@ -3,13 +3,14 @@
 import Image from "next/image";
 import React from "react";
 import type { Product } from "@/data/products";
+import { constructImageUrl } from "@/lib/utils";
 
 export default function ProductCard({ product }: { product: Product }) {
   return (
     <article className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition overflow-hidden">
       <div className="relative w-full h-44 sm:h-48">
         <Image
-          src={product.image ?? "/samples/placeholder.jpg"}
+          src={constructImageUrl(product.image ?? "/samples/placeholder.jpg")}
           alt={product.title}
           fill
           className="object-cover"

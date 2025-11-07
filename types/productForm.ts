@@ -35,29 +35,46 @@ export const clothingSchema = z.object({
 });
 
 // Combined schema
-export const productFormSchema = z.object({
-  // Step 1
-  images: z.array(z.instanceof(File)).min(1, "At least one image is required"),
-  category: z.object({
-    id: z.string().min(1, "Please select a category"),
-    name: z.string(),
-  }),
-  location: z.string().min(2, "Location must be at least 2 characters"),
+export const productFormSchema = z
+  .object({
+    // Step 1
+    images: z
+      .array(z.instanceof(File))
+      .min(3, "At least 3 image is required")
+      .max(10, "You can upload up to 10 images"),
+    category: z.object({
+      id: z.string().min(1, "Please select a category"),
+      name: z.string(),
+    }),
+    location_state: z.string().min(2, "Select a state"),
+    location_lga: z.string().min(2, "Select a local government area"),
 
-  // Step 2 - Product Details
-  name: z.string().min(2, "Product name must be at least 2 characters"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
-  price: z.string().min(1, "Price is required"),
-  priceType: z
-    .enum(["fixed", "negotiable"])
-    .describe("Please select a price type")
-    .optional(),
-  saleType: z
-    .enum(["wholesale", "retail"])
-    .describe("Please indicate if the price is negotiable")
-    .optional(),
-  features: z.string().min(1, "At least one feature is required"),
-});
+    // Step 2 - Product Details
+    name: z.string().min(2, "Product name must be at least 2 characters"),
+    description: z
+      .string()
+      .min(10, "Description must be at least 10 characters"),
+    price: z.string().optional(),
+    price_input_mode: z.enum(["enter", "quote"]).default("enter"),
+    priceType: z
+      .enum(["fixed", "negotiable"])
+      .describe("Please select a price type")
+      .optional(),
+    saleType: z
+      .enum(["wholesale", "retail"])
+      .describe("Please indicate if the price is negotiable")
+      .optional(),
+    features: z.string().min(1, "At least one feature is required"),
+  })
+  .superRefine((data, ctx) => {
+    if (data.price_input_mode === "enter" && !data.price) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["price"],
+        message: "Price is required when entering a price",
+      });
+    }
+  });
 
 export type ProductFormData = z.infer<typeof productFormSchema>;
 

@@ -9,6 +9,8 @@ import { Pencil } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 
+import { listStates, getLga } from "@/services/locationService";
+
 interface Step3Props {
   form: UseFormReturn<ProductFormData>;
   onEdit: (step: number) => void;
@@ -17,6 +19,8 @@ interface Step3Props {
 export function Step3({ form, onEdit }: Step3Props) {
   const formData = form.watch();
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [stateName, setStateName] = useState("Loading...");
+  const [lgaName, setLgaName] = useState("Loading...");
 
   useEffect(() => {
     if (formData.images) {
@@ -28,6 +32,29 @@ export function Step3({ form, onEdit }: Step3Props) {
       };
     }
   }, [formData.images]);
+
+  useEffect(() => {
+    const fetchLocationNames = async () => {
+      if (formData.location_state) {
+        const statesResult = await listStates();
+        if (statesResult.success) {
+          const state = statesResult.data?.find(
+            (s) => s.state_id === formData.location_state
+          );
+          setStateName(state ? state.name : "Unknown State");
+        }
+      }
+
+      if (formData.location_lga) {
+        const lgaResult = await getLga(formData.location_lga);
+        if (lgaResult.success) {
+          setLgaName(lgaResult.data ? lgaResult.data.name : "Unknown LGA");
+        }
+      }
+    };
+
+    fetchLocationNames();
+  }, [formData.location_state, formData.location_lga]);
 
   return (
     <div className="space-y-6">
@@ -88,7 +115,9 @@ export function Step3({ form, onEdit }: Step3Props) {
               <h4 className="text-sm font-medium text-muted-foreground">
                 Location
               </h4>
-              <p className="mt-1 capitalize">{formData.location}</p>
+              <p className="mt-1 capitalize">
+                {lgaName}, {stateName}
+              </p>
             </div>
           </div>
         </CardContent>
@@ -121,7 +150,11 @@ export function Step3({ form, onEdit }: Step3Props) {
               <h4 className="text-sm font-medium text-muted-foreground">
                 Price
               </h4>
-              <p className="mt-1 font-medium text-lg">₦{formData.price}</p>
+              {formData.price_input_mode === "enter" ? (
+                <p className="mt-1 font-medium text-lg">₦{formData.price}</p>
+              ) : (
+                "Contact seller for price"
+              )}
             </div>
           </div>
 

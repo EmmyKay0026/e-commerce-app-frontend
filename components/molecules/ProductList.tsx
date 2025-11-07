@@ -75,7 +75,7 @@ const ProductList = ({ product }: { product: Product }) => {
           className="w-8 h-8 lg:w-4 lg:h-4 text-muted-foreground absolute top-3 right-3 lg:static"
         />
         <div className="flex items-center gap-3">
-          <Link className="" href={`/products/${product.id}`}>
+          <Link className="" href={`/products/${product.slug}`}>
             <Button
               variant={"link"}
               className="w-full mt-3 text-primary font-bold"

@@ -29,7 +29,10 @@ import {
   demoWishlist,
 } from "@/constants/product";
 import { getBusinessProducts } from "@/services/productService";
-import { getPublicProfile } from "@/services/userService";
+import {
+  getPublicProfile,
+  getPublicProfileByProfileLink,
+} from "@/services/userService";
 import { useUserStore } from "@/store/useUserStore";
 import { Product } from "@/types/models";
 import { PopoverClose } from "@radix-ui/react-popover";
@@ -78,7 +81,7 @@ const UserProductList = () => {
       if (!id) return;
       setIsPageLoading(true);
 
-      const userRes = await getPublicProfile(id?.toString());
+      const userRes = await getPublicProfileByProfileLink(id?.toString());
       const userDetails = userRes.data;
 
       if (!userDetails || !userDetails?.business_profile) return;

@@ -8,7 +8,10 @@ import { cn } from "@/lib/utils";
 import UserProfileCard from "../molecules/UserProfileCard"; // ✅ correct import
 import { useUserStore } from "@/store/useUserStore";
 import { User } from "@/types/models";
-import { getPublicProfile } from "@/services/userService";
+import {
+  getPublicProfile,
+  getPublicProfileByProfileLink,
+} from "@/services/userService";
 
 const TopBar = () => {
   const [activeTab, setActiveTab] = useState("posts");
@@ -20,7 +23,7 @@ const TopBar = () => {
   const router = useRouter();
   const params = useParams(); // 👈 get route parameters like { id: "1" }
   const pathname = usePathname(); // ✅ get current route path
-  const userId = params?.id as string;
+  const userId = params?.id as string; //This is actually the profile link but left as userId for legacy reasons
 
   useEffect(() => {
     if (!userId) return;
@@ -35,9 +38,9 @@ const TopBar = () => {
     }
 
     const getViewedUserDetails = async () => {
-      const res = await getPublicProfile(userId);
+      const res = await getPublicProfileByProfileLink(userId);
       if (res.status === 200 && res.data) {
-        console.log("Res", res);
+        // console.log("Res", res);
 
         setProfileDetails(res.data);
       } else {

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { cn } from "@/lib/utils";
+import { cn, formatPhoneNumber } from "@/lib/utils";
 import { useIsMobile as useMediaQuery } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import {
@@ -306,8 +306,8 @@ function ProfileForm({ className }: React.ComponentProps<"form">) {
         <Label htmlFor="phone_number">Phone number</Label>
         <Input
           id="phone_number"
-          value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
+          value={formatPhoneNumber(phoneNumber)}
+          onChange={(e) => setPhoneNumber(formatPhoneNumber(e.target.value))}
         />
       </div>
 
@@ -315,8 +315,8 @@ function ProfileForm({ className }: React.ComponentProps<"form">) {
         <Label htmlFor="whatsapp_number">WhatsApp number</Label>
         <Input
           id="whatsapp_number"
-          value={whatsAppNumber}
-          onChange={(e) => setWhatsAppNumber(e.target.value)}
+          value={formatPhoneNumber(whatsAppNumber)}
+          onChange={(e) => setWhatsAppNumber(formatPhoneNumber(e.target.value))}
         />
       </div>
 

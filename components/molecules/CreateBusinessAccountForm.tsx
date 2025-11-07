@@ -1,228 +1,274 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { createBusinessProfile } from "@/services/businessProfileService";
+import React from "react";
 import Link from "next/link";
+import { formatPhoneNumber } from "@/lib/utils";
 
-export default function CreateBusinessAccountForm() {
-  const router = useRouter();
-  const [businessName, setBusinessName] = useState("");
-  const [slug, setSlug] = useState("");
-  const [description, setDescription] = useState("");
-  const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [coverPreview, setCoverPreview] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [createdBusinessSlug, setCreatedBusinessSlug] = useState("");
+interface CreateBusinessAccountFormProps {
+  businessName: string;
+  setBusinessName: (value: string) => void;
+  slug: string;
+  setSlug: (value: string) => void;
+  sanitizeSlug: (value: string) => string;
+  description: string;
+  setDescription: (value: string) => void;
+  coverPreview: string | null;
+  handleFileChange: (files: FileList | null) => void;
+  phoneNumber: string;
+  setPhoneNumber: (value: string) => void;
+  whatsappNumber: string;
+  setWhatsappNumber: (value: string) => void;
+  businessEmail: string;
+  setBusinessEmail: (value: string) => void;
+  businessAddress: string;
+  setBusinessAddress: (value: string) => void;
+  handleSubmit: (e: React.FormEvent) => void;
+  isSubmitting: boolean;
+  error: string | null;
+  fieldErrors: Record<string, string>;
+}
 
-  const handleFileChange = (f?: FileList | null) => {
-    const file = f && f.length > 0 ? f[0] : null;
-    setCoverFile(file);
-    if (!file) {
-      setCoverPreview(null);
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => setCoverPreview(String(reader.result));
-    reader.readAsDataURL(file);
-  };
-
-  const sanitizeSlug = (s: string) =>
-    s
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9\-\s]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-");
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    if (!businessName.trim()) {
-      setError("Business name is required.");
-      return;
-    }
-    if (!slug.trim()) {
-      setError("Slug is required.");
-      return;
-    }
-
-    const finalSlug = sanitizeSlug(slug);
-    setIsSubmitting(true);
-    try {
-      const payload: any = {
-        business_name: businessName,
-        slug: finalSlug,
-        description: description,
-        cover_image: coverPreview || "",
-        status: "active",
-      };
-
-      const resp = await createBusinessProfile(payload);
-
-      if (resp.success) {
-        setCreatedBusinessSlug(finalSlug);
-        setShowSuccessModal(true);
-        setBusinessName("");
-        setSlug("");
-        setDescription("");
-        setCoverFile(null);
-        setCoverPreview(null);
-
-        router.refresh();
-      } else {
-        setError(resp.error || "Failed to create business profile.");
-      }
-    } catch (err: any) {
-      setError(err?.message || "An unexpected error occurred.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
+export default function CreateBusinessAccountForm({
+  businessName,
+  setBusinessName,
+  slug,
+  setSlug,
+  sanitizeSlug,
+  description,
+  setDescription,
+  coverPreview,
+  handleFileChange,
+  phoneNumber,
+  setPhoneNumber,
+  whatsappNumber,
+  setWhatsappNumber,
+  businessEmail,
+  setBusinessEmail,
+  businessAddress,
+  setBusinessAddress,
+  handleSubmit,
+  isSubmitting,
+  error,
+  fieldErrors,
+}: CreateBusinessAccountFormProps) {
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4">
-      <div className="w-full max-w-2xl bg-white rounded-lg shadow p-6">
-        <h1 className="text-2xl font-semibold mb-4">Create Business Account</h1>
-        <p className="">
-          Before adding a product, you must create a business account.
-        </p>
-        <p className="">
-          Need a guide creating your business, read the{" "}
-          <Link
-            href={"/guide/creating-a-business-account"}
-            className="text-primary  italic underline "
-          >
-            business guide.
-          </Link>
-        </p>
-
-        <form onSubmit={handleSubmit} className="space-y-4 mt-7">
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Business name
-            </label>
-            <input
-              value={businessName}
-              onChange={(e) => setBusinessName(e.target.value)}
-              className="w-full border rounded px-3 py-2"
-              placeholder="My Awesome Store"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Slug</label>
-            <input
-              value={slug}
-              onChange={(e) => setSlug(e.target.value)}
-              onBlur={(e) => setSlug(sanitizeSlug(e.target.value))}
-              className="w-full border rounded px-3 py-2"
-              placeholder="my-awesome-store"
-              required
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              URL-friendly identifier used in your shop link
-            </p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Description
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full border rounded px-3 py-2 h-24"
-              placeholder="Tell customers about your business"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Cover image
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => handleFileChange(e.target.files)}
-              className="block"
-            />
-            {coverPreview && (
-              <img
-                src={coverPreview}
-                alt="cover preview"
-                className="mt-2 h-40 object-cover w-full rounded"
-              />
-            )}
-            <p className="text-xs text-muted-foreground mt-1">
-              Optional: upload a cover image for your store (will be sent as
-              data URL). Replace with proper upload in production.
-            </p>
-          </div>
-
-          {error && <div className="text-sm text-red-600">{error}</div>}
-
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="bg-primary text-white px-4 py-2 rounded disabled:opacity-60"
-            >
-              {isSubmitting ? "Creating..." : "Create Business Account"}
-            </button>
-          </div>
-        </form>
+    <form onSubmit={handleSubmit} className="space-y-4 mt-7">
+      <div>
+        <label className="block text-sm font-medium mb-1">
+          Business name
+        </label>
+        <input
+          value={businessName}
+          onChange={(e) => setBusinessName(e.target.value)}
+          className="w-full border rounded px-3 py-2"
+          placeholder="My Awesome Store"
+          required
+        />
+        {fieldErrors.business_name && (
+          <p className="text-sm text-red-500 mt-1">
+            {fieldErrors.business_name}
+          </p>
+        )}
       </div>
 
-      {showSuccessModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg
-                  className="w-8 h-8 text-green-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+      <div>
+        <label className="block text-sm font-medium mb-1">Slug</label>
+        <input
+          value={slug}
+          onChange={(e) => setSlug(e.target.value)}
+          onBlur={(e) => setSlug(sanitizeSlug(e.target.value))}
+          className="w-full border rounded px-3 py-2"
+          placeholder="my-awesome-store"
+          required
+        />
+        {fieldErrors.slug && (
+          <p className="text-sm text-red-500 mt-1">{fieldErrors.slug}</p>
+        )}
+        <p className="text-xs text-muted-foreground mt-1">
+          URL-friendly identifier used in your shop link
+        </p>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">
+          Description
+        </label>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="w-full border rounded px-3 py-2 h-24"
+          placeholder="Tell customers about your business"
+        />
+        {fieldErrors.description && (
+          <p className="text-sm text-red-500 mt-1">
+            {fieldErrors.description}
+          </p>
+        )}
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">
+          Cover image
+        </label>
+        <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
+          <div className="text-center">
+            {coverPreview ? (
+              <div className="relative w-48 h-48 mx-auto mb-4">
+                <img
+                  src={coverPreview}
+                  alt="cover preview"
+                  className="h-full w-full object-cover rounded-md"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleFileChange(null)}
+                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
               </div>
-              <h3 className="text-lg font-semibold mb-2">
-                Business Account Created!
-              </h3>
-              <p className="text-gray-600 mb-4">
-                Your business profile has been created successfully. You can now
-                start managing your store.
-              </p>
-              <div className="flex gap-3 justify-center">
-                <Link
-                  href={`/sell`}
-                  onClick={() => router.refresh()}
-                  className="bg-primary text-white px-4 py-2 rounded"
-                >
-                  Add new product
-                </Link>
-                <Link
-                  href={`/shop/${createdBusinessSlug}`}
-                  className="bg-gray-100 text-gray-700 px-4 py-2 rounded"
-                >
-                  View business page
-                </Link>
-              </div>
+            ) : (
+              <svg
+                className="mx-auto h-12 w-12 text-gray-300"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5a.75.75 0 00.75-.75v-1.94l-2.432-2.432a1.125 1.125 0 00-1.588 0L9.75 17.25l-5.154-5.154a1.125 1.125 0 00-1.588 0L3 16.06zm10.5-7.81a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            )}
+
+            <div className="mt-4 flex text-sm leading-6 text-gray-600">
+              <label
+                htmlFor="file-upload"
+                className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
+              >
+                <span>Upload a file</span>
+                <input
+                  id="file-upload"
+                  name="file-upload"
+                  type="file"
+                  className="sr-only"
+                  accept="image/*"
+                  onChange={(e) => handleFileChange(e.target.files)}
+                />
+              </label>
+              <p className="pl-1">or drag and drop</p>
             </div>
+            <p className="text-xs leading-5 text-gray-600">PNG, JPG, GIF up to 10MB</p>
           </div>
         </div>
-      )}
-    </div>
+        {fieldErrors.cover_image && (
+          <p className="text-sm text-red-500 mt-1">
+            {fieldErrors.cover_image}
+          </p>
+        )}
+      </div>
+
+      <div className="border-t pt-4">
+        <h2 className="text-lg font-semibold">Business Contact</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          This information will be displayed on your shop page. If you don't provide new details, your existing contact information will be used.
+        </p>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Business Email
+          </label>
+          <input
+            type="email"
+            value={businessEmail}
+            onChange={(e) => setBusinessEmail(e.target.value)}
+            className="w-full border rounded px-3 py-2"
+            placeholder="contact@example.com"
+          />
+          {fieldErrors.business_email && (
+            <p className="text-sm text-red-500 mt-1">
+              {fieldErrors.business_email}
+            </p>
+          )}
+        </div>
+
+        <div className="mt-4">
+          <label className="block text-sm font-medium mb-1">
+            Phone Number
+          </label>
+          <input
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(formatPhoneNumber(e.target.value))}
+            className="w-full border rounded px-3 py-2"
+            placeholder="+234..."
+          />
+          {fieldErrors.phone_number && (
+            <p className="text-sm text-red-500 mt-1">
+              {fieldErrors.phone_number}
+            </p>
+          )}
+        </div>
+
+        <div className="mt-4">
+          <label className="block text-sm font-medium mb-1">
+            WhatsApp Number
+          </label>
+          <input
+            value={whatsappNumber}
+            onChange={(e) => setWhatsappNumber(formatPhoneNumber(e.target.value))}
+            className="w-full border rounded px-3 py-2"
+            placeholder="+234..."
+          />
+          {fieldErrors.whatsapp_number && (
+            <p className="text-sm text-red-500 mt-1">
+              {fieldErrors.whatsapp_number}
+            </p>
+          )}
+        </div>
+
+        <div className="mt-4">
+          <label className="block text-sm font-medium mb-1">
+            Business Address
+          </label>
+          <textarea
+            value={businessAddress}
+            onChange={(e) => setBusinessAddress(e.target.value)}
+            className="w-full border rounded px-3 py-2 h-24"
+            placeholder="123 Business St, Suite 100, City, Country"
+          />
+          {fieldErrors.business_address && (
+            <p className="text-sm text-red-500 mt-1">
+              {fieldErrors.business_address}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {error && <div className="text-sm text-red-600">{error}</div>}
+
+      <div className="flex justify-end">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="bg-primary text-white px-4 py-2 rounded disabled:opacity-60"
+        >
+          {isSubmitting ? "Creating..." : "Create Business Account"}
+        </button>
+      </div>
+    </form>
   );
 }

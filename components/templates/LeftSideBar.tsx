@@ -14,7 +14,10 @@ import UserProfileCompletion from "../molecules/UserProfileCompletion";
 import UserSideBarMenu from "../molecules/UserSideBarMenu";
 import { useUserStore } from "@/store/useUserStore";
 import { User } from "@/types/models";
-import { getPublicProfile } from "@/services/userService";
+import {
+  getPublicProfile,
+  getPublicProfileByProfileLink,
+} from "@/services/userService";
 
 const LeftBar = () => {
   const isOwner = useUserStore((state) => state.isOwner);
@@ -26,11 +29,34 @@ const LeftBar = () => {
   const params = useParams();
   const router = useRouter();
 
-  const userId = params?.id as string; // Get /user/[id] from route
+  const profileLink = params?.id as string; // Get /user/[id] from route
 
   useEffect(() => {
-    if (!userId) return;
-    updateIsOwner(userId.toString());
+    if (!profileLink) return;
+    if (isOwner === true) {
+      setProfileDetails(currentUser);
+      return;
+    }
+
+    const getViewedUserDetails = async () => {
+      const res = await getPublicProfileByProfileLink(profileLink);
+      if (res.status === 200 && res.data) {
+        console.log("Res", res);
+
+        setProfileDetails(res.data);
+      } else {
+        setProfileDetails(null);
+      }
+      if (res.status === 404) {
+        router.push("/404");
+      }
+    };
+    getViewedUserDetails();
+  }, []);
+
+  useEffect(() => {
+    if (!profileLink) return;
+    updateIsOwner(profileLink.toString());
   }, []);
 
   // ✅ Logged-in user
@@ -55,29 +81,6 @@ const LeftBar = () => {
     window.addEventListener("resize", checkScreenSize);
     return () => window.removeEventListener("resize", checkScreenSize);
   }, [checkScreenSize]);
-
-  useEffect(() => {
-    if (!userId) return;
-    if (isOwner === true) {
-      setProfileDetails(currentUser);
-      return;
-    }
-
-    const getViewedUserDetails = async () => {
-      const res = await getPublicProfile(userId);
-      if (res.status === 200 && res.data) {
-        console.log("Res", res);
-
-        setProfileDetails(res.data);
-      } else {
-        setProfileDetails(null);
-      }
-      if (res.status === 404) {
-        router.push("/404");
-      }
-    };
-    getViewedUserDetails();
-  }, []);
 
   const handleMenuClick = () => {
     if (isMobile) updateHambugerShowState(hambugerShowState);
@@ -115,62 +118,6 @@ const LeftBar = () => {
         // currentUser={currentUser}
         profileDetails={profileDetails}
       />
-      {/* <UserProfileCompletion
-        // currentUser={currentUser}
-        profileDetails={profileDetails}
-      /> */}
-      {/* <div className="flex justify-center sticky items-center">
-        <Avatar className="h-15 w-15">
-          <AvatarImage
-            src={mockUser.profilePicture || "/placeholder.svg"}
-            alt={mockUser.fullName}
-          />
-          <AvatarFallback className="text-xl">
-            {getInitials(mockUser.fullName)}
-          </AvatarFallback>
-        </Avatar>
-      </div> */}
-
-      {/* <nav
-        className={cn(
-          "flex-col sticky justify-between items-stretch w-full h-full max-h-[450px]",
-          hambugerShowState ? "flex" : "hidden w-[0%]"
-        )}
-      >
-        <ul className="space-y-1">
-          {sideMenu.map((item) => (
-            <li key={item.id}>
-              <Link
-                href={item.link}
-                onClick={handleMenuClick}
-                className={cn(
-                  "flex items-center py-[10px] mt-3 w-full cursor-pointer gap-4 group hover:bg-primary transition-colors",
-                  isLinkActive(item.link) ? "bg-primary" : ""
-                )}
-              >
-                <div className="flex items-center w-[50%] gap-4 mx-auto">
-                  <img
-                    src={item.icon}
-                    alt={`${item.title} icon`}
-                    className={cn(
-                      "w-[18px] h-[18px] filter invert group-hover:invert-0 transition-all",
-                      isLinkActive(item.link) ? "invert-0" : "invert"
-                    )}
-                  />
-                  <span
-                    className={cn(
-                      "text-black group-hover:text-white transition-colors",
-                      isLinkActive(item.link) ? "text-white" : ""
-                    )}
-                  >
-                    {item.title}
-                  </span>
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav> */}
     </aside>
   );
 };

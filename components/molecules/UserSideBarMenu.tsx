@@ -104,7 +104,7 @@ export default function UserSideBarMenu({
   // const isOwner = Boolean(
   //   currentUser && String(currentUser.id) === String(profileUser.id)
   // );
-  const uid = routeUserId ?? String(profileDetails.id);
+  const uid = routeUserId ?? String(profileDetails.profile_link);
 
   const ownerItems = [
     { name: "My Products", href: `/user/${uid}/products`, icon: Store },

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, notFound } from "next/navigation";
 import { useUserStore } from "@/store/useUserStore";
-import { getProductById } from "@/services/productService";
+import { getProductBySlug } from "@/services/productService";
 import { Product } from "@/types/models";
 import { EditProductForm } from "@/components/organisms/EditProductForm";
 
@@ -23,7 +23,7 @@ export default function ProductEditPage() {
 
     const fetchProduct = async () => {
       try {
-        const result = await getProductById(productId as string);
+        const result = await getProductBySlug(productId as string);
         if (result.success && result.data) {
           setProduct(result.data);
         } else {

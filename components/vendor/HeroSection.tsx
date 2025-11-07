@@ -10,6 +10,7 @@ import { getInitials } from "@/services/userService";
 import { FaWhatsapp } from "react-icons/fa";
 import Link from "next/link";
 import ShowContactButton from "../atoms/ShowContactButton";
+import { constructImageUrl } from "@/lib/utils";
 
 export function HeroSection({
   vendor,
@@ -23,7 +24,7 @@ export function HeroSection({
         <Image
           fill
           sizes="100vw"
-          src={vendor?.cover_image ?? ""}
+          src={constructImageUrl(vendor?.cover_image ?? "")}
           alt={vendor?.business_name ?? vendor.user.first_name}
           className="h-full w-full object-cover"
         />
@@ -38,7 +39,7 @@ export function HeroSection({
             <div className="flex h-32 w-32 md:h-40 md:w-40 items-center justify-center rounded-2xl bg-background border-4 border-background shadow-xl">
               {vendor?.user.profile_picture ? (
                 <Image
-                  src={vendor.user.profile_picture}
+                  src={constructImageUrl(vendor.user.profile_picture)}
                   alt={vendor?.user?.first_name}
                   width={160}
                   height={360}
@@ -72,7 +73,7 @@ export function HeroSection({
                     Serving customers worldwide with quality products and
                     exceptional service since 2018. */}
                   </p>
-                  <Link href={`/user/${vendor.user.id}/profile`}>
+                  <Link href={`/user/${vendor.user.profile_link}/profile`}>
                     <p className="">
                       owned by{" "}
                       <span className="font-semibold text-foreground">
