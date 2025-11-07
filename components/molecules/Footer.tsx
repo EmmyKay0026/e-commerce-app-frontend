@@ -37,7 +37,7 @@ export default function Footer() {
               <Link href={"/markeplace"}>Marketplace</Link>
             </li>
             <li>
-              <Link href={"/"}>Contact Us</Link>
+              {/* <Link href={"/"}>Contact Us</Link> */}
             </li>
           </ul>
         </div>
@@ -46,10 +46,14 @@ export default function Footer() {
         <div>
           <h3 className="font-semibold mb-3">Useful Links</h3>
           <ul className="space-y-2 text-gray-400 text-sm">
-            <li>Return Policy</li>
-            <li>Product Condition Policy</li>
-            <li>Warranty Policy</li>
-            <li>Shipping Policy</li>
+            <li></li>
+            <li>
+              <Link href={"/guide/creating-a-business-account"}>How to be a vendor</Link>
+              </li>
+            <li>
+              <Link href={"/guide/how-to-sell"}>How to start selling</Link>
+              </li>
+            {/* <li>Shipping Policy</li> */}
             <li>Terms and Conditions</li>
             <li>Privacy Policy</li>
           </ul>
@@ -59,7 +63,7 @@ export default function Footer() {
         <div>
           <h3 className="font-semibold mb-3">Contact Us</h3>
           <p className="text-sm text-gray-400">
-            📍 Amadi-ama, Trans Amadi Industrial Layout,
+            Amadi-ama, Trans Amadi Industrial Layout,
             <br />
             Port Harcourt, Rivers State.
           </p>

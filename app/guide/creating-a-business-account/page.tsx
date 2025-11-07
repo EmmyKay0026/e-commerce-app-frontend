@@ -1,42 +1,21 @@
 // app/how to be a vendor/page.tsx
 import React from "react";
+import Hero from "@/components/organisms/SharedHeroSection";
 
 export default function VendorPage() {
   return (
     <main>
-      <HeroSection />
+      {/* Reusable Hero Component */}
+      <Hero
+        title=" How to become a Vendor"
+        subtitle="Ready to reach thousands of industrial buyers across Nigeria? Here's
+            what you need to get started."
+        backgroundImage="/hero-sections-img.png"
+      />
+
+      {/* Main Content */}
       <BeVendorContent />
     </main>
-  );
-}
-
-/* Hero section */
-function HeroSection() {
-  return (
-    <section
-      aria-label="About IndustrialMart hero"
-      className="relative h-[40vh] flex flex-col items-center w-full justify-center text-center px-4"
-      style={{
-        backgroundImage: "url('/industrial-bg.png')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
-      {/* Dark overlay for contrast */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[rgba(8,97,193,0.75)] to-[rgba(0, 0, 0, 0.1)]" />
-
-      <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-8 lg:px-12 h-full flex items-center justify-center text-center">
-        <div className="text-white">
-          <h1 className="text-2xl md:text-5xl lg:text-6xl font-extrabold">
-            How to become a Vendor
-          </h1>
-          <p className="mt-2 text-1xl md:text-1.5xl lg:text-2xl text-white/90 max-w-xl mx-auto">
-            Ready to reach thousands of industrial buyers across Nigeria? Here's
-            what you need to get started.
-          </p>
-        </div>
-      </div>
-    </section>
   );
 }
 
@@ -163,27 +142,41 @@ function BeVendorContent() {
         </div>
       </div>
 
-      {/* === What Happens Next Section === */}
-      <div className="max-w-3xl mx-auto text-center px-6 md:px-8 lg:px-12 pb-20">
-        <h3 className="text-xl md:text-2xl font-semibold text-[#0861C1] mb-4">
-          What happens next
-        </h3>
-        <p className="text-base md:text-lg text-black/90 leading-relaxed mb-6">
-          After approval, you can log in to your vendor dashboard and start
-          adding products, setting prices, and connecting with buyers.
-          <br />
-          Questions? Contact our vendor support team at{" "}
-          <a
-            href="mailto:vendorsupport@industrialmart.com"
-            className="text-[#0861C1] font-medium underline"
-          >
-            examplesupport@industrialmart.com
-          </a>
-          .
-        </p>
-        <button className="bg-[#0861C1] text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-[#074a96] transition">
-          Become a Vendor
-        </button>
+      <div
+        className="
+    relative h-[50vh] flex flex-col items-center justify-center 
+    w-full text-center px-4 overflow-hidden
+    bg-cover bg-no-repeat bg-[position:center_top_20%]
+  "
+        style={{
+          backgroundImage: "url('/hero-sections-img.png')",
+        }}
+      >
+        {/* Overlay (Behind Content) */}
+        <div className="absolute inset-0 z-0 bg-gradient-to-r from-[rgba(8,97,193,0.9)] to-[rgba(0,0,0,0.1)]" />
+
+        {/* === What Happens Next Section === */}
+        <div className="max-w-3xl mx-auto text-center px-6 md:px-8 lg:px-12 relative z-10">
+          <h3 className="text-xl md:text-4xl font-semibold text-white mb-4">
+            What happens next
+          </h3>
+          <p className="text-base md:text-lg text-white leading-relaxed mb-6">
+            After approval, you can log in to your vendor dashboard and start
+            adding products, setting prices, and connecting with buyers.
+            <br />
+            Questions? Contact our vendor support team at{" "}
+            <a
+              href="mailto:vendorsupport@industrialmart.com"
+              className="text-[#ffffff] font-medium underline"
+            >
+              examplesupport@industrialmart.com
+            </a>
+            .
+          </p>
+          <button className="bg-[#0861C1] text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-[#074a96] transition">
+            Become a Vendor
+          </button>
+        </div>
       </div>
     </section>
   );
