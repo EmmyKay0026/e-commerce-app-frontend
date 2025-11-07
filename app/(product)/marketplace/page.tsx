@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { listProducts } from "@/services/productService";
 import { Button } from "@/components/ui/button";
+import { constructImageUrl } from "@/lib/utils";
 
 const MarketPlace = () => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -165,7 +166,7 @@ const MarketPlace = () => {
   if (error) return <p className="text-center py-20 text-red-600">{error}</p>;
 
   return (
-    <div className="max-w-[100dvw] w-full px-4 md:px-6 lg:px-10">
+    <div className="max-w-dvw w-full px-4 md:px-6 lg:px-10">
       {/* Search bar */}
       <div
         id="hero-search"
@@ -186,7 +187,7 @@ const MarketPlace = () => {
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 const q = (e.currentTarget as HTMLInputElement).value;
-                router.push(`/market-place?q=${encodeURIComponent(q)}`);
+                router.push(`/marketplace?q=${encodeURIComponent(q)}`);
                 setSearchResults(null);
               }
             }}
@@ -235,13 +236,13 @@ const MarketPlace = () => {
                   {searchResults.slice(0, 6).map((p) => (
                     <li key={p.id} className="px-3 py-2 hover:bg-gray-50">
                       <Link
-                        href={`/products/${p.id}`}
+                        href={`/products/${p.slug}`}
                         className="flex items-center gap-3"
                       >
                         <div className="h-10 w-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
                           {p.images && p.images[0] ? (
                             <Image
-                              src={p.images[0]}
+                              src={constructImageUrl(p.images[0])}
                               alt={p.name}
                               width={40}
                               height={40}

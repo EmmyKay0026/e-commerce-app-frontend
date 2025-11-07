@@ -16,7 +16,7 @@ import { useAuthModal } from "@/store/useAuthModal";
 
 const staticNavItems = [
   { name: "Home", href: "/", icon: Home },
-  { name: "Marketplace", href: "/market-place", icon: Store },
+  { name: "Marketplace", href: "/marketplace", icon: Store },
   // Spacer will be inserted manually between index 1 and 2
   { name: "Products", href: "/products", icon: List },
 ];
@@ -38,7 +38,7 @@ export default function MobileBottomNav() {
       ...staticNavItems,
       {
         name: "Account",
-        href: user ? `/user/${user.id}/profile` : "#",
+        href: user ? `/user/${user.profile_link}/profile` : "#",
         icon: User,
       },
     ],

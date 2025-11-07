@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
+import { constructImageUrl } from "@/lib/utils";
 
 interface ProductCardGridProps {
   id: string;
@@ -56,7 +57,7 @@ export function ProductCardGrid({
       {/* Product Image */}
       <div className="relative aspect-square bg-muted group">
         <Image
-          src={image || "/placeholder.svg"}
+          src={constructImageUrl(image || "/placeholder.svg")}
           alt={image || "description of the image"}
           fill
           className="object-cover"
@@ -113,10 +114,7 @@ export function ProductCardGrid({
         </div> */}
 
         {/* Price */}
-        <div className="text-2xl font-bold text-foreground">
-          
-          {price}
-        </div>
+        <div className="text-2xl font-bold text-foreground">{price}</div>
 
         {/* Order Info */}
         {/* <div className="text-xs text-muted-foreground">

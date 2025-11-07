@@ -34,7 +34,7 @@ export default function Footer() {
               <Link href={"/about-us"}>About Us</Link>
             </li>
             <li>
-              <Link href={"/market-place"}>Marketplace</Link>
+              <Link href={"/markeplace"}>Marketplace</Link>
             </li>
             <li>
               {/* <Link href={"/"}>Contact Us</Link> */}

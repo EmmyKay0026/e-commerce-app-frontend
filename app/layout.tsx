@@ -7,6 +7,7 @@ import Navbar from "@/components/molecules/Navbar";
 import AuthModal from "@/components/organisms/AuthModal";
 // import { useAuthModal } from "@/store/useAuthModal";
 import { useFetchDataOnMount } from "@/store/useUserStore";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,7 +36,7 @@ export default function RootLayout({
         className={`overflow-x-hidden overflow-y-auto max-w-[100dvw] ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Navbar />
-
+        <Toaster />
         <AuthModal />
         {/* <SignModalManager />
         <RegisterModalManager /> */}

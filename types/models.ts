@@ -3,11 +3,11 @@
 export interface BusinessProfile {
   id?: string;
   owner_id?: string;
-  business_name: string;
-  business_email: string;
+  business_name?: string;
+  business_email?: string;
   business_phone: string;
 
-  business_whatsapp_number: string;
+  business_whatsapp_number?: string;
   cover_image?: string;
   address?: string;
   description?: string;
@@ -38,18 +38,30 @@ export interface User {
   suspended_status_release_date?: string;
 }
 
+export interface CategoryInfo {
+  name: string;
+  slug: string;
+}
+
 export interface Product {
   id: string; // UUID
   product_owner_id: string; // FK -> VendorProfile.id
   name: string;
   description: string;
-  price: string; // for display only (not transactions)
+  price: string | undefined; // for display only (not transactions)
   images: string[]; // URLs to Google Storage
   category_id?: string; // FK -> Category.id
+  category?: CategoryInfo;
+  parentCategories?: CategoryInfo[];
   tags?: string[];
   status: "active" | "inactive" | "deleted" | "pending_review";
   created_at: string;
-  location?: string;
+  location_lga?: string;
+  location_state?: string;
+  slug: string; // URL-friendly identifier
+  price_input_mode?: "enter" | "quote";
+  sale_type: "wholesale" | "retail";
+  price_type: "fixed" | "negotiable";
   metadata: Record<string, any>; // to contain more description of the item
   view_count?: string;
   business: {

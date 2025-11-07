@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Bookmark, Heart, MessageCircle, Save, Scale } from "lucide-react";
+import { constructImageUrl } from "@/lib/utils";
 
 export interface ProductCardListProps {
   id: string;
@@ -52,7 +53,7 @@ export function ProductCardList({
           {/* Product Image */}
           <div className="relative w-full md:w-48 h-48 flex-shrink-0 bg-muted rounded-lg overflow-hidden group">
             <Image
-              src={image || "/placeholder.svg"}
+              src={constructImageUrl(image || "/placeholder.svg")}
               alt={image || "description of the image"}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-300"
