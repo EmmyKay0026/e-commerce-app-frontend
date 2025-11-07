@@ -333,3 +333,33 @@ export const isRootCategory = (category: Category): boolean => {
 export const hasChildren = (category: Category): boolean => {
   return !!category.child_categories && category.child_categories.length > 0;
 };
+export const getCategoryWithParentCategories = async (
+  id: string
+): Promise<ServiceResult<Category>> => {
+  try {
+    const res = await api.get(`/categories/${id}/with-parent-cats`);
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        status: res.status,
+        data: res.data.data as Category,
+      };
+    }
+
+    return {
+      success: false,
+      status: res.status,
+      data: null,
+      error: `Unexpected status ${res.status}`,
+    };
+  } catch (err: any) {
+    const msg =
+      err?.response?.data?.error ||
+      err?.response?.data?.message ||
+      err?.message ||
+      "Network error";
+    const status = err?.response?.status;
+    return { success: false, status, data: null, error: msg };
+  }
+};

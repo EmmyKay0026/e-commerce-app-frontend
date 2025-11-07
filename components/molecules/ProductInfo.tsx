@@ -12,6 +12,7 @@ import {
   Share2,
   Phone,
   Bookmark,
+  MapPin,
 } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
@@ -146,6 +147,39 @@ export function ProductInfo({
       </div>
 
       <Separator />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {product.sale_type && (
+          <div>
+            <h3 className="font-semibold">Sale Type</h3>
+            <p className="text-muted-foreground capitalize">
+              {product.sale_type}
+            </p>
+          </div>
+        )}
+        {product.price_type && product.price_input_mode === "enter" && (
+          <div>
+            <h3 className="font-semibold">Price Type</h3>
+            <p className="text-muted-foreground capitalize">
+              {product.price_type}
+            </p>
+          </div>
+        )}
+        {product.location_lga && product.location_state && (
+          <div>
+            <h3 className="font-semibold">Location</h3>
+            {
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <MapPin className="h-4 w-4" />
+                <p className="text-muted-foreground capitalize">
+                  {product.location_lga}, {product.location_state}
+                </p>
+              </div>
+            }
+          </div>
+        )}
+      </div>
+
+      <Separator />
       {/* Product Description */}
       {/* {metadata && (
         <>
@@ -182,9 +216,9 @@ export function ProductInfo({
                   vendor?.cover_image || "/placeholder.svg"
                 )}
                 alt={vendor.business_name || "Vendor"}
-                width={40}
-                height={40}
-                className="w-10 h-10 rounded-full object-cover"
+                width={50}
+                height={50}
+                className="w-13 h-13 rounded-full object-cover"
               />
               <div className="">
                 <Link
@@ -193,7 +227,7 @@ export function ProductInfo({
                 >
                   {vendor?.business_name}
                 </Link>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground line-clamp-2">
                   {vendor?.description || "No description available."}
                 </p>
               </div>

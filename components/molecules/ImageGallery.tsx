@@ -43,7 +43,7 @@ export function ImageGallery({
 
         {/* Overlay Actions */}
         <div className="absolute top-4 right-4 flex gap-2">
-          <Button
+          {/* <Button
             size="icon"
             variant="secondary"
             className="rounded-full bg-background/80 backdrop-blur-sm hover:bg-background"
@@ -59,7 +59,7 @@ export function ImageGallery({
                 isFavorite ? "fill-secondary text-secondary" : ""
               }`}
             />
-          </Button>
+          </Button> */}
 
           <Dialog>
             <DialogTrigger asChild>
@@ -94,8 +94,8 @@ export function ImageGallery({
         index={index ?? 0}
       />
       {/* Thumbnail Grid */}
-      <article className="overflow-x-clip">
-        <div className="flex flex-wrap flex-row lg:flex-col gap-2 w-full lg:flex-nowrap lg:w-[25%] h-full lg:max-h-[500px] ">
+      <article className=" overflow-x-auto w-full h-auto md:w-[30%] md:h-[400px] md:overflow-x-clip overflow-y-auto">
+        <div className="flex flex-nowrap flex-row lg:flex-col gap-2 w-full lg:flex-nowrap lg:w-[25%] h-full lg:max-h-[500px] ">
           {images.map((image, index) => (
             <button
               key={index}

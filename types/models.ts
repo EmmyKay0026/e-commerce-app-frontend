@@ -84,6 +84,7 @@ export interface Category {
   icon?: string;
   image?: string;
   child_categories?: string[]; // Sub categories
+  parent_categories?: Category[];
 }
 
 export type State = {
