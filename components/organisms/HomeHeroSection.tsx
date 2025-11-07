@@ -114,7 +114,7 @@ const HomeHeroSection = () => {
     <section
       className="relative w-full h-auto py-20 lg:py-0 lg:h-[100dvh] flex items-center px-5 md:px-10 lg:px-20 text-center bg-fixed bg-cover bg-center bg-no-repeat"
       style={{
-        backgroundImage: `url('/oilandgas.jpeg')`,
+        backgroundImage: `url('/industrial-mart-img.png')`,
       }}
     >
       {/* Overlay */}

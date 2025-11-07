@@ -37,7 +37,7 @@ export default function Footer() {
               <Link href={"/market-place"}>Marketplace</Link>
             </li>
             <li>
-              <Link href={"/"}>Contact Us</Link>
+              {/* <Link href={"/"}>Contact Us</Link> */}
             </li>
           </ul>
         </div>
@@ -47,8 +47,12 @@ export default function Footer() {
           <h3 className="font-semibold mb-3">Useful Links</h3>
           <ul className="space-y-2 text-gray-400 text-sm">
             <li></li>
-            {/* <li>Product Condition Policy</li> */}
-            {/* <li>Warranty Policy</li> */}
+            <li>
+              <Link href={"/guide/creating-a-business-account"}>How to be a vendor</Link>
+              </li>
+            <li>
+              <Link href={"/guide/how-to-sell"}>How to start selling</Link>
+              </li>
             {/* <li>Shipping Policy</li> */}
             <li>Terms and Conditions</li>
             <li>Privacy Policy</li>
