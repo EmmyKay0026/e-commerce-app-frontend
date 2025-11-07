@@ -1,18 +1,13 @@
+// app/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "@/components/ui/sonner";
 import Footer from "@/components/molecules/Footer";
 import Navbar from "@/components/molecules/Navbar";
-import SignModalManager from "@/components/organisms/SignModalManager";
-import RegisterModalManager from "@/components/organisms/RegisterModalManager";
 import AuthModal from "@/components/organisms/AuthModal";
-import { useAuthModal } from "@/store/useAuthModal";
-import { useFetchDataOnMount } from "@/store/useUserStore";
-import { useFetchCategoriesOnMount } from "@/store/useCategoryStore";
-import { BASE_URL } from "@/services/categoryService";
-import Script from "next/script";
 import ClientProviders from "@/lib/clientProvider";
+import Script from "next/script";
+import { headers } from "next/headers";
 
 
 const geistSans = Geist({
@@ -25,72 +20,99 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata = {
-  title: "Industrial Mart Nigeria Nig Ltd | Leading Marketplace for Industrial Equipment & Tools",
-  description:
-    "Industrial Mart Nigeria Nig Ltd connects buyers and sellers across Nigeria’s industrial sectors — offering top-quality machinery, tools, and accessories from verified suppliers for oil & gas, manufacturing, and more.",
-  keywords: [
-    "industrial mart",
-    "industrial tools Nigeria",
-    "industrial equipment marketplace",
-    "oil and gas tools",
-    "manufacturing equipment Nigeria",
-    "MRO tools",
-    "industrial machinery",
-    "buy and sell tools",
-    "equipment suppliers Nigeria",
-  ],
-  authors: [{ name: "Industrial Mart Nigeria Nig Ltd" }],
-  openGraph: {
-    title: "Industrial Mart Nigeria Nig Ltd | Marketplace for Industrial Equipment",
+/* ------------------------------------------------------------------
+   Helper: Get current pathname safely in server context
+------------------------------------------------------------------- */
+async function getPathname(): Promise<string> {
+  const h = await headers();
+  return h.get("x-pathname") ?? "/";
+}
+
+/* ------------------------------------------------------------------
+   1. DYNAMIC METADATA (runs on server)
+------------------------------------------------------------------- */
+export async function generateMetadata(): Promise<Metadata> {
+  const pathname = await getPathname();
+
+  const defaultMeta = {
+    title: "Industrial Mart Nigeria | Industrial Tools & Equipment Marketplace",
     description:
-      "Discover Nigeria’s trusted industrial marketplace for tools, equipment, and machinery. Connecting verified suppliers with buyers in oil & gas, manufacturing, and maintenance sectors.",
-    url: "https://industrialmart.ng",
-    siteName: "Industrial Mart Nigeria Nig Ltd",
-    images: [
-      {
-        url: "https://industrialmart.ng/og-image.jpg", // replace with your actual image
-        width: 1200,
-        height: 630,
-        alt: "Industrial Mart Nigeria Nig Ltd",
+      "Buy & sell industrial machinery, tools, and MRO supplies in Nigeria. Verified suppliers for oil & gas, manufacturing, and construction.",
+  };
+
+  return {
+    ...defaultMeta,
+    metadataBase: new URL("https://industrialmart.ng"),
+    alternates: {
+      canonical: `https://industrialmart.ng${pathname}`,
+    },
+    openGraph: {
+      ...defaultMeta,
+      url: `https://industrialmart.ng${pathname}`,
+      siteName: "Industrial Mart Nigeria",
+      images: [
+        {
+          url: "https://industrialmart.ng/og-image.jpg",
+          width: 1200,
+          height: 630,
+          alt: "Industrial Mart Nigeria - Industrial Equipment Marketplace",
+        },
+      ],
+      locale: "en_NG",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      ...defaultMeta,
+      creator: "@industrialmart",
+      images: ["https://industrialmart.ng/og-image.jpg"],
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
       },
-    ],
-    locale: "en_NG",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Industrial Mart Nigeria Nig Ltd",
-    description:
-      "Your go-to marketplace for industrial tools and equipment across Nigeria.",
-    creator: "@industrialmart",
-    images: ["https://industrialmart.ng/og-image.jpg"], // replace with your actual image
-  },
-};
+    },
+    verification: {
+      google: "YOUR_GOOGLE_SITE_VERIFICATION_CODE",
+    },
+  };
+}
 
-
-export default function RootLayout({
+/* ------------------------------------------------------------------
+   2. ROOT LAYOUT
+------------------------------------------------------------------- */
+export default async function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
-  // useFetchDataOnMount();
-  // useFetchCategoriesOnMount();
+}) {
   return (
-    <html lang="en">
+    <html lang="en-NG" className={`${geistSans.variable} ${geistMono.variable}`}>
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#000000" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
         <Script
-          id="structured-data"
+          id="org-schema"
           type="application/ld+json"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Organization",
               name: "Industrial Mart Nigeria Nig Ltd",
               url: "https://industrialmart.ng",
-              logo: "https://industrialmart.ng/logo.png", // update path
+              logo: "https://industrialmart.ng/logo.png",
               description:
-                "A leading marketplace for industrial equipment and tools in Nigeria, connecting buyers and sellers across oil & gas, manufacturing, and other industrial sectors.",
+                "Leading B2B marketplace for industrial equipment, tools, and MRO supplies in Nigeria.",
               sameAs: [
                 "https://facebook.com/industrialmart",
                 "https://twitter.com/industrialmart",
@@ -98,25 +120,29 @@ export default function RootLayout({
               ],
               contactPoint: {
                 "@type": "ContactPoint",
-                telephone: "+234-XXXXXXXXXX",
+                telephone: "+234-800-123-4567",
                 contactType: "Customer Service",
                 areaServed: "NG",
-                availableLanguage: ["English"],
+                availableLanguage: "English",
+              },
+              address: {
+                "@type": "PostalAddress",
+                addressCountry: "NG",
+                addressRegion: "Lagos",
               },
             }),
           }}
         />
-      </head>
-      <body
-        className={`overflow-x-hidden overflow-y-auto max-w-[100dvw] ${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <Navbar />
 
+        <link rel="preconnect" href="https://images.example.com" />
+        <link rel="dns-prefetch" href="https://images.example.com" />
+      </head>
+
+      <body className="overflow-x-hidden antialiased">
+        <Navbar />
         <AuthModal />
         <ClientProviders />
-        {/* <SignModalManager />
-        <RegisterModalManager /> */}
-        {children}
+        <main>{children}</main>
         <Footer />
       </body>
     </html>

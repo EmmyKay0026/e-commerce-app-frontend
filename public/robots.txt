@@ -1,0 +1,26 @@
+# public/robots.txt
+User-agent: *
+Allow: /
+
+# Block private & sensitive paths
+Disallow: /auth/
+Disallow: /signIn
+Disallow: /register
+Disallow: /user/settings
+Disallow: /user/create-business-account
+Disallow: /admin
+Disallow: /api/auth
+Disallow: /api/webhook
+Disallow: /checkout
+Disallow: /cart
+
+# Allow important dynamic pages
+Allow: /category/
+Allow: /products/
+Allow: /shop/
+Allow: /market-place
+Allow: /about-us
+Allow: /sell
+
+# Sitemap
+Sitemap: https://industrialmart.ng/sitemap.xml

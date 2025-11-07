@@ -32,20 +32,6 @@ export default function SidebarFilter({
   const [powerSource, setPowerSource] = useState<string>("");
   const [sort, setSort] = useState<string>("recommended");
 
-  // ✅ Extract unique brands
-  const brands = useMemo(() => {
-    const b = new Set<string>();
-    products.forEach((p) => p.brand && b.add(p.brand));
-    return Array.from(b);
-  }, [products]);
-
-  // ✅ Extract unique locations
-  const locations = useMemo(() => {
-    const s = new Set<string>();
-    products.forEach((p) => p.location && s.add(p.location));
-    return Array.from(s);
-  }, [products]);
-
   // ✅ Handle filters change
   const handleFiltersChange = useCallback(() => {
     onFiltersChangeAction({
@@ -117,7 +103,9 @@ export default function SidebarFilter({
 
       {/* Price range */}
       <div className="mb-5">
-        <label className="block text-sm text-gray-600 mb-2">Price range (₦)</label>
+        <label className="block text-sm text-gray-600 mb-2">
+          Price range (₦)
+        </label>
         <div className="flex gap-2">
           <input
             type="number"
@@ -141,7 +129,7 @@ export default function SidebarFilter({
       </div>
 
       {/* Location */}
-      <div className="mb-5">
+      {/* <div className="mb-5">
         <label className="block text-sm text-gray-600 mb-2">Location</label>
         <select
           value={location}
@@ -155,10 +143,10 @@ export default function SidebarFilter({
             </option>
           ))}
         </select>
-      </div>
+      </div> */}
 
       {/* Brand */}
-      <div className="mb-5">
+      {/* <div className="mb-5">
         <label className="block text-sm text-gray-600 mb-2">
           Manufacturer / Brand
         </label>
@@ -178,7 +166,7 @@ export default function SidebarFilter({
             ))
           )}
         </div>
-      </div>
+      </div> */}
 
       {/* Sort */}
       <div className="mb-4">

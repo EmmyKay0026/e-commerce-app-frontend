@@ -24,20 +24,23 @@ export function ImageGallery({
 }: ImageGalleryProps) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [index, setIndex] = useState<number | null>(null);
-  return (
-    <div className="space-y-4 flex  flex-col lg:flex-row-reverse gap-4">
-      {/* Main Image */}
 
+  return (
+    <div className="space-y-4 flex flex-col lg:flex-row-reverse gap-4">
+      {/* Main Image */}
       <div
         onClick={() => setIndex(selectedImage)}
         className="relative w-full h-full aspect-square bg-muted rounded-lg overflow-hidden group"
+        itemScope
+        itemType="https://schema.org/ImageObject"
       >
         <Image
           src={images[selectedImage] || "/placeholder.svg"}
-          alt={`${productName} - Image ${selectedImage + 1}`}
+          alt={`${productName} - Main product image`}
           fill
           className="object-cover cursor-pointer"
           priority
+          itemProp="contentUrl"
         />
 
         {/* Overlay Actions */}
@@ -46,17 +49,17 @@ export function ImageGallery({
             size="icon"
             variant="secondary"
             className="rounded-full bg-background/80 backdrop-blur-sm hover:bg-background"
-            onClick={onToggleFavorite}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleFavorite?.();
+            }}
           >
             <Bookmark
-              onClick={() =>
-                toast.success(
-                  isFavorite ? "Removed from wishlist" : "Added to wishlist"
-                )
-              }
-              className={`w-5 h-5 ${
-                isFavorite ? "fill-secondary text-secondary" : ""
-              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                toast.success(isFavorite ? "Removed from wishlist" : "Added to wishlist");
+              }}
+              className={`w-5 h-5 ${isFavorite ? "fill-secondary text-secondary" : ""}`}
             />
           </Button>
 
@@ -66,6 +69,7 @@ export function ImageGallery({
                 size="icon"
                 variant="secondary"
                 className="rounded-full bg-background/80 backdrop-blur-sm hover:bg-background"
+                onClick={(e) => e.stopPropagation()}
               >
                 <ZoomIn className="w-5 h-5" />
               </Button>
@@ -77,6 +81,7 @@ export function ImageGallery({
                   alt={`${productName} - Zoomed`}
                   fill
                   className="object-contain"
+                  itemProp="contentUrl"
                 />
               </div>
             </DialogContent>
@@ -90,6 +95,7 @@ export function ImageGallery({
         slides={images.map((src) => ({ src }))}
         index={index ?? 0}
       />
+
       {/* Thumbnail Grid */}
       <article className="overflow-x-clip">
         <div className="flex flex-wrap flex-row lg:flex-col gap-2 w-full lg:flex-nowrap lg:w-[25%] h-full lg:max-h-[500px] ">
@@ -102,16 +108,16 @@ export function ImageGallery({
                   ? "border-primary ring-2 ring-primary/20"
                   : "border-transparent hover:border-muted-foreground/20"
               }`}
+              itemScope
+              itemType="https://schema.org/ImageObject"
             >
               <Image
                 src={image || "/placeholder.svg"}
                 alt={`Thumbnail ${index + 1}`}
                 fill
                 className="object-cover w-full h-full"
+                itemProp="contentUrl"
               />
-              {/* <div className="absolute top-2 left-2 bg-primary/80 text-primary-foreground text-xs font-semibold px-2 py-1 rounded">
-              #{index + 1}
-            </div> */}
             </button>
           ))}
         </div>

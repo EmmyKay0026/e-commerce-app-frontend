@@ -10,6 +10,8 @@ import { FaWhatsapp } from "react-icons/fa";
 import { User } from "@/types/models";
 import useApi from "@/hooks/useApi";
 import { useUserStore } from "@/store/useUserStore";
+import ShowContactButton from "../atoms/ShowContactButton";
+import Link from "next/link";
 
 interface UserProfileCardProps {
   // currentUser: User | null;
@@ -174,20 +176,21 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
         <h2 className="text-lg font-semibold">
           {profileDetails.first_name + " " + profileDetails.last_name}
         </h2>
-        <p className="text-sm text-gray-500">{profileDetails.email}</p>
+        {/* <p className="text-sm text-gray-500">{profileDetails.email}</p> */}
       </div>
 
       <div className="flex gap-4">
         {isOwner === true ? (
-          <Button variant="outline">
-            <Edit className="mr-2 h-4 w-4" />
-            Edit Profile
-          </Button>
+          <Link href={"/user/settings"}>
+            <Button variant="outline">
+              <Edit className="mr-2 h-4 w-4" />
+              Edit Profile
+            </Button>
+          </Link>
         ) : (
-          <Button variant="outline">
-            <FaWhatsapp className="mr-2 h-4 w-4" />
-            Chat
-          </Button>
+          <ShowContactButton
+            userPhoneNumber={profileDetails.phone_number ?? "No contact info"}
+          />
         )}
       </div>
     </section>

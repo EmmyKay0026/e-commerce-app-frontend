@@ -89,10 +89,7 @@ export function ProductCardList({
 
             {/* Price and Order Info */}
             <div>
-              <p className="text-2xl font-bold text-foreground mb-1">
-                {currency}
-                {price}
-              </p>
+              <p className="text-2xl font-bold text-foreground mb-1">{price}</p>
               {/* <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 {minOrder && <span>Min. order: {minOrder} pieces</span>}
                 {soldCount !== undefined && (

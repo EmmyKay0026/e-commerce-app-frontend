@@ -31,13 +31,13 @@ export default function ProfilePage() {
   return (
     <main className="flex">
       {/* <LeftBar /> */}
-      <UserDashboard
+      {/* <UserDashboard
         user={finalUser}
         currentUser={currentUser}
         products={demoProducts}
         wishlist={demoWishlist}
         isLoggedIn={isLoggedIn}
-      />
+      /> */}
     </main>
   );
 }

@@ -1,36 +1,17 @@
-import axios from "axios";
-import type { Category, Product } from "@/types/models";
+import type { Category, Product, ServiceResult } from "@/types/models";
+import api from "@/config/api";
 
-export const BASE_URL = process.env.NEXT_PUBLIC_API_BASE;
-
-const api = axios.create({
-  baseURL: BASE_URL,
-  headers: { "Content-Type": "application/json" },
-});
-
-type ApiResponse<T> = {
-  success: boolean;
-  data: T;
-  message?: string;
-};
-
-// Extended category type with children for tree structure
-export interface CategoryTree extends Category {
-  children?: CategoryTree[];
-}
-
-/**
- * Get all categories from the API
- */
+/* ------------------------------------------------------------------
+   1. GET ALL CATEGORIES
+------------------------------------------------------------------- */
 export const getAllCategories = async (): Promise<Category[]> => {
   try {
-    const res = await api.get<ApiResponse<Category[]>>("/categories");
+    const res = await api.get<ServiceResult<Category[]>>("/categories");
     const data = res.data;
 
-    // Handle different response formats
     if (Array.isArray(data)) return data;
     if (data?.data && Array.isArray(data.data)) return data.data;
-    
+
     return [];
   } catch (error) {
     console.error("Failed to fetch categories:", error);
@@ -38,19 +19,21 @@ export const getAllCategories = async (): Promise<Category[]> => {
   }
 };
 
-/**
- * Get single category by ID or slug
- */
+/* ------------------------------------------------------------------
+   2. GET SINGLE CATEGORY BY ID OR SLUG
+------------------------------------------------------------------- */
 export const getCategoryByIdOrSlug = async (
   idOrSlug: string
 ): Promise<Category | null> => {
   try {
-    const res = await api.get<ApiResponse<Category>>(`/categories/${idOrSlug}`);
-    
+    const res = await api.get<ServiceResult<Category>>(
+      `/categories/${idOrSlug}`
+    );
+
     if (res.data?.success && res.data.data) {
       return res.data.data;
     }
-    
+
     return null;
   } catch (error) {
     console.error(`Failed to fetch category (${idOrSlug}):`, error);
@@ -58,125 +41,159 @@ export const getCategoryByIdOrSlug = async (
   }
 };
 
-/**
- * Get products by category ID
- */
-export const getProductsByCategory = async (categoryId: string): Promise<Product[]> => {
-  const res = await axios.get(`${BASE_URL}/products`, {
-    params: { category: categoryId },
-  });
+/* ------------------------------------------------------------------
+   3. GET PRODUCTS BY CATEGORY ID
+------------------------------------------------------------------- */
+export const getProductsByCategory = async (
+  categoryId: string
+): Promise<ServiceResult<Product[]>> => {
+  try {
+    const res = await api.get(`/categories/${categoryId}/products`);
 
-  const data = res.data;
+    if (res.status === 200) {
+      return {
+        success: true,
+        status: res.status,
+        data: res.data.data as Product[],
+      };
+    }
 
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.data)) return data.data;
-  if (Array.isArray(data?.products)) return data.products;
-
-  return [];
+    return {
+      success: false,
+      status: res.status,
+      data: null,
+      error: `Unexpected status ${res.status}`,
+    };
+  } catch (err: any) {
+    const msg =
+      err?.response?.data?.error ||
+      err?.response?.data?.message ||
+      err?.message ||
+      "Network error";
+    const status = err?.response?.status;
+    return { success: false, status, data: null, error: msg };
+  }
 };
 
-// ===== HIERARCHY UTILITIES =====
+/* ------------------------------------------------------------------
+   4. GET CATEGORY BY ID ONLY (NEW – uses api instance)
+------------------------------------------------------------------- */
+export const getCategoryById = async (
+  id: string
+): Promise<ServiceResult<Category>> => {
+  try {
+    const res = await api.get<ServiceResult<Category>>(`/categories/${id}`);
 
-/**
- * Build a hierarchical tree structure from flat category list
- * Handles multi-parent categories by creating references
- */
-// export const buildCategoryTree = (categories: Category[]): CategoryTree[] => {
-//   const categoryMap = new Map<string, CategoryTree>();
-//   const rootCategories: CategoryTree[] = [];
+    if (res.data?.success && res.data.data) {
+      return {
+        success: true,
+        status: res.status,
+        data: res.data.data,
+      };
+    }
 
-//   // Create a map for quick lookups
-//   categories.forEach((cat) => {
-//     categoryMap.set(cat.id, { ...cat, children: [] });
-//   });
+    return {
+      success: false,
+      status: res.status,
+      data: null,
+      error: res.data?.error || "Category not found",
+    };
+  } catch (err: any) {
+    const msg =
+      err?.response?.data?.error ||
+      err?.response?.data?.message ||
+      err?.message ||
+      "Network error";
+    const status = err?.response?.status;
+    return { success: false, status, data: null, error: msg };
+  }
+};
 
-//   // Build the tree
-//   categories.forEach((cat) => {
-//     const category = categoryMap.get(cat.id)!;
+/* ------------------------------------------------------------------
+   5. GET ALL PARENT CATEGORIES
+------------------------------------------------------------------- */
+export const getAllParentCategories = async (): Promise<
+  ServiceResult<Category[]>
+> => {
+  try {
+    const res = await api.get(`/categories/parent-cats`);
 
-//     if (!cat.parent_category_id || cat.parent_category_id.length === 0) {
-//       // Root category
-//       rootCategories.push(category);
-//     } else {
-//       // Add to all parents (handles multi-parent scenario)
-//       cat.parent_category_id.forEach((parentId) => {
-//         const parent = categoryMap.get(parentId);
-//         if (parent) {
-//           if (!parent.children) parent.children = [];
-//           parent.children.push(category);
-//         }
-//       });
-//     }
-//   });
+    if (res.status === 200) {
+      return {
+        success: true,
+        status: res.status,
+        data: res.data.data as Category[],
+      };
+    }
 
-//   return rootCategories;
-// };
+    return {
+      success: false,
+      status: res.status,
+      data: null,
+      error: `Unexpected status ${res.status}`,
+    };
+  } catch (err: any) {
+    const msg =
+      err?.response?.data?.error ||
+      err?.response?.data?.message ||
+      err?.message ||
+      "Network error";
+    const status = err?.response?.status;
+    return { success: false, status, data: null, error: msg };
+  }
+};
 
-/**
- * Get all parent categories for a given category
- */
+/* ------------------------------------------------------------------
+   6. GET CHILD CATEGORIES
+------------------------------------------------------------------- */
+export const getChildCategories = async (
+  parentId: string
+): Promise<ServiceResult<Category[]>> => {
+  try {
+    const res = await api.get(`/categories/${parentId}/with-child-cats`, {
+      params: { parent_id: parentId },
+    });
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        status: res.status,
+        data: res.data.data as Category[],
+      };
+    }
+
+    return {
+      success: false,
+      status: res.status,
+      data: null,
+      error: `Unexpected status ${res.status}`,
+    };
+  } catch (err: any) {
+    const msg =
+      err?.response?.data?.error ||
+      err?.response?.data?.message ||
+      err?.message ||
+      "Network error";
+    const status = err?.response?.status;
+    return { success: false, status, data: null, error: msg };
+  }
+};
+
+/* ------------------------------------------------------------------
+   7. UTILITY: BREADCRUMB, SEARCH, TREE (unchanged)
+------------------------------------------------------------------- */
 export const getParentCategories = (
   categoryId: string,
   allCategories: Category[]
 ): Category[] => {
   const category = allCategories.find((cat) => cat.id === categoryId);
-  
-  if (!category || !category.parent_category_id) {
-    return [];
-  }
+  if (!category || !category.parent_category_id) return [];
 
   return allCategories.filter((cat) =>
     category.parent_category_id!.includes(cat.id)
   );
 };
 
-/**
- * Get all child categories for a given category (direct children only)
- */
-export const getChildCategories = (
-  categoryId: string,
-  allCategories: Category[]
-): Category[] => {
-  const category = allCategories.find((cat) => cat.id === categoryId);
-  
-  if (!category || !category.child_categories) {
-    return [];
-  }
-
-  return allCategories.filter((cat) =>
-    category.child_categories!.includes(cat.id)
-  );
-};
-
-/**
- * Get all descendant categories recursively
- */
-export const getAllDescendants = (
-  categoryId: string,
-  allCategories: Category[]
-): Category[] => {
-  const descendants: Category[] = [];
-  const visited = new Set<string>();
-
-  const traverse = (id: string) => {
-    if (visited.has(id)) return;
-    visited.add(id);
-
-    const children = getChildCategories(id, allCategories);
-    children.forEach((child) => {
-      descendants.push(child);
-      traverse(child.id);
-    });
-  };
-
-  traverse(categoryId);
-  return descendants;
-};
-
-/**
- * Get breadcrumb path for a category
- * Returns array of categories from root to current category
- */
 export const getCategoryBreadcrumb = (
   categoryId: string,
   allCategories: Category[]
@@ -208,7 +225,6 @@ export const getCategoryBreadcrumb = (
     return false;
   };
 
-  // Start from root categories
   const roots = allCategories.filter(
     (cat) => !cat.parent_category_id || cat.parent_category_id.length === 0
   );
@@ -220,15 +236,11 @@ export const getCategoryBreadcrumb = (
   return breadcrumb;
 };
 
-/**
- * Find categories by search term (name or description)
- */
 export const searchCategories = (
   searchTerm: string,
   allCategories: Category[]
 ): Category[] => {
   const term = searchTerm.toLowerCase().trim();
-  
   if (!term) return allCategories;
 
   return allCategories.filter(
@@ -239,25 +251,18 @@ export const searchCategories = (
   );
 };
 
-/**
- * Get root categories (categories without parents)
- */
 export const getRootCategories = (allCategories: Category[]): Category[] => {
   return allCategories.filter(
     (cat) => !cat.parent_category_id || cat.parent_category_id.length === 0
   );
 };
 
-/**
- * Check if a category is a root category
- */
 export const isRootCategory = (category: Category): boolean => {
-  return !category.parent_category_id || category.parent_category_id.length === 0;
+  return (
+    !category.parent_category_id || category.parent_category_id.length === 0
+  );
 };
 
-/**
- * Check if a category has children
- */
 export const hasChildren = (category: Category): boolean => {
   return !!category.child_categories && category.child_categories.length > 0;
 };

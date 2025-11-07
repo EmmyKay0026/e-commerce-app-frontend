@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { slugify } from "@/lib/utils";
 import ProductCards from "../molecules/ProductCards";
 import {
+  getAllCategories,
   getChildCategories,
   getProductsByCategory,
   getRootCategories,
@@ -13,41 +14,57 @@ import {
 } from "@/services/categoryService";
 import { Category, Product } from "@/types/models";
 import { transformProduct } from "@/services/productService";
-import { useCategoryStore, useFetchCategoriesOnMount } from "@/store/useCategoryStore";
 
 const CategorySection: React.FC = () => {
-  const { categories, loading, error } = useCategoryStore();
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [allCategories, setAllCategories] = useState<Category[]>([]);
+  const [loadingCats, setLoadingCats] = useState(true);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
+    "5d7b7aff-f70b-4c18-b560-efa468844a09"
+  );
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
-  const [productError, setProductError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [showMobile, setShowMobile] = useState(false);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
-  // ✅ Automatically fetch categories on mount
-  useFetchCategoriesOnMount();
+  /** Fetch all categories once */
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoadingCats(true);
+        const data = await getAllCategories();
+        setAllCategories(data);
+      } catch (e: any) {
+        console.error("getAllCategories error:", e);
+        setError("Failed to load categories");
+      } finally {
+        setLoadingCats(false);
+      }
+    })();
+  }, []);
 
   /** Root categories for sidebar and dropdown */
   const rootCategories = useMemo(() => {
-    return getRootCategories(categories);
-  }, [categories]);
+    return getRootCategories(allCategories);
+  }, [allCategories]);
 
   /** Fetch products when a category is selected */
-  React.useEffect(() => {
+  useEffect(() => {
     if (!selectedCategoryId) {
       setProducts([]);
       return;
     }
-
     (async () => {
       try {
         setLoadingProducts(true);
-        setProductError(null);
+        setError(null);
         const prods = await getProductsByCategory(selectedCategoryId);
-        setProducts(prods);
+        if (prods.status) {
+          setProducts(prods?.data ?? []);
+        }
       } catch (e: any) {
         console.error("getProductsByCategory error:", e);
-        setProductError(e.message ?? "Failed to load products");
+        setError(e.message ?? "Failed to load products");
       } finally {
         setLoadingProducts(false);
       }
@@ -57,15 +74,17 @@ const CategorySection: React.FC = () => {
   /** Selected category info */
   const selectedCategory = useMemo(() => {
     if (!selectedCategoryId) return null;
-    return categories.find((c) => c.id === selectedCategoryId) ?? null;
-  }, [selectedCategoryId, categories]);
+    return allCategories.find((c) => c.id === selectedCategoryId) ?? null;
+  }, [selectedCategoryId, allCategories]);
 
   /** Get child categories */
   const getCategoryChildren = useCallback(
-    (categoryId: string): Category[] => {
-      return getChildCategories(categoryId, categories);
+    async (categoryId: string): Promise<Category[]> => {
+      const childrenCat = await getChildCategories(categoryId);
+
+      return childrenCat.data!;
     },
-    [categories]
+    [allCategories]
   );
 
   /** Desktop item (recursive) */
@@ -103,7 +122,7 @@ const CategorySection: React.FC = () => {
                 <ChevronDown className="ml-1 h-4 w-4" />
               ))}
           </div>
-
+          {/* 
           {categoryHasChildren && isHover && children.length > 0 && (
             <ul
               className="absolute left-0 top-0 ml-1 min-w-[200px] rounded-lg border border-gray-200 bg-white shadow-lg z-20"
@@ -112,7 +131,7 @@ const CategorySection: React.FC = () => {
             >
               {children.map((child) => DesktopItem(child, depth + 1))}
             </ul>
-          )}
+          )} */}
         </li>
       );
     },
@@ -163,11 +182,11 @@ const CategorySection: React.FC = () => {
             )}
           </div>
 
-          {categoryHasChildren && expanded && children.length > 0 && (
+          {/* {categoryHasChildren && expanded && children.length > 0 && (
             <ul className="mt-1 space-y-1">
               {children.map((child) => MobileItem(child, depth + 1))}
             </ul>
-          )}
+          )} */}
         </li>
       );
     },
@@ -194,7 +213,7 @@ const CategorySection: React.FC = () => {
             Categories
           </h4>
 
-          {loading ? (
+          {loadingCats ? (
             <div className="space-y-2">
               <div className="h-3 w-3/4 animate-pulse rounded bg-gray-200" />
               <div className="h-3 w-2/3 animate-pulse rounded bg-gray-200" />
@@ -244,7 +263,7 @@ const CategorySection: React.FC = () => {
             )}
           </div>
 
-          {productError && <p className="mb-4 text-sm text-red-600">{productError}</p>}
+          {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
           {loadingProducts ? (
             <div className="grid grid-cols-2 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -258,7 +277,7 @@ const CategorySection: React.FC = () => {
           ) : products.length ? (
             <div className="grid grid-cols-2 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {products.map((p) => (
-                <ProductCards key={p.id} product={transformProduct(p)} />
+                <ProductCards key={p.id} product={p} />
               ))}
             </div>
           ) : (

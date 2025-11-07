@@ -5,6 +5,11 @@ import { Star, Heart, ShoppingCart } from "lucide-react";
 import { demoProducts } from "@/constants/product";
 import { ProductCardGrid } from "../molecules/ProductCardGridView";
 import ProductCards from "../molecules/ProductCards";
+import { useEffect, useState } from "react";
+import { BusinessProfile, Product, User } from "@/types/models";
+import { getBusinessProducts } from "@/services/productService";
+import { useParams } from "next/navigation";
+import { getBusinessProfileBySlug } from "@/services/businessProfileService";
 
 const featuredProducts = [
   {
@@ -43,6 +48,35 @@ const featuredProducts = [
 ];
 
 export function FeaturedProducts() {
+  const { slug } = useParams();
+  const [isPageLoading, setIsPageLoading] = useState<boolean>(false);
+  const [businessProducts, setBusinessProducts] = useState<Product[] | null>(
+    null
+  );
+
+  useEffect(() => {
+    const getBusniessProducts = async () => {
+      // const businessDetails= await getBusinessProfileBySlug(slug?.toString())
+      const { data } = await getBusinessProfileBySlug(slug?.toString()!);
+      if (!data) return;
+      const buzRes = data as unknown as BusinessProfile & { user: User };
+      if (!buzRes || !buzRes.id) return;
+
+      setIsPageLoading(true);
+
+      const res = await getBusinessProducts(buzRes.id);
+      if (res.success && res.data) {
+        // console.log(res.data);
+
+        setBusinessProducts(res.data.data);
+      }
+      // console.log(res);
+      setIsPageLoading(false);
+    };
+
+    getBusniessProducts();
+  }, [slug]);
+
   return (
     <section id="featured" className="px-2 lg:px-8 py-16 md:py-24 bg-muted/30">
       <div className="container mx-auto px-4">
@@ -56,24 +90,11 @@ export function FeaturedProducts() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {demoProducts.map((product) => (
+          {businessProducts?.map((product) => (
             <ProductCards
               // id={product.id}
               key={product.id}
-              product={product}
-              // name={product?.name!}
-              // description={product?.description!}
-              // price={product?.price!}
-              // image={product?.images[0]!}
-              // estimatedDelivery={""}
-              // minOrder={0}
-              // soldCount={0}
-              // supplier={{
-              //   name: "",
-              //   yearsActive: 0,
-              //   country: "",
-              //   countryCode: "",
-              // }}
+              product={product!}
             />
           ))}
         </div>
