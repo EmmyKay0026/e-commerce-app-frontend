@@ -140,7 +140,7 @@ export function EditProductForm({ product }: EditProductFormProps) {
       }
 
       const finalImageKeys = [...existingImageKeys, ...uploadedKeys];
-
+      //
       const result = await updateProduct(product.id, {
         name: data.name,
         description: data.description,
