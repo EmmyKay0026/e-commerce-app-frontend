@@ -1,4 +1,3 @@
-// app/shop/[slug]/VendorShopClient.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -35,15 +34,18 @@ export default function VendorShopClient({
     }
 
     const fetchVendor = async () => {
-      const res = await getBusinessProfileBySlug(slug as string);
-      if (res.success && res.data) {
-        setVendor(res.data); // ← NO CAST! Type-safe
-        setPageIsLoading(false);
-      } else {
-        router.push("/404");
-      }
-    };
+      const res = await getBusinessProfileBySlug(slug?.toString());
+      // console.log(res);
 
+      if (res.success && res.data) {
+        setVendor(res.data as unknown as BusinessProfile & { user: User });
+        setPageIsLoading(false);
+      }
+      // if (res.status === 404) {
+      //   router.push("/404");
+      //   return;
+      // }
+    };
     fetchVendor();
   }, [slug, router, initialVendor]);
 

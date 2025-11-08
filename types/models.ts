@@ -38,6 +38,8 @@ export interface User {
   suspended_status_release_date?: string;
 }
 
+export type VendorProfile = BusinessProfile & { user: User };
+
 export interface CategoryInfo {
   name: string;
   slug: string;
