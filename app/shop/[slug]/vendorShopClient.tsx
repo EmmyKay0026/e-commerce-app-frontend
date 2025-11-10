@@ -1,56 +1,51 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { VendorHeroSkeleton } from "@/components/molecules/VendorShopSkeleton";
 import { HeroSection } from "@/components/vendor/HeroSection";
 import { ProductsGrid } from "@/components/vendor/ProductGrid";
 import { ContactSection } from "@/components/vendor/ContactSection";
-import { VendorHeroSkeleton } from "@/components/molecules/VendorShopSkeleton";
 import { getBusinessProfileBySlug } from "@/services/businessProfileService";
-import { BusinessProfile, User, VendorProfile } from "@/types/models";
+import { BusinessProfile, User } from "@/types/models";
 
-// export type VendorProfile = BusinessProfile & { user?: User };
+interface VendorShopClientProps {
+  slug: string;
+}
 
-export default function VendorShopClient({ 
-  initialVendor 
-}: { 
-  initialVendor?: VendorProfile 
-}) {
-  const { slug } = useParams();
-  const router = useRouter();
-  const [vendor, setVendor] = useState<VendorProfile | null>(initialVendor || null);
-  const [pageIsLoading, setPageIsLoading] = useState(!initialVendor);
+export default function VendorShopClient({ slug }: VendorShopClientProps) {
+  const [vendor, setVendor] = useState<(BusinessProfile & { user: User }) | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (initialVendor) {
-      setVendor(initialVendor);
-      setPageIsLoading(false);
-      return;
-    }
-
-    if (!slug) {
-      router.push("/404");
-      return;
-    }
-
     const fetchVendor = async () => {
-      const res = await getBusinessProfileBySlug(slug?.toString());
-      // console.log(res);
-
-      if (res.success && res.data) {
-        setVendor(res.data as unknown as BusinessProfile & { user: User });
-        setPageIsLoading(false);
+      try {
+        setLoading(true);
+        const res = await getBusinessProfileBySlug(slug);
+        if (res.success && res.data) {
+          setVendor(res.data as BusinessProfile & { user: User });
+        } else {
+          setVendor(null); // Vendor not found
+        }
+      } catch (error) {
+        console.error("Error fetching vendor:", error);
+        setVendor(null);
+      } finally {
+        setLoading(false);
       }
-      // if (res.status === 404) {
-      //   router.push("/404");
-      //   return;
-      // }
     };
-    fetchVendor();
-  }, [slug, router, initialVendor]);
 
-  if (pageIsLoading) return <VendorHeroSkeleton />;
-  if (!vendor) return null;
+    fetchVendor();
+  }, [slug]);
+
+  if (loading) return <VendorHeroSkeleton />;
+
+  if (!vendor) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <h1 className="text-2xl font-semibold">Vendor not found.</h1>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

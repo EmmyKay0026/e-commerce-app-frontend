@@ -87,7 +87,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  useFetchDataOnMount();
+  // useFetchDataOnMount();
   return (
     <html lang="en-NG" className={`${geistSans.variable} ${geistMono.variable}`}>
       <head>
