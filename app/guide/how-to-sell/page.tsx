@@ -1,5 +1,6 @@
 // app/how to be a vendor/page.tsx
 import React from "react";
+import Link from "next/link";
 import Hero from "@/components/organisms/SharedHeroSection";
 
 export default function VendorPage() {
@@ -165,10 +166,10 @@ function StartSellingContent() {
         className="
     relative h-[50vh] flex flex-col items-center justify-center 
     w-full text-center px-4 overflow-hidden
-    bg-cover bg-no-repeat bg-[position:center_top_20%]
+    bg-cover bg-no-repeat bg-[position:center]
   "
         style={{
-          backgroundImage: "url('/hero-sections-img.png')",
+          backgroundImage: "url('/industrial-bg.png')",
         }}
       >
         {/* Overlay (Behind Content) */}
@@ -181,21 +182,23 @@ function StartSellingContent() {
           </h3>
           <p className="text-base md:text-lg text-white leading-relaxed mb-6">
             After approval, your product will be visible to thousands of buyers
-          across Nigeria. You'll start receiving inquiries and can manage your
-          listings from your vendor dashboard.
-          <br />
-          Questions? Contact our vendor support team at{" "}
-          <a
-            href="mailto:vendorsupport@industrialmart.com"
-            className="text-[#ffffff] font-medium underline"
-          >
-            examplesupport@industrialmart.com
-          </a>
+            across Nigeria. You'll start receiving inquiries and can manage your
+            listings from your vendor dashboard.
+            <br />
+            Questions? Contact our vendor support team at{" "}
+            <a
+              href="mailto:vendorsupport@industrialmart.com"
+              className="text-[#ffffff] font-medium underline"
+            >
+              examplesupport@industrialmart.com
+            </a>
             .
           </p>
-          <button className="bg-[#0861C1] text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-[#074a96] transition">
-            Start Selling
-          </button>
+          <Link href={"/sell"}>
+            <button className="bg-[#0861C1] text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-[#074a96] transition">
+              Start Selling
+            </button>
+          </Link>
         </div>
       </div>
     </section>

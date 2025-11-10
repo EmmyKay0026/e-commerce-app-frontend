@@ -9,6 +9,7 @@ import { z } from "zod";
 import CreateBusinessAccountForm from "@/components/molecules/CreateBusinessAccountForm";
 import { uploadImageToCloudflare } from "@/lib/cloudflareImageUpload";
 import { constructImageUrl, formatPhoneNumber } from "@/lib/utils";
+import Hero from "@/components/organisms/SharedHeroSection";
 
 export default function CreateBusinessAccountPage() {
   const [businessName, setBusinessName] = useState("");
@@ -180,34 +181,43 @@ export default function CreateBusinessAccountPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4">
-      <div className="w-full max-w-2xl bg-white rounded-lg shadow p-6">
-        <h1 className="text-2xl font-semibold mb-4">Create Business Account</h1>
+    <>
+      <Hero
+        title="Create Your Business Account"
+        subtitle="Join IndustrialMart Nigeria and showcase your industrial products to a wider audience."
+        backgroundImage="/hero-sections-img.png"
+      />
+      <div className="min-h-screen flex items-center justify-center py-12 px-4">
+        <div className="w-full max-w-2xl bg-white rounded-lg shadow p-6">
+          <h1 className="text-2xl font-semibold mb-4">
+            Create Business Account
+          </h1>
 
-        <CreateBusinessAccountForm
-          businessName={businessName}
-          setBusinessName={setBusinessName}
-          slug={slug}
-          setSlug={setSlug}
-          sanitizeSlug={sanitizeSlug}
-          description={description}
-          setDescription={setDescription}
-          coverPreview={coverPreview}
-          handleFileChange={handleFileChange}
-          phoneNumber={phoneNumber}
-          setPhoneNumber={setPhoneNumber}
-          whatsappNumber={whatsappNumber}
-          setWhatsappNumber={setWhatsappNumber}
-          businessEmail={businessEmail}
-          setBusinessEmail={setBusinessEmail}
-          businessAddress={businessAddress}
-          setBusinessAddress={setBusinessAddress}
-          handleSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
-          error={error}
-          fieldErrors={fieldErrors}
-        />
+          <CreateBusinessAccountForm
+            businessName={businessName}
+            setBusinessName={setBusinessName}
+            slug={slug}
+            setSlug={setSlug}
+            sanitizeSlug={sanitizeSlug}
+            description={description}
+            setDescription={setDescription}
+            coverPreview={coverPreview}
+            handleFileChange={handleFileChange}
+            phoneNumber={phoneNumber}
+            setPhoneNumber={setPhoneNumber}
+            whatsappNumber={whatsappNumber}
+            setWhatsappNumber={setWhatsappNumber}
+            businessEmail={businessEmail}
+            setBusinessEmail={setBusinessEmail}
+            businessAddress={businessAddress}
+            setBusinessAddress={setBusinessAddress}
+            handleSubmit={handleSubmit}
+            isSubmitting={isSubmitting}
+            error={error}
+            fieldErrors={fieldErrors}
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
