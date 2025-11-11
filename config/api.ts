@@ -1,7 +1,10 @@
 import axios, { AxiosInstance } from "axios";
 import { supabase } from "./supabase";
 
-const baseURL = new URL(process.env.NEXT_PUBLIC_API_BASE_URL!).toString();
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
+  ? new URL(process.env.NEXT_PUBLIC_API_BASE_URL).toString()
+  : "https://e-commerce-app-backend-khxb.onrender.com/api";
+
 
 let userBearer: string | null = null;
 

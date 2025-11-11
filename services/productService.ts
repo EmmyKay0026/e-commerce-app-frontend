@@ -627,3 +627,32 @@ export async function getAllCategories(): Promise<ServiceResult<Category[]>> {
     };
   }
 }
+
+export async function getAllProductsForSitemap(): Promise<Product[]> {
+  const allProducts: Product[] = [];
+  let page = 1;
+  const perPage = 100;
+  let hasMore = true;
+  const MAX_PAGES = 100;
+
+  while (hasMore && page <= MAX_PAGES) {
+    const result = await listProducts({ page, perPage });
+
+    if (!result.success || !result.data) break;
+
+    const { products, total } = result.data;
+    allProducts.push(...products);
+
+    if (total !== null && allProducts.length >= total) {
+      hasMore = false;
+    } else if (products.length < perPage) {
+      hasMore = false;
+    } else {
+      page++;
+    }
+
+    await new Promise((r) => setTimeout(r, 50)); // Be nice
+  }
+
+  return allProducts;
+}

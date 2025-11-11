@@ -1,75 +1,31 @@
-// import { VendorHeader } from "@/components/vendor-shop/vendor-header";
-// import { HeroSection } from "@/components/vendor-shop/hero-section";
-// import { CategoriesSection } from "@/components/vendor-shop/categories-section";
-// import { FeaturedProducts } from "@/components/vendor-shop/featured-products";
-// import { ProductsGrid } from "@/components/vendor-shop/products-grid";
-// import { ContactSection } from "@/components/vendor-shop/contact-section";
-// import { VendorFooter } from "@/components/vendor-shop/footer";
-"use client";
-import { VendorHeroSkeleton } from "@/components/molecules/VendorShopSkeleton";
-// import { CategoriesSection } from "@/components/vendor/CategoriesSection";
-import { ContactSection } from "@/components/vendor/ContactSection";
-import { FeaturedProducts } from "@/components/vendor/FeaturedProducts";
-import { VendorFooter } from "@/components/vendor/Footer";
-import { HeroSection } from "@/components/vendor/HeroSection";
-import { ProductsGrid } from "@/components/vendor/ProductGrid";
-import { VendorHeader } from "@/components/vendor/VendorHeader";
-import { userDB } from "@/constants/userData";
-import { getBusinessProfileBySlug } from "@/services/businessProfileService";
-import { useUserStore } from "@/store/useUserStore";
-import { BusinessProfile, User } from "@/types/models";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { set } from "zod";
+// app/shop/[slug]/page.tsx
+import { generateVendorMetadata, generateVendorSchema } from "./metadata";
+import VendorShopClient from "./vendorShopClient";
+import Script from "next/script";
 
-export default function VendorShopPage() {
-  const { slug } = useParams();
-  const user = useUserStore((state) => state.user);
-  const [vendor, setVendor] = useState<
-    (BusinessProfile & { user: User }) | null
-  >(null);
-  const [pageIsLoading, setPageIsLoading] = useState<boolean>(true);
-  const router = useRouter();
-  useEffect(() => {
-    if (!slug) {
-      router.push("/404");
-      return;
-    }
+export const dynamic = "force-dynamic"; // <<< important!
 
-    const fetchVendor = async () => {
-      const res = await getBusinessProfileBySlug(slug?.toString());
-      // console.log(res);
+type Props = { params: { slug: string } };
 
-      if (res.success && res.data) {
-        setVendor(res.data as unknown as BusinessProfile & { user: User });
-        setPageIsLoading(false);
-      }
-      // if (res.status === 404) {
-      //   router.push("/404");
-      //   return;
-      // }
-    };
-    fetchVendor();
-  }, []);
+export async function generateMetadata({ params }: Props) {
+  return generateVendorMetadata(params.slug);
+}
 
-  if (pageIsLoading) {
-    return <VendorHeroSkeleton />;
-  }
-  if (!vendor) {
-    router.push("/404");
-    return <div>Vendor not found.</div>;
-  }
+export default function VendorShopPage({ params }: Props) {
+  const { slug } = params;
+
+  const schema = generateVendorSchema(slug); // optional, can await if needed
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* <VendorHeader /> */}
-      <main className="">
-        <HeroSection vendor={vendor} />
-        {/* <FeaturedProducts /> */}
-        {/* <CategoriesSection /> */}
-        <ProductsGrid vendor={vendor} />
-        <ContactSection vendor={vendor} />
-      </main>
-      {/* <VendorFooter /> */}
-    </div>
+    <>
+      {schema && (
+        <Script
+          id="vendor-jsonld"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        />
+      )}
+      <VendorShopClient slug={slug} />
+    </>
   );
 }
