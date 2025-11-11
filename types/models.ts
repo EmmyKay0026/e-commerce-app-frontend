@@ -38,6 +38,8 @@ export interface User {
   suspended_status_release_date?: string;
 }
 
+export type VendorProfile = BusinessProfile & { user: User };
+
 export interface CategoryInfo {
   name: string;
   slug: string;
@@ -56,6 +58,7 @@ export interface Product {
   tags?: string[];
   status: "active" | "inactive" | "deleted" | "pending_review";
   created_at: string;
+  updated_at?: string;
   location_lga?: string;
   location_state?: string;
   slug: string; // URL-friendly identifier

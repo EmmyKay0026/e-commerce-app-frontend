@@ -1,5 +1,6 @@
 import api from "@/config/api";
 import { ServiceResult, User, BusinessProfile } from "@/types/models";
+import { VendorProfile } from "@/types/models"
 
 // Placeholder BusinessProfile type — replace with your concrete type when available
 // export type BusinessProfile = any;
@@ -74,7 +75,7 @@ export async function getBusinessProfileById(
  */
 export async function getBusinessProfileBySlug(
   slug: string
-): Promise<ServiceResult<{ data: BusinessProfile & { user: User } }>> {
+): Promise<ServiceResult<VendorProfile>> {
   console.log("Got here");
 
   try {
