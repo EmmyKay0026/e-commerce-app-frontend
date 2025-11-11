@@ -5,7 +5,10 @@ import { ProductInfo } from "@/components/molecules/ProductInfo";
 import { ProductDetailSkeleton } from "@/components/molecules/ProductPageSkeleton";
 import CategoryCards from "@/components/organisms/CategoryCards";
 // import { getProductById } from "@/services/productService";
-import { getProductsByCategory } from "@/services/categoryService";
+import {
+  getCategoryWithParentCategories,
+  getProductsByCategory,
+} from "@/services/categoryService";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -65,7 +68,7 @@ export default function ProductDetailPage() {
   useEffect(() => {
     // 🔹 Fetch related products by categoryId
     if (!relatedCategoryId) return;
-    console.log(relatedCategoryId);
+    // console.log(relatedCategoryId);
 
     const handleRelatedProducFetch = async () => {
       const related = await getProductsByCategory(relatedCategoryId);
@@ -77,14 +80,40 @@ export default function ProductDetailPage() {
     handleRelatedProducFetch();
   }, [relatedCategoryId]);
 
+  useEffect(() => {
+    const getParentOfCategoryWithId = async () => {
+      console.log("here");
+
+      const categoryId = productDetails?.category_id;
+      if (!categoryId) return;
+
+      const parents = await getCategoryWithParentCategories(categoryId);
+      console.log("parent_categories", parents.data);
+
+      if (parents && productDetails) {
+        setProductDetails({
+          ...productDetails,
+          parentCategories: parents?.data?.parent_categories,
+          category: {
+            name: parents?.data?.name!,
+            slug: parents?.data?.slug!,
+          },
+          // category: parents.category,
+        });
+      }
+    };
+
+    getParentOfCategoryWithId();
+  }, [productDetails?.category_id]);
+
   if (loading) return <ProductDetailSkeleton />;
   if (!productDetails)
     return <div className="text-center py-20">Product not found</div>;
 
   const allCategories: CategoryInfo[] = [
-    ...(productDetails.parentCategories || []),
+    ...(productDetails?.parentCategories ?? []),
     ...(productDetails.category ? [productDetails.category] : []),
-  ];
+  ].filter((c): c is CategoryInfo => c !== null && c !== undefined);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background">
@@ -96,42 +125,55 @@ export default function ProductDetailPage() {
           </h1>
 
           {/* ---------- Breadcrumb ---------- */}
-          <div className="flex items-center justify-center text-center">
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/">Home</BreadcrumbLink>
-                </BreadcrumbItem>
+          {allCategories.length > 0 ? (
+            <div className="flex items-center justify-center text-center">
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href="/">Home</BreadcrumbLink>
+                  </BreadcrumbItem>
 
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/marketplace">
-                    Market place
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href="/marketplace">
+                      Market place
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
 
-                {allCategories.map((cat, index) => {
-                  const href = `/category/${allCategories
-                    .slice(0, index + 1)
-                    .map((c) => c.slug)
-                    .join("/")}`;
-                  return (
-                    <React.Fragment key={cat.slug}>
-                      <BreadcrumbSeparator />
-                      <BreadcrumbItem>
-                        <BreadcrumbLink href={href}>{cat.name}</BreadcrumbLink>
-                      </BreadcrumbItem>
-                    </React.Fragment>
-                  );
-                })}
+                  {allCategories.map((cat, index) => {
+                    console.log("productDetails", productDetails);
+                    console.log("allCategories", allCategories);
+                    if (!cat) return null;
+                    const href = `/category/${allCategories
+                      .slice(0, index + 1)
+                      .map((c) => c.slug)
+                      .join("/")}`;
+                    return (
+                      <React.Fragment key={cat.slug}>
+                        <BreadcrumbSeparator />
+                        <BreadcrumbItem>
+                          <BreadcrumbLink href={href}>
+                            {cat.name}
+                          </BreadcrumbLink>
+                        </BreadcrumbItem>
+                      </React.Fragment>
+                    );
+                  })}
 
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>{productDetails.name}</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-          </div>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>{productDetails.name}</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center gap-2">
+              <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded" />
+              <div className="h-4 w-8 bg-gray-200 dark:bg-gray-700 rounded" />
+              <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded" />
+            </div>
+          )}
         </div>
       </div>
 

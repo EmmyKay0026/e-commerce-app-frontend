@@ -82,9 +82,9 @@ function AboutContent() {
       <div
         className="relative h-[40vh] flex flex-col items-center justify-center w-full text-center px-4 overflow-hidden"
         style={{
-          backgroundImage: "url('/hero-sections-img.png')",
+          backgroundImage: "url('/industrial-bg.png')",
           backgroundSize: "cover",
-          backgroundPosition: "center top 20%",
+          backgroundPosition: "center",
         }}
       >
         {/* Overlay (Behind Content) */}

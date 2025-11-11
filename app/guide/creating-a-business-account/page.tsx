@@ -1,5 +1,6 @@
 // app/how to be a vendor/page.tsx
 import React from "react";
+import Link from "next/link";
 import Hero from "@/components/organisms/SharedHeroSection";
 
 export default function VendorPage() {
@@ -146,10 +147,10 @@ function BeVendorContent() {
         className="
     relative h-[50vh] flex flex-col items-center justify-center 
     w-full text-center px-4 overflow-hidden
-    bg-cover bg-no-repeat bg-[position:center_top_20%]
+    bg-cover bg-no-repeat bg-[position:center]
   "
         style={{
-          backgroundImage: "url('/hero-sections-img.png')",
+          backgroundImage: "url('/industrial-bg.png')",
         }}
       >
         {/* Overlay (Behind Content) */}
@@ -173,9 +174,11 @@ function BeVendorContent() {
             </a>
             .
           </p>
-          <button className="bg-[#0861C1] text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-[#074a96] transition">
-            Become a Vendor
-          </button>
+          <Link href={"/create-business-account"}>
+            <button className="bg-[#0861C1] text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-[#074a96] transition">
+              Become a Vendor
+            </button>
+          </Link>
         </div>
       </div>
     </section>
