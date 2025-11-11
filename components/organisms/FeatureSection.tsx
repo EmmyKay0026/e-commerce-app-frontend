@@ -1,38 +1,46 @@
-"use client"
+"use client";
 
-import Image from "next/image"
+import Image from "next/image";
 // import { Input } from "@/components/ui/input"
 // import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { LifeBuoy, Wrench, Sliders, ShieldCheck, Wallet } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const FeatureSection = () => {
-  return (   
+  return (
     <section className="w-full bg-primary ">
       <h1 className="text-3xl md:text-5xl text-center text-white pt-10 font-bold mb-3">
         Why Choose Us?
       </h1>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 py-12 px-5 md:px-10 lg:px-20 text-white">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 py-12 px-5 md:px-5 lg:px-30 text-white">
         {[
           {
-            title: "Millions of business offerings",
-            desc: "Explore products and suppliers from millions of offerings worldwide.",
+            icon: <Wallet className="w-8 h-8 text-[#ffffff]" />,
+            title: "Fair Pricing",
+            desc: "Get certified tools and machinery at reasonable prices without compromising on quality.",
           },
           {
-            title: "Assured quality and transactions",
-            desc: "Ensure production quality from verified suppliers, with your orders protected from payment to delivery.",
+            icon: <Wrench className="w-8 h-8 text-[#ffffff]" />,
+            title: "After-sales support",
+            desc: "Get all the technical help you may need after purchasing a product.",
           },
           {
-            title: "One-stop trading solution",
-            desc: "Order seamlessly from product/supplier search to order management, payment, and fulfillment.",
+            icon: <Sliders className="w-8 h-8 text-[#ffffff]" />,
+            title: "Tailored services",
+            desc: "Whether you're running a refinery, managing a construction site, or maintaining oil rigs, we match equipment to your specific needs.",
           },
           {
-            title: "Tailored trading experience",
-            desc: "Get curated benefits, discounts, and extra support to grow your business.",
+            icon: <ShieldCheck className="w-8 h-8 text-[#ffffff]" />,
+            title: "Safety and efficiency",
+            desc: "Get equipment that meets compliance standards and keeps your team protected without slowing down operations.",
           },
         ].map((item, idx) => (
-          <Card key={idx} className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-sm text-gray-900 border-none">
+          <Card
+            key={idx}
+            className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-sm text-gray-900 border-none"
+          >
             <div className="w-12 h-12 flex items-center justify-center ml-5 rounded-full border border-grayCustom">
-              <span className="text-2xl text-white">📦</span>
+              {item.icon}
             </div>
             <CardHeader>
               <CardTitle className="text-lg text-white">{item.title}</CardTitle>
@@ -44,7 +52,6 @@ const FeatureSection = () => {
         ))}
       </div>
     </section>
-        
-  )
-}
+  );
+};
 export default FeatureSection;

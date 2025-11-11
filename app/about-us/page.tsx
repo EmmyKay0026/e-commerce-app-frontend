@@ -15,11 +15,11 @@ function HeroSection() {
   return (
     <section
       aria-label="About IndustrialMart hero"
-      className="relative h-[60vh] flex flex-col items-center w-full justify-center text-center px-4"
+      className="relative h-[50vh] flex flex-col items-center w-full justify-center text-center px-4"
       style={{
-        backgroundImage: "url('/industrial-bg.png')",
+        backgroundImage: "url('/hero-sections-img.png')",
         backgroundSize: "cover",
-        backgroundPosition: "center",
+        backgroundPosition: "center top 20%",
       }}
     >
       {/* Dark overlay for contrast */}
@@ -30,7 +30,7 @@ function HeroSection() {
           <h1 className="text-2xl md:text-3xl lg:text-5xl font-extrabold leading-tight">
             Leading Marketer of Industrial Equipment &amp; Tools in Nigeria.
           </h1>
-          <p className="mt-2 text-sm md:text-base text-white/90 max-w-xl mx-auto">
+          <p className="mt-2 text-sm md:text-base lg:text-[20px] text-white/90 max-w-xl mx-auto">
             Explore our range of equipment and tools for Oil &amp; Gas,
             Manufacturing, Construction and other industrial sectors.
           </p>
@@ -82,9 +82,9 @@ function AboutContent() {
       <div
         className="relative h-[40vh] flex flex-col items-center justify-center w-full text-center px-4 overflow-hidden"
         style={{
-          backgroundImage: "url('/industrial-bg.png')",
+          backgroundImage: "url('/hero-sections-img.png')",
           backgroundSize: "cover",
-          backgroundPosition: "center",
+          backgroundPosition: "center top 20%",
         }}
       >
         {/* Overlay (Behind Content) */}
