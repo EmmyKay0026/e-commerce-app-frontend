@@ -170,7 +170,7 @@ function StartSellingContent() {
     bg-cover bg-no-repeat bg-[position:center]
   "
         style={{
-          backgroundImage: "url('/industrial-bg.png')",
+          backgroundImage: "url('/industrial-bg.webp')",
         }}
       >
         {/* Overlay (Behind Content) */}
