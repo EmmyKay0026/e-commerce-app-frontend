@@ -6,17 +6,16 @@ import { Button } from "@/components/ui/button";
 import { List } from "lucide-react";
 import CategoriesModal from "../molecules/CategoriesModal";
 import { listProducts } from "@/services/productService";
-import type { Category, Product } from "@/types/models";
+import type { Product } from "@/types/models";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getAllParentCategories } from "@/services/categoryService";
 import { constructImageUrl } from "@/lib/utils";
+import { useCategoryStore } from "@/store/useCategoryStore";
 
 const HomeHeroSection = () => {
   const [showCategories, setShowCategories] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [quickCatList, setQuickCatList] = useState<Category[]>([]);
   const [searchResults, setSearchResults] = useState<Product[] | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const debounceRef = useRef<number | null>(null);
@@ -25,7 +24,15 @@ const HomeHeroSection = () => {
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
 
-  // cleanup on unmount
+  // ✅ Zustand store usage
+  const { categories, loading, fetchCategories } = useCategoryStore();
+
+  // Fetch categories on mount (only once)
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (debounceRef.current) window.clearTimeout(debounceRef.current);
@@ -33,28 +40,15 @@ const HomeHeroSection = () => {
     };
   }, []);
 
-  useEffect(() => {
-    const getParentCategory = async () => {
-      const res = await getAllParentCategories();
-
-      if (res.success) {
-        setQuickCatList(res.data ?? []);
-      }
-    };
-    getParentCategory();
-  }, []);
-
-  // close search results when clicking outside
+  // Close search results when clicking outside
   useEffect(() => {
     const onDocClick = (e: MouseEvent) => {
       const target = e.target as Node;
-      // If click is inside the search input container or inside the dropdown, do nothing
       if (
         (searchRef.current && searchRef.current.contains(target)) ||
         (dropdownRef.current && dropdownRef.current.contains(target))
-      ) {
+      )
         return;
-      }
 
       setSearchResults(null);
     };
@@ -69,39 +63,40 @@ const HomeHeroSection = () => {
   const handleDebouncedSearch = (q: string) => {
     if (debounceRef.current) window.clearTimeout(debounceRef.current);
 
-    if (!q || q.trim().length === 0) {
+    if (!q.trim()) {
       setSearchResults(null);
       setIsSearching(false);
       return;
     }
 
     debounceRef.current = window.setTimeout(async () => {
-      // abort previous
       if (abortControllerRef.current) {
         try {
           abortControllerRef.current.abort();
         } catch {}
         abortControllerRef.current = null;
       }
+
       const controller = new AbortController();
       abortControllerRef.current = controller;
-
       setIsSearching(true);
+
       try {
         const res = await listProducts({
           q,
           perPage: 6,
           signal: controller.signal,
         });
+
         if (res.success && res.data) {
           setSearchResults(res.data.products || []);
         } else {
           setSearchResults([]);
-          console.warn("Search error:", res.error);
         }
       } catch (err: any) {
-        if (err.name === "AbortError" || err.name === "CanceledError") return;
-        console.error("Search failed:", err);
+        if (err.name !== "AbortError" && err.name !== "CanceledError") {
+          console.error("Search failed:", err);
+        }
         setSearchResults([]);
       } finally {
         setIsSearching(false);
@@ -127,7 +122,7 @@ const HomeHeroSection = () => {
           Your No.1 Marketplace For Quality Industrial Equipments
         </h2>
         <p className="mt-3 text-lg text-gray-100">
-          A platform for easy buying and selling of industria l equipment across
+          A platform for easy buying and selling of industrial equipment across
           the oil & gas industrial sectors
         </p>
 
@@ -146,8 +141,7 @@ const HomeHeroSection = () => {
               }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  const q = (e.currentTarget as HTMLInputElement).value;
-                  router.push(`/products?q=${encodeURIComponent(q)}`);
+                  router.push(`/products?q=${encodeURIComponent(searchQuery)}`);
                   setSearchResults(null);
                 }
               }}
@@ -171,20 +165,8 @@ const HomeHeroSection = () => {
               className="absolute left-0 right-0 mt-1 bg-white rounded-lg shadow-lg z-40 max-h-72 overflow-auto"
             >
               {isSearching ? (
-                <div className="p-3">
-                  <ul className="divide-y">
-                    {Array.from({ length: 4 }).map((_, i) => (
-                      <li key={i} className="px-3 py-2">
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 bg-gray-200 rounded animate-pulse" />
-                          <div className="flex-1">
-                            <div className="h-3 bg-gray-200 rounded w-2/3 mb-2 animate-pulse" />
-                            <div className="h-2 bg-gray-200 rounded w-1/3 animate-pulse" />
-                          </div>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
+                <div className="p-3 text-sm text-muted-foreground">
+                  Searching...
                 </div>
               ) : searchResults.length === 0 ? (
                 <div className="p-3 text-sm text-muted-foreground">
@@ -227,9 +209,7 @@ const HomeHeroSection = () => {
 
                   <div className="p-2 border-t text-center">
                     <Link
-                      href={`/products?q=${encodeURIComponent(
-                        searchQuery || ""
-                      )}`}
+                      href={`/products?q=${encodeURIComponent(searchQuery)}`}
                       className="text-sm font-medium text-primary"
                     >
                       See all results
@@ -250,24 +230,33 @@ const HomeHeroSection = () => {
             <List />
             All categories
           </Button>
-          {quickCatList.splice(0, 3).map((cat, i) => (
-            <Link
-              key={i}
-              // onClick={() => setShowCategories(true)}
-              href={`/category/${cat.slug}`}
-              className="flex items-center  justify-center cursor-pointer gap-1 hover:text-white  bg-transparent rounded-full  text-white/90"
-            >
-              <Image
-                src={constructImageUrl(cat.icon ?? cat.image ?? "")}
-                alt={cat.name}
-                width={20}
-                height={20}
-                className="object-cover invert"
-              />
-              {/* <List /> */}
-              {cat.name}
-            </Link>
-          ))}
+
+          {loading ? (
+            <span className="text-sm text-white/80">Loading...</span>
+          ) : categories.length > 0 ? (
+            categories.slice(0, 3).map((cat, i) => (
+              <Link
+                key={i}
+                href={`/category/${cat.slug}`}
+                className="flex items-center justify-center cursor-pointer gap-1 hover:text-white bg-transparent rounded-full text-white/90"
+              >
+                {cat.icon || cat.image ? (
+                  <Image
+                    src={constructImageUrl(cat.icon ?? cat.image ?? "")}
+                    alt={cat.name}
+                    width={20}
+                    height={20}
+                    className="object-cover invert"
+                  />
+                ) : null}
+                {cat.name}
+              </Link>
+            ))
+          ) : (
+            <span className="text-sm text-white/80">
+              No categories available
+            </span>
+          )}
         </div>
       </div>
 

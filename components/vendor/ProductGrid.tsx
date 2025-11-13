@@ -33,6 +33,8 @@ import { BusinessProfile, Product, User } from "@/types/models";
 import ProductCards from "../molecules/ProductCards";
 import ProductList from "../molecules/ProductList";
 import { getBusinessProducts } from "@/services/productService";
+import Link from "next/link";
+import { useUserStore, useFetchDataOnMount } from "@/store/useUserStore";
 // import { ProductCardCompact } from "@/components/product-card-compact";
 
 export function ProductsGrid({
@@ -40,6 +42,9 @@ export function ProductsGrid({
 }: {
   vendor: BusinessProfile & { user: User };
 }) {
+  useFetchDataOnMount();
+
+  const { user: currentUser, isOwner, isLoading } = useUserStore();
   const [isActive, setIsActive] = useState<"grid" | "list">("list");
   const [showSearch, setShowSearch] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>("");
@@ -47,6 +52,8 @@ export function ProductsGrid({
   const [businessProducts, setBusinessProducts] = useState<Product[] | null>(
     null
   );
+
+  const isMyShop = isOwner === true;
 
   useEffect(() => {
     const getBusniessProducts = async () => {
@@ -65,6 +72,12 @@ export function ProductsGrid({
 
     getBusniessProducts();
   }, []);
+
+  useEffect(() => {
+    if (vendor?.user?.id) {
+      useUserStore.getState().updateIsOwner(vendor.user.id);
+    }
+  }, [vendor?.user?.id]);
 
   return (
     <section id="products" className="px-2 lg:px-8 py-16 md:py-24">
@@ -155,19 +168,25 @@ export function ProductsGrid({
                   <Store />
                 </EmptyMedia>
                 <EmptyTitle>
-                  {`
-                      ${
-                        vendor?.business_name || vendor?.user.first_name
-                      }'s store is empty`}
+                  {`${vendor?.business_name || vendor?.user.first_name}'s store is empty`}
                 </EmptyTitle>
                 <EmptyDescription>
-                  Add products to your store to start selling.
+                  {isMyShop
+                    ? "Add products to your store to start selling."
+                    : "Check out other great items on the marketplace."}
                 </EmptyDescription>
               </EmptyHeader>
+
               <EmptyContent>
-                <Button variant="outline" size="sm">
-                  Continue shopping
-                </Button>
+                {isMyShop ? (
+                  <Button asChild variant="outline" size="sm">
+                    <Link href="/sell">Add products</Link>
+                  </Button>
+                ) : (
+                  <Button asChild variant="outline" size="sm">
+                    <Link href="/products">Continue shopping</Link>
+                  </Button>
+                )}
               </EmptyContent>
             </Empty>
           )}
