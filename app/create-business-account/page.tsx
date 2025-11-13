@@ -189,9 +189,9 @@ export default function CreateBusinessAccountPage() {
       />
       <div className="min-h-screen flex items-center justify-center py-12 px-4">
         <div className="w-full max-w-2xl bg-white rounded-lg shadow p-6">
-          <h1 className="text-2xl font-semibold mb-4">
+          {/* <h1 className="text-2xl font-semibold mb-4">
             Create Business Account
-          </h1>
+          </h1> */}
 
           <CreateBusinessAccountForm
             businessName={businessName}

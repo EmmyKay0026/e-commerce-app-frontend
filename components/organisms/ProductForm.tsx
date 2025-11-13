@@ -164,12 +164,12 @@ export function ProductForm() {
   return (
     <div className="min-h-screen bg-background py-8 px-4">
       <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-8">
+        {/* <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">Submit Your Product</h1>
           <p className="text-muted-foreground">
             Fill in the details to list your product
           </p>
-        </div>
+        </div> */}
 
         <StepIndicator currentStep={currentStep} totalSteps={TOTAL_STEPS} />
 
