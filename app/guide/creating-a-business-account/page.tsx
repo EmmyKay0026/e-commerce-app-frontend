@@ -1,5 +1,6 @@
 // app/how to be a vendor/page.tsx
 import React from "react";
+import Link from "next/link";
 import Hero from "@/components/organisms/SharedHeroSection";
 
 export default function VendorPage() {
@@ -37,15 +38,15 @@ function BeVendorContent() {
             Step 1: Vendor Identity
           </h2>
           <p className="text-base md:text-lg text-black/90 leading-relaxed">
-            Enter your <strong>Full Name</strong>. This will be our primary
-            point of contact for the account. Provide your official{" "}
-            <strong>Business Name</strong> (e.g., John Ventures). This is how
-            your business will be displayed on the marketplace.
+            Enter your <strong>Business Name</strong> (e.g., John Ventures)
+            Next, choose a<strong> Business Slug</strong>, which serves as your
+            unique web address on IndustrialMart. It appears as
+            “industrialmart.ng/shop/your-slug”.
           </p>
         </div>
         <div className="md:w-2/5 flex justify-center">
           <img
-            src="/be-a-vendor-img.png"
+            src="/creating-a-business-acct-img.png"
             alt="Step 1 - Vendor Identity"
             className="w-full max-w-sm h-auto rounded-lg shadow-md object-cover"
           />
@@ -56,20 +57,19 @@ function BeVendorContent() {
       <div className="relative z-20 flex flex-col md:flex-row-reverse items-center justify-center gap-10 max-w-6xl mx-auto px-6 md:px-8 lg:px-12 mb-16">
         <div className="md:w-3/5 text-left">
           <h2 className="text-xl md:text-2xl font-semibold text-[#0861C1] mb-4">
-            Step 2: Your Unique URL
+            Step 2: Business Description
           </h2>
           <p className="text-base md:text-lg text-black/90 leading-relaxed">
-            Your <strong>Business slug</strong> is your unique web address on
-            IndustrialMart. It appears as “industrialmart.com/vendor/your-slug”.
-            Choose something short and memorable{" "}
-            <strong>based on your business name</strong>. Use only lowercase
-            letters, numbers, and hyphens.
+            Briefly <strong> describe what your business offers</strong>.
+            Highlight your key products, services, or specialties to attract the
+            right customers. Clear descriptions help customers understand your
+            brand and attract the right buyers.
           </p>
         </div>
         <div className="md:w-2/5 flex justify-center">
           <img
-            src="/be-a-vendor-img(2).png"
-            alt="Step 2 - Business Slug"
+            src="/creating-a-business-acct-img(2).png"
+            alt="Step 2 - Business Description"
             className="w-full max-w-sm h-auto rounded-lg shadow-md object-cover"
           />
         </div>
@@ -79,19 +79,21 @@ function BeVendorContent() {
       <div className="relative z-20 flex flex-col md:flex-row items-center justify-center gap-10 max-w-6xl mx-auto px-6 md:px-8 lg:px-12 mb-16">
         <div className="md:w-3/5 text-left">
           <h2 className="text-xl md:text-2xl font-semibold text-[#0861C1] mb-4">
-            Step 3: Account Access
+            Step 3: Upload Your Business Cover Photo
           </h2>
           <p className="text-base md:text-lg text-black/90 leading-relaxed">
-            Provide a <strong>working business email</strong> where we can reach
-            you. You'll receive notifications about orders, inquiries, and
-            account updates here, so make sure you have access to this email.
-            We'll also use it to verify your account.
+            Add a <strong> high-quality image</strong> that represents your
+            business. This could be a logo, storefront, warehouse, or images of
+            your products. This photo will appear on your vendor profile, so
+            choose something
+            <strong> professional</strong> that helps buyers recognize your
+            brand.
           </p>
         </div>
         <div className="md:w-2/5 flex justify-center">
           <img
-            src="/be-a-vendor-img(3).png"
-            alt="Step 3 - Product Upload"
+            src="/creating-a-business-acct-img(3).png"
+            alt="Step 3 - cover photo Upload"
             className="w-full max-w-sm h-auto rounded-lg shadow-md object-cover"
           />
         </div>
@@ -104,15 +106,16 @@ function BeVendorContent() {
             Step 4: Stay Connected
           </h2>
           <p className="text-base md:text-lg text-black/90 leading-relaxed">
-            Enter a valid <strong>Phone Number</strong>. And also enter your{" "}
-            <strong>WhatsApp Number</strong> so buyers can contact you directly
-            for immediate inquiries and quick order follow-ups.
+            Provide your business contact details so customers can easily reach
+            you. Enter your{" "}
+            <strong> email, phone number, and WhatsApp number</strong>. Note:
+            Your email can’t be changed later, so ensure it’s correct.
           </p>
         </div>
         <div className="md:w-2/5 flex justify-center">
           <img
-            src="/be-a-vendor-img(4).png"
-            alt="Step 4 - Business Verification"
+            src="/creating-a-business-acct-img(4).png"
+            alt="Step 4 - Stay Connected"
             className="w-full max-w-sm h-auto rounded-lg shadow-md object-cover"
           />
         </div>
@@ -122,20 +125,17 @@ function BeVendorContent() {
       <div className="relative z-20 flex flex-col md:flex-row items-center justify-center gap-10 max-w-6xl mx-auto px-6 md:px-8 lg:px-12 mb-12">
         <div className="md:w-3/5 text-left">
           <h2 className="text-xl md:text-2xl font-semibold text-[#0861C1] mb-4">
-            Step 5: Complete your profile and send us your application.
+            Step 5: Start Selling.
           </h2>
           <p className="text-base md:text-lg text-black/90 leading-relaxed">
-            Add a <strong>high-quality image</strong> that represents your
-            business. This could be a logo, storefront, warehouse, or images of
-            your products. <strong>Click Submit</strong> to finalize and send
-            your application. Our team will review your application within 2–3
-            business days and notify you immediately via email once your vendor
-            status is approved.
+            Enter <strong> your business address</strong> to complete your registration. Once
+            done, <strong> click “Create Business Account”</strong> to finish setting up your
+            vendor profile and start selling on IndustrialMart.
           </p>
         </div>
         <div className="md:w-2/5 flex justify-center">
           <img
-            src="/be-a-vendor-img(5).png"
+            src="/creating-a-business-acct-img(5).png"
             alt="Step 5 - Start Selling"
             className="w-full max-w-sm h-auto rounded-lg shadow-md object-cover"
           />
@@ -146,10 +146,10 @@ function BeVendorContent() {
         className="
     relative h-[50vh] flex flex-col items-center justify-center 
     w-full text-center px-4 overflow-hidden
-    bg-cover bg-no-repeat bg-[position:center_top_20%]
+    bg-cover bg-no-repeat bg-[position:center]
   "
         style={{
-          backgroundImage: "url('/hero-sections-img.png')",
+          backgroundImage: "url('/industrial-bg.png')",
         }}
       >
         {/* Overlay (Behind Content) */}
@@ -166,16 +166,19 @@ function BeVendorContent() {
             <br />
             Questions? Contact our vendor support team at{" "}
             <a
-              href="mailto:vendorsupport@industrialmart.com"
+              href="mailto:vendorsupport@industrialmart.ng"
               className="text-[#ffffff] font-medium underline"
             >
-              examplesupport@industrialmart.com
+              <br />
+              support@industrialmart.ng
             </a>
             .
           </p>
-          <button className="bg-[#0861C1] text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-[#074a96] transition">
-            Become a Vendor
-          </button>
+          <Link href={"/create-business-account"}>
+            <button className="bg-[#0861C1] text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-[#074a96] transition">
+              Become a Vendor
+            </button>
+          </Link>
         </div>
       </div>
     </section>
