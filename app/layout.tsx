@@ -95,6 +95,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#000000" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/webp" href="/indLogo.webp" />
 
         <Script
           id="org-schema"
@@ -135,17 +136,17 @@ export default function RootLayout({
       </head>
 
       <body
-              className={`overflow-x-hidden overflow-y-auto max-w-[100dvw] ${geistSans.variable} ${geistMono.variable} antialiased`}
-            >
-              <Navbar />
-              <Toaster />
-              <AuthModal />
-              <LayoutProvider />
-              {/* <SignModalManager />
-              <RegisterModalManager /> */}
-              {children}
-              <Footer />
-            </body>
+        className={`overflow-x-hidden overflow-y-auto max-w-[100dvw] ${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <Navbar />
+        <Toaster />
+        <AuthModal />
+        <LayoutProvider />
+        {/* <SignModalManager />
+        <RegisterModalManager /> */}
+        {children}
+        <Footer />
+      </body>
     </html>
   );
 }
