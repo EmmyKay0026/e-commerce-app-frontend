@@ -11,7 +11,7 @@ export default function VendorPage() {
         title=" How to become a Vendor"
         subtitle="Ready to reach thousands of industrial buyers across Nigeria? Here's
             what you need to get started."
-        backgroundImage="/hero-sections-img.png"
+        backgroundImage="/hero-sections-img.webp"
       />
 
       {/* Main Content */}

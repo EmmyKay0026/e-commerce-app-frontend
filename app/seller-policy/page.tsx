@@ -17,7 +17,7 @@ export default function SellerPolicy() {
       <Hero
         title="Seller Policy (Vendor Terms and Agreement)"
         subtitle="Guidelines, obligations, and standards for vendors on IndustrialMart Nigeria."
-        backgroundImage="/hero-sections-img.png"
+        backgroundImage="/hero-sections-img.webp"
       />
 
       <section className="bg-white text-gray-800">

@@ -8,7 +8,7 @@ export default function TermsAndConditions() {
       <Hero
         title="Terms and Conditions"
         subtitle="Please read these terms carefully before using IndustrialMart Nigeria or any of our services."
-        backgroundImage="/hero-sections-img.png"
+        backgroundImage="/hero-sections-img.webp"
       />
 
       {/* Main Content */}

@@ -11,7 +11,7 @@ export default function VendorPage() {
         title="How to Sell on IndustrialMart"
         subtitle="Ready to list your products and connect with buyers? Follow these
             simple steps to get started."
-        backgroundImage="/hero-sections-img.png"
+        backgroundImage="/hero-sections-img.webp"
       />
 
       {/* Main Content */}

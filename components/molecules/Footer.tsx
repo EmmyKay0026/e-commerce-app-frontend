@@ -26,7 +26,7 @@ export default function Footer() {
           </p>
           <div className="flex gap-3 mt-4">
             <a
-              href="https://www.facebook.com/confirmemail.php?next=https%3A%2F%2Fwww.facebook.com%2Findustrialmartnigeria#"
+              href="https://www.facebook.com/share/17WTTNEaSV/"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Visit IndustrialMart Nigeria on Facebook"

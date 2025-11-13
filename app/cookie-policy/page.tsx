@@ -8,7 +8,7 @@ export default function CookiesPolicy() {
       <Hero
         title="Cookies Policy"
         subtitle="Learn how IndustrialMart Nigeria uses cookies to enhance your browsing experience and improve our services."
-        backgroundImage="/hero-sections-img.png"
+        backgroundImage="/hero-sections-img.webp"
       />
 
       {/* Main Content */}
