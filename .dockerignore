@@ -1,0 +1,63 @@
+# Dependency directories
+node_modules
+.next
+
+# Testing
+coverage
+
+# Production build files
+build
+dist
+
+# Local environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Editor directories and files
+.vscode
+.idea
+*.suo
+*.ntvsps
+*.njsproj
+*.sln
+*.sw?
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Dockerfile itself (if it's in the same directory as the .dockerignore)
+Dockerfile
+
+# Git
+.git
+.gitignore
+
+# biome.json (if you don't want to include it in the image)
+biome.json
+
+# components.json (if you don't want to include it in the image)
+components.json
+
+# package-lock.json (if you want to regenerate it in the container)
+package-lock.json
+
+# postcss.config.mjs (if you don't want to include it in the image)
+postcss.config.mjs
+
+# tsconfig.json (if you don't want to include it in the image)
+tsconfig.json
+
+# README.md
+README.md
