@@ -44,20 +44,9 @@ Dockerfile
 .git
 .gitignore
 
-# biome.json (if you don't want to include it in the image)
-biome.json
 
-# components.json (if you don't want to include it in the image)
-components.json
 
-# package-lock.json (if you want to regenerate it in the container)
-package-lock.json
 
-# postcss.config.mjs (if you don't want to include it in the image)
-postcss.config.mjs
-
-# tsconfig.json (if you don't want to include it in the image)
-tsconfig.json
 
 # README.md
 README.md
