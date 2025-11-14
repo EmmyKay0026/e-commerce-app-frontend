@@ -128,9 +128,9 @@ export default function Footer() {
             Port Harcourt, Rivers State.
           </p>
           <p className="text-sm mt-3 text-gray-400">
-            Email: sales@industrialmartnigeria.com
+            Email: support@industrialmart.ng
           </p>
-          <p className="text-sm mt-2 text-gray-400">Call us: +234-7078581059</p>
+          {/* <p className="text-sm mt-2 text-gray-400">Call us: +234-7078581059</p> */}
         </div>
       </div>
 
