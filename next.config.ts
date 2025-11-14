@@ -21,6 +21,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  assetPrefix: process.env.VERCEL ? undefined : '',
 };
 
 export default nextConfig;

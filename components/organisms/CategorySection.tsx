@@ -136,12 +136,27 @@ const CategorySection: React.FC = () => {
     [hoveredId, selectedCategoryId, getCategoryChildren]
   );
 
-  /** Mobile item (recursive expandable) */
+  /** Mobile item (recursive expandable) - FIXED */
   const MobileItem = useCallback(
-    (cat: Category, depth = 0) => {
+    ({ cat, depth = 0 }: { cat: Category; depth?: number }) => {
       const categoryHasChildren = hasChildren(cat);
-      const children = categoryHasChildren ? getCategoryChildren(cat.id) : [];
       const [expanded, setExpanded] = useState(false);
+      const [children, setChildren] = useState<Category[]>([]);
+      const [loadingChildren, setLoadingChildren] = useState(false);
+
+      useEffect(() => {
+        if (expanded && categoryHasChildren && children.length === 0) {
+          setLoadingChildren(true);
+          getCategoryChildren(cat.id).then((childCats) => {
+            setChildren(childCats);
+          }).catch((err) => {
+            console.error("Failed to load children for", cat.id, err);
+            setChildren([]); // prevent infinite retry
+          }).finally(() => {
+            setLoadingChildren(false);
+          });
+        }
+      }, [expanded, categoryHasChildren, cat.id, children.length]);
 
       return (
         <li key={cat.id}>
@@ -170,8 +185,11 @@ const CategorySection: React.FC = () => {
                   setExpanded(!expanded);
                 }}
                 className="p-2"
+                disabled={loadingChildren}
               >
-                {expanded ? (
+                {loadingChildren ? (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
+                ) : expanded ? (
                   <ChevronUp className="h-4 w-4 text-gray-500" />
                 ) : (
                   <ChevronDown className="h-4 w-4 text-gray-500" />
@@ -180,15 +198,24 @@ const CategorySection: React.FC = () => {
             )}
           </div>
 
-          {/* {categoryHasChildren && expanded && children.length > 0 && (
+          {/* Render children only when loaded */}
+          {expanded && (
             <ul className="mt-1 space-y-1">
-              {children.map((child) => MobileItem(child, depth + 1))}
+              {loadingChildren ? (
+                <li className="px-4 py-2 text-sm text-gray-500">Loading...</li>
+              ) : children.length > 0 ? (
+                children.map((child) => (
+                  <MobileItem key={child.id} cat={child} depth={depth + 1} />
+                ))
+              ) : categoryHasChildren ? (
+                <li className="px-4 py-2 text-sm text-gray-400">No subcategories</li>
+              ) : null}
             </ul>
-          )} */}
+          )}
         </li>
       );
     },
-    [selectedCategoryId, getCategoryChildren]
+    [selectedCategoryId, getCategoryChildren, setShowMobile]
   );
 
   return (
@@ -240,7 +267,9 @@ const CategorySection: React.FC = () => {
 
           {showMobile && (
             <ul className="absolute mt-3 w-full max-h-[300px] overflow-y-auto rounded-xl border border-gray-200 bg-white px-3 py-3 shadow-md z-10 space-y-1">
-              {rootCategories.map((cat) => MobileItem(cat))}
+              {rootCategories.map((cat) => (
+                <MobileItem key={cat.id} cat={cat} depth={0} />
+              ))}
             </ul>
           )}
         </div>

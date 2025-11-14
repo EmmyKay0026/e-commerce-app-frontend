@@ -14,6 +14,8 @@ import {
   Bookmark,
   Settings,
   LogOut,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import CategoriesModal from "./CategoriesModal";
 import { motion, AnimatePresence } from "framer-motion";
@@ -48,6 +50,32 @@ export default function Navbar() {
   const [searchResults, setSearchResults] = useState<Product[] | null>(null);
   const [isSearching, setIsSearching] = useState(false);
 
+  const [showBottomNav, setShowBottomNav] = useState(true);
+  const [manualToggle, setManualToggle] = useState(true);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+        // Scrolling down
+        setShowBottomNav(false);
+      } else {
+        // Scrolling up
+        setShowBottomNav(true);
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isMobile]);
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (listRef.current && !listRef.current.contains(e.target as Node)) {
@@ -81,11 +109,10 @@ export default function Navbar() {
     } else {
       toast("✅ Logged out successfully!");
       setIsOpen(true);
-      // optional: close modal (if this modal is open) or redirect
-      // toogle(); // uncomment to close the modal
-      window.location.href = "/"; // uncomment to redirect after logout
+      window.location.href = "/";
     }
   };
+
   // close search results when clicking outside the search area
   useEffect(() => {
     const handleOutside = (e: MouseEvent) => {
@@ -132,22 +159,17 @@ export default function Navbar() {
   }, []);
 
   const handleDebouncedSearch = (query: string) => {
-    // clear previous debounce
     if (debounceRef.current) {
       window.clearTimeout(debounceRef.current);
     }
 
-    // short-circuit empty queries
     if (!query || query.trim().length === 0) {
       setSearchResults(null);
       setIsSearching(false);
       return;
     }
 
-    // debounce network requests
-    // using window.setTimeout so it returns number
     debounceRef.current = window.setTimeout(async () => {
-      // abort previous request if any
       if (abortControllerRef.current) {
         try {
           abortControllerRef.current.abort();
@@ -168,20 +190,17 @@ export default function Navbar() {
         if (res.success && res.data) {
           setSearchResults(res.data.products || []);
         } else {
-          // no results or error - clear results and optionally log
           setSearchResults([]);
           console.warn("Search error:", res.error);
         }
       } catch (err: any) {
         if (err.name === "CanceledError" || err.name === "AbortError") {
-          // request was aborted — ignore
           return;
         }
         console.error("Search request failed:", err);
         setSearchResults([]);
       } finally {
         setIsSearching(false);
-        // clear controller if it's still the same
         if (abortControllerRef.current === controller)
           abortControllerRef.current = null;
       }
@@ -196,7 +215,6 @@ export default function Navbar() {
           <div className="block w-full">
             {/* Top Bar */}
             <div className="w-full bg-white flex justify-between z-50 py-2 px-16">
-              {/* Logo */}
               <Link href={"/"} className="relative w-40 h-15 cursor-pointer">
                 <Image
                   src="/ind_logo.png"
@@ -207,7 +225,6 @@ export default function Navbar() {
                 />
               </Link>
 
-              {/* Search Bar (shows on scroll) */}
               <div className="flex items-center gap-3">
                 {showSearch && (
                   <motion.div
@@ -218,7 +235,7 @@ export default function Navbar() {
                     }}
                     exit={{ opacity: 0, y: -5 }}
                     transition={{ duration: 0.3, ease: "easeOut" }}
-                    className="hidden md:flex items-center bg-white rounded-full overflow-hidden  border-[0.5px] border-[#007bff] pl-2 pr-0 w-[300px] "
+                    className="hidden md:flex items-center bg-white rounded-full overflow-hidden border-[0.5px] border-[#007bff] pl-2 pr-0 w-[300px]"
                     ref={searchRef}
                   >
                     <Input
@@ -242,7 +259,6 @@ export default function Navbar() {
                     />
                     <Search className="text-[#c0ab87] sbg-secondary ml-2 h-9 p-2 w-10 rounded-full" />
 
-                    {/* Results dropdown (desktop) */}
                     {searchResults !== null && (
                       <div className="absolute left-0 top-[10vh] mt-2 w-full bg-white rounded-b-lg shadow-lg z-50 max-h-64 overflow-auto">
                         {isSearching ? (
@@ -323,7 +339,6 @@ export default function Navbar() {
                 )}
               </div>
 
-              {/* Links + Sign-in */}
               <div className="flex justify-between items-center gap-6 relative">
                 <ul className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-700">
                   <li className="hover:text-secondary transition-colors cursor-pointer">
@@ -385,7 +400,6 @@ export default function Navbar() {
         {/* ===== MOBILE NAVBAR ===== */}
         {isMobile && (
           <div className="w-full">
-            {/* Top Bar */}
             <div className="flex justify-between items-center bg-white pr-4">
               <div className="relative w-36 h-14">
                 <Image
@@ -457,7 +471,7 @@ export default function Navbar() {
             </Button>
             {user ? (
               <div className="relative w-full">
-                <Button className="bg-white hover:bg-transparent   cursor-pointer text-black px-5 rounded mx-2 transition-all flex items-center gap-2">
+                <Button className="bg-white hover:bg-transparent cursor-pointer text-black px-5 rounded mx-2 transition-all flex items-center gap-2">
                   <Image
                     alt={user.first_name}
                     src={constructImageUrl(user.profile_picture ?? "/user.png")}
@@ -473,7 +487,6 @@ export default function Navbar() {
                 <User className="text-gray-900 bg-gray-300 h-10 p-2 mr-2 w-10 rounded-full" />
                 <Button
                   onClick={() => {
-                    // close dropdown and open global sign-in modal
                     setShowList(false);
                     setIsOpen(true);
                   }}
@@ -579,12 +592,14 @@ export default function Navbar() {
               ✕
             </Button>
             <ul className="flex flex-col text-sm text-gray-800 p-4 space-y-3">
-              <li className="hover:text-secondary cursor-pointer">About us</li>
               <li className="hover:text-secondary cursor-pointer">
-                Marketplace
+                <Link href="/about-us">About us</Link>
               </li>
               <li className="hover:text-secondary cursor-pointer">
-                Start selling
+                <Link href="/marketplace">Marketplace</Link>
+              </li>
+              <li className="hover:text-secondary cursor-pointer">
+                <Link href="/sell">Start selling</Link>
               </li>
             </ul>
           </motion.div>
@@ -704,12 +719,50 @@ export default function Navbar() {
         )}
       </AnimatePresence>
 
-      {/* removed local SignInModal mount - global manager will handle it */}
       <CategoriesModal
         isOpen={showCategories}
         onClose={() => setShowCategories(false)}
       />
-      <MobileBottomNav />
+      
+      {/* Toggle Button - Shows when nav is hidden */}
+      <AnimatePresence>
+        {isMobile && !manualToggle && (
+          <motion.button
+            initial={{ y: 80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 80, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            onClick={() => setManualToggle(true)}
+            className="fixed bottom-15 right-4 z-[60] bg-white rounded-full shadow-lg p-2 border border-gray-200"
+          >
+            <ChevronUp className="w-5 h-5 text-gray-700" />
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* Mobile Bottom Nav with Toggle Button */}
+      <AnimatePresence>
+        {isMobile && showBottomNav && manualToggle && (
+          <motion.div
+            initial={{ y: 80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 80, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed bottom-0 left-0 w-full z-50"
+          >
+            {/* Toggle Button Above Nav */}
+            <div className="absolute -top-12 right-4 z-[60]">
+              <button
+                onClick={() => setManualToggle(false)}
+                className="fixed bottom-15 right-4 z-[60] bg-white rounded-full shadow-lg p-2 border border-gray-200"
+              >
+                <ChevronDown className="w-5 h-5 text-gray-700" />
+              </button>
+            </div>
+            <MobileBottomNav />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }

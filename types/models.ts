@@ -50,7 +50,7 @@ export interface Product {
   product_owner_id: string; // FK -> VendorProfile.id
   name: string;
   description: string;
-  price: string | undefined; // for display only (not transactions)
+  price: string | undefined; // use for filter (lowest to highest or highest)
   images: string[]; // URLs to Google Storage
   category_id?: string; // FK -> Category.id
   category?: CategoryInfo;
@@ -59,12 +59,12 @@ export interface Product {
   status: "active" | "inactive" | "deleted" | "pending_review";
   created_at: string;
   updated_at?: string;
-  location_lga?: string;
-  location_state?: string;
+  location_lga?: string; // use for filter
+  location_state?: string; // use for filter
   slug: string; // URL-friendly identifier
   price_input_mode?: "enter" | "quote";
   sale_type: "wholesale" | "retail";
-  price_type: "fixed" | "negotiable";
+  price_type: "fixed" | "negotiable"; // use For filter
   metadata: Record<string, any>; // to contain more description of the item
   view_count?: string;
   business: {

@@ -51,9 +51,11 @@ export default function MobileBottomNav() {
         <div className="relative">
           {/* Floating Center Button */}
           <div className="absolute left-1/2 -translate-x-1/2 -top-3 z-20">
-            <button className="w-12 h-12 rounded-full bg-primary hover:bg-white-500 shadow-xl flex items-center justify-center transition-all duration-300 active:scale-95">
-              <Plus className="w-6 h-6 text-white" strokeWidth={2.5} />
-            </button>
+            <Link href="/sell">
+              <button className="w-12 h-12 rounded-full bg-primary hover:bg-primary/90 shadow-xl flex items-center justify-center transition-all duration-300 active:scale-95">
+                <Plus className="w-6 h-6 text-white" strokeWidth={2.5} />
+              </button>
+            </Link>
           </div>
 
           {/* Navbar with SVG Curved Cutout */}
