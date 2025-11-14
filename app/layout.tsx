@@ -4,7 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Footer from "@/components/molecules/Footer";
 import Navbar from "@/components/molecules/Navbar";
-import LayoutProvider from "@/components/providers/LayoutProvider"
+import LayoutProvider from "@/components/providers/LayoutProvider";
 import AuthModal from "@/components/organisms/AuthModal";
 // import { useAuthModal } from "@/store/useAuthModal";
 import { useFetchDataOnMount } from "@/store/useUserStore";
@@ -89,7 +89,10 @@ export default function RootLayout({
 }>) {
   // useFetchDataOnMount();
   return (
-    <html lang="en-NG" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html
+      lang="en-NG"
+      className={`${geistSans.variable} ${geistMono.variable}`}
+    >
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#000000" />
@@ -135,17 +138,17 @@ export default function RootLayout({
       </head>
 
       <body
-              className={`overflow-x-hidden overflow-y-auto max-w-[100dvw] ${geistSans.variable} ${geistMono.variable} antialiased`}
-            >
-              <Navbar />
-              <Toaster />
-              <AuthModal />
-              <LayoutProvider />
-              {/* <SignModalManager />
+        className={`overflow-x-hidden overflow-y-auto max-w-dvw ${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <Navbar />
+        <Toaster />
+        <AuthModal />
+        <LayoutProvider />
+        {/* <SignModalManager />
               <RegisterModalManager /> */}
-              {children}
-              <Footer />
-            </body>
+        {children}
+        <Footer />
+      </body>
     </html>
   );
 }
