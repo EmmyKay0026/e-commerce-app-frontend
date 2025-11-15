@@ -121,7 +121,7 @@ export default function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
       onClick={onClose}
     >
       <div
-        className="bg-white/95 rounded-xl shadow-xl w-full max-w-md p-6 relative"
+        className="bg-white/95 rounded-xl shadow-xl w-full max-w-screen md:max-w-md p-6 relative"
         // onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-2xl font-semibold mb-2">Create an account</h2>

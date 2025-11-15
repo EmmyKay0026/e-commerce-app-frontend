@@ -1,223 +1,129 @@
-"use client";
+// Updated CategoryExplorer with adapted UI design
 
-import React, { useEffect, useState, useMemo, useCallback } from "react";
 import Link from "next/link";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { slugify } from "@/lib/utils";
-import ProductCards from "../molecules/ProductCards";
-// import {
-//   getChildCategories,
-//   getProductsByCategory,
-//   getRootCategories,
-//   hasChildren,
-// } from "@/services/categoryService";
-import { Category, Product } from "@/types/models";
-import { transformProduct } from "@/services/productService";
-import { useCategoryStore } from "@/store/useCategoryStore";
+import ProductCards from "@/components/molecules/ProductCards";
+import type { Category, Product } from "@/types/models";
+import { preloadCategoryMaps } from "@/services/preloadCategories";
 import {
-  getChildCategories,
-  getProductsByCategory,
-  getRootCategories,
-  hasChildren,
+  getAllCategories,
+  listProductsByCategory,
 } from "@/services/categoryService";
+import MobileDropdown from "@/components/molecules/MobileDropDown"
 
-const CategorySection: React.FC = () => {
-  const {
-    categories: allCategories,
-    loading: loadingCats,
-    fetchCategories,
-  } = useCategoryStore();
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
-    "5d7b7aff-f70b-4c18-b560-efa468844a09"
-  );
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loadingProducts, setLoadingProducts] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showMobile, setShowMobile] = useState(false);
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
+// Preload slug → ID map
+await preloadCategoryMaps();
 
-  /** Fetch all categories once */
-  useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
+// Fetch all categories
+const allCategories: Category[] = await getAllCategories();
 
-  /** Root categories for sidebar and dropdown */
-  const rootCategories = useMemo(() => {
-    return getRootCategories(allCategories);
-  }, [allCategories]);
+// Build tree using child_categories: string[]
+function buildCategoryTree(categories: Category[]): Category[] {
+  const map = new Map<string, Category>();
+  const roots: Category[] = [];
 
-  /** Fetch products when a category is selected */
-  useEffect(() => {
-    if (!selectedCategoryId) {
-      setProducts([]);
+  categories.forEach((cat) => {
+    map.set(cat.id, { ...cat });
+  });
+
+  categories.forEach((cat) => {
+    const current = map.get(cat.id)!;
+
+    if (!cat.parent_category_id || cat.parent_category_id.length === 0) {
+      roots.push(current);
       return;
     }
-    (async () => {
-      try {
-        setLoadingProducts(true);
-        setError(null);
-        const prods = await getProductsByCategory(selectedCategoryId);
-        if (prods.status) {
-          setProducts(prods?.data ?? []);
+
+    let attached = false;
+    for (const parentId of cat.parent_category_id) {
+      if (map.has(parentId)) {
+        const parent = map.get(parentId)!;
+        if (!parent.child_categories) parent.child_categories = [];
+        if (!parent.child_categories.includes(cat.id)) {
+          parent.child_categories.push(cat.id);
         }
-      } catch (e: any) {
-        console.error("getProductsByCategory error:", e);
-        setError(e.message ?? "Failed to load products");
-      } finally {
-        setLoadingProducts(false);
+        attached = true;
       }
-    })();
-  }, [selectedCategoryId]);
+    }
 
-  /** Selected category info */
-  const selectedCategory = useMemo(() => {
-    if (!selectedCategoryId) return null;
-    return allCategories.find((c) => c.id === selectedCategoryId) ?? null;
-  }, [selectedCategoryId, allCategories]);
+    if (!attached) roots.push(current);
+  });
 
-  /** Get child categories */
-  const getCategoryChildren = useCallback(
-    async (categoryId: string): Promise<Category[]> => {
-      const childrenCat = await getChildCategories(categoryId);
+  return roots;
+}
 
-      return childrenCat.data!;
-    },
-    [allCategories]
+const rootCategories = buildCategoryTree(allCategories);
+const defaultCategory = rootCategories[0] || allCategories[0];
+const selectedCategoryId = defaultCategory?.id;
+
+// Fetch initial products
+const productsResult = await listProductsByCategory(selectedCategoryId!, {
+  limit: 12,
+});
+const products: Product[] = productsResult.success
+  ? productsResult.data?.products || []
+  : [];
+
+// Recursive desktop item
+function CategoryTreeItem({ category }: { category: Category }) {
+  const hasChildren = category.child_categories?.length;
+  const isSelected = category.id === selectedCategoryId;
+
+  return (
+    <li>
+      <Link
+        href={`/category/${category.slug}`}
+        className={`block py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+          isSelected
+            ? "bg-blue-100 text-blue-700 font-bold"
+            : "text-gray-700 hover:bg-gray-100"
+        }`}
+      >
+        {category.name}
+      </Link>
+
+      {hasChildren ? (
+        <ul className="ml-4 mt-1 border-l border-gray-200 pl-4 space-y-1">
+          {category.child_categories!.map((childId) => {
+            const child = allCategories.find((c) => c.id === childId);
+            return child ? (
+              <CategoryTreeItem key={child.id} category={child} />
+            ) : null;
+          })}
+        </ul>
+      ) : null}
+    </li>
   );
+}
 
-  /** Desktop item (recursive) */
-  const DesktopItem = useCallback(
-    (cat: Category, depth = 0) => {
-      const categoryHasChildren = hasChildren(cat);
-      const isHover = hoveredId === cat.id;
-      const isSel = selectedCategoryId === cat.id;
-      const children = categoryHasChildren ? getCategoryChildren(cat.id) : [];
+// Mobile recursive item
+export function MobileItem({ cat, depth }: { cat: Category; depth: number }) {
+  const hasChildren = cat.child_categories?.length;
 
-      return (
-        <li
-          key={cat.id}
-          className="relative"
-          onMouseEnter={() => setHoveredId(cat.id)}
-          onMouseLeave={() => setHoveredId(null)}
-        >
-          <div
-            onClick={() => {
-              setSelectedCategoryId(cat.id);
-              setShowMobile(false);
-            }}
-            className={`flex cursor-pointer items-center justify-between rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-              isSel
-                ? "bg-blue-100 text-blue-700"
-                : "hover:bg-gray-100 text-gray-700"
-            }`}
-            style={{ paddingLeft: `${16 + depth * 12}px` }}
-          >
-            <span>{cat.name}</span>
-            {categoryHasChildren &&
-              (isHover ? (
-                <ChevronUp className="ml-1 h-4 w-4" />
-              ) : (
-                <ChevronDown className="ml-1 h-4 w-4" />
-              ))}
-          </div>
-          {/* 
-          {categoryHasChildren && isHover && children.length > 0 && (
-            <ul
-              className="absolute left-0 top-0 ml-1 min-w-[200px] rounded-lg border border-gray-200 bg-white shadow-lg z-20"
-              onMouseEnter={() => setHoveredId(cat.id)}
-              onMouseLeave={() => setHoveredId(null)}
-            >
-              {children.map((child) => DesktopItem(child, depth + 1))}
-            </ul>
-          )} */}
-        </li>
-      );
-    },
-    [hoveredId, selectedCategoryId, getCategoryChildren]
+  return (
+    <li>
+      <Link
+        href={`/category/${cat.slug}`}
+        className="block py-2 px-3 rounded-lg text-sm text-gray-700 hover:bg-gray-100"
+      >
+        {"— ".repeat(depth)}
+        {cat.name}
+      </Link>
+
+      {hasChildren && (
+        <ul className="ml-2 space-y-1">
+          {cat.child_categories!.map((childId) => {
+            const child = allCategories.find((c) => c.id === childId);
+            return child ? (
+              <MobileItem key={child.id} cat={child} depth={depth + 1} />
+            ) : null;
+          })}
+        </ul>
+      )}
+    </li>
   );
+}
 
-  /** Mobile item (recursive expandable) - FIXED */
-  const MobileItem = useCallback(
-    ({ cat, depth = 0 }: { cat: Category; depth?: number }) => {
-      const categoryHasChildren = hasChildren(cat);
-      const [expanded, setExpanded] = useState(false);
-      const [children, setChildren] = useState<Category[]>([]);
-      const [loadingChildren, setLoadingChildren] = useState(false);
-
-      useEffect(() => {
-        if (expanded && categoryHasChildren && children.length === 0) {
-          setLoadingChildren(true);
-          getCategoryChildren(cat.id).then((childCats) => {
-            setChildren(childCats);
-          }).catch((err) => {
-            console.error("Failed to load children for", cat.id, err);
-            setChildren([]); // prevent infinite retry
-          }).finally(() => {
-            setLoadingChildren(false);
-          });
-        }
-      }, [expanded, categoryHasChildren, cat.id, children.length]);
-
-      return (
-        <li key={cat.id}>
-          <div
-            className="flex items-center justify-between"
-            style={{ paddingLeft: `${depth * 16}px` }}
-          >
-            <div
-              onClick={() => {
-                setSelectedCategoryId(cat.id);
-                setShowMobile(false);
-              }}
-              className={`flex-1 cursor-pointer rounded-lg px-4 py-3 text-sm font-medium transition-all ${
-                selectedCategoryId === cat.id
-                  ? "bg-blue-100 text-blue-700"
-                  : "hover:bg-gray-100 text-gray-700"
-              }`}
-            >
-              {cat.name}
-            </div>
-
-            {categoryHasChildren && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setExpanded(!expanded);
-                }}
-                className="p-2"
-                disabled={loadingChildren}
-              >
-                {loadingChildren ? (
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
-                ) : expanded ? (
-                  <ChevronUp className="h-4 w-4 text-gray-500" />
-                ) : (
-                  <ChevronDown className="h-4 w-4 text-gray-500" />
-                )}
-              </button>
-            )}
-          </div>
-
-          {/* Render children only when loaded */}
-          {expanded && (
-            <ul className="mt-1 space-y-1">
-              {loadingChildren ? (
-                <li className="px-4 py-2 text-sm text-gray-500">Loading...</li>
-              ) : children.length > 0 ? (
-                children.map((child) => (
-                  <MobileItem key={child.id} cat={child} depth={depth + 1} />
-                ))
-              ) : categoryHasChildren ? (
-                <li className="px-4 py-2 text-sm text-gray-400">No subcategories</li>
-              ) : null}
-            </ul>
-          )}
-        </li>
-      );
-    },
-    [selectedCategoryId, getCategoryChildren, setShowMobile]
-  );
-
+export default function CategoryExplorer() {
   return (
     <section className="bg-gray-50 w-full max-w-[100dvw] py-16">
       {/* Header */}
@@ -238,51 +144,27 @@ const CategorySection: React.FC = () => {
             Categories
           </h4>
 
-          {loadingCats ? (
-            <div className="space-y-2">
-              <div className="h-3 w-3/4 animate-pulse rounded bg-gray-200" />
-              <div className="h-3 w-2/3 animate-pulse rounded bg-gray-200" />
-              <div className="h-3 w-1/2 animate-pulse rounded bg-gray-200" />
-            </div>
-          ) : (
-            <ul className="space-y-1">
-              {rootCategories.map((cat) => DesktopItem(cat))}
-            </ul>
-          )}
+          <ul className="space-y-1">
+            {rootCategories.map((cat) => (
+              <CategoryTreeItem key={cat.id} category={cat} />
+            ))}
+          </ul>
         </aside>
 
         {/* Mobile Dropdown */}
         <div className="block lg:hidden w-full relative">
-          <button
-            onClick={() => setShowMobile((v) => !v)}
-            className="flex w-full items-center justify-between rounded-xl border border-gray-200 bg-white p-3 font-medium text-gray-800 shadow-sm"
-          >
-            <span>{selectedCategory?.name ?? "Select category"}</span>
-            {showMobile ? (
-              <ChevronUp className="h-5 w-5" />
-            ) : (
-              <ChevronDown className="h-5 w-5" />
-            )}
-          </button>
-
-          {showMobile && (
-            <ul className="absolute mt-3 w-full max-h-[300px] overflow-y-auto rounded-xl border border-gray-200 bg-white px-3 py-3 shadow-md z-10 space-y-1">
-              {rootCategories.map((cat) => (
-                <MobileItem key={cat.id} cat={cat} depth={0} />
-              ))}
-            </ul>
-          )}
+          <MobileDropdown root={rootCategories} />
         </div>
 
         {/* Product Grid */}
         <div className="lg:col-span-3">
           <div className="mb-6 flex items-center justify-between">
             <h4 className="text-xl font-bold text-gray-900">
-              {selectedCategory?.name ?? "Products"}
+              {defaultCategory?.name || "Products"}
             </h4>
-            {selectedCategory && (
+            {defaultCategory && (
               <Link
-                href={`/category/${selectedCategory.slug}`}
+                href={`/category/${defaultCategory.slug}`}
                 className="text-sm font-medium text-blue-600 hover:underline"
               >
                 See more
@@ -290,32 +172,18 @@ const CategorySection: React.FC = () => {
             )}
           </div>
 
-          {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
-
-          {loadingProducts ? (
-            <div className="grid grid-cols-2 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="h-48 animate-pulse rounded-xl bg-white shadow"
-                />
-              ))}
-            </div>
-          ) : products.length ? (
-            <div className="grid grid-cols-2 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {products.length ? (
+            <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-3">
               {products.map((p) => (
                 <ProductCards key={p.id} product={p} />
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-500">
-              No products found for this category.
-            </p>
+            <p className="text-sm text-gray-500">No products found.</p>
           )}
         </div>
       </div>
     </section>
   );
-};
+}
 
-export default CategorySection;

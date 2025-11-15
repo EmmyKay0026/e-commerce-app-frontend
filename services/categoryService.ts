@@ -28,22 +28,18 @@ export const getAllCategories = async (): Promise<Category[]> => {
 /**
  * Get single category by ID or slug
  */
-export const getCategoryByIdOrSlug = async (
-  idOrSlug: string
-): Promise<Category | null> => {
+
+export const getCategoryByIdOrSlug = async (slug: string): Promise<ServiceResult<Category>> => {
   try {
-    const res = await api.get<ServiceResult<Category>>(
-      `/categories/${idOrSlug}`
-    );
-
-    if (res.data?.success && res.data.data) {
-      return res.data.data;
-    }
-
-    return null;
+    // Change from: /categories/mechanical-power-transmission
+    // To: /categories?slug=mechanical-power-transmission
+    const res = await api.get<ServiceResult<Category>>('/categories', {
+      params: { slug }
+    });
+    
+    return res.data;
   } catch (error) {
-    console.error(`Failed to fetch category (${idOrSlug}):`, error);
-    return null;
+    return { success: false };
   }
 };
 
@@ -361,5 +357,61 @@ export const getCategoryWithParentCategories = async (
       "Network error";
     const status = err?.response?.status;
     return { success: false, status, data: null, error: msg };
+  }
+};
+
+// export type ServiceResults<T = any> = {
+//   success: boolean;
+//   data?: T;
+//   error?: string;
+// };
+
+export const getCategoryById = async (id: string): Promise<ServiceResult<Category>> => {
+  try {
+    const res = await api.get<ServiceResult<Category>>(`/categories/${id}`);
+    return res.data.success && res.data.data
+      ? { success: true, data: res.data.data }
+      : { success: false };
+  } catch {
+    return { success: false };
+  }
+};
+
+export const listProductsByCategory = async (
+  categoryId: string,
+  filters: any = {}
+) => {
+  try {
+    const res = await api.get(`/categories/${categoryId}/products`, {
+      params: filters,
+    });
+
+    // YOUR BACKEND RETURNS: { success: true, data: [products] }
+    // NOT { data: { products: [...] } }
+    const products = Array.isArray(res.data.data) 
+      ? res.data.data 
+      : [];
+
+    return {
+      success: true,
+      data: { products },
+    };
+  } catch (error: any) {
+    console.error("Products fetch failed:", error.response?.data || error.message);
+    return { success: false };
+  }
+}
+
+export const getCategoryFilterOptions = async (categoryId: string, filters = {}) => {
+  try {
+    const res = await api.get(`/categories/${categoryId}/filters`, { params: filters });
+    
+    // Same pattern: { success: true, data: { states: [...], ... } }
+    return res.data.success 
+      ? { success: true, data: res.data.data || {} }
+      : { success: false };
+  } catch (error) {
+    console.error("Filters failed:", error);
+    return { success: false };
   }
 };

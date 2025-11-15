@@ -1,4 +1,3 @@
-// "use client";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -11,6 +10,7 @@ import { useFetchDataOnMount } from "@/store/useUserStore";
 import { Toaster } from "@/components/ui/sonner";
 import { headers } from "next/headers";
 import Script from "next/script";
+import { preloadCategoryMaps } from "@/services/preloadCategories";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -82,18 +82,19 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  await preloadCategoryMaps();
   // useFetchDataOnMount();
   return (
     <html lang="en-NG" className={`${geistSans.variable} ${geistMono.variable}`}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#000000" />
-        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/favicons.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="icon" type="image/webp" href="/indLogo.webp" />
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import type { Product } from "@/types/models";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 export type FilterState = {
   minPrice?: number;
@@ -13,18 +13,29 @@ export type FilterState = {
 };
 
 type Props = {
-  products: Product[];
-  activeCategory?: string;
-  onFiltersChangeAction: (filters: FilterState) => void;
+  activeCategory: string;
   initialFilters?: FilterState;
+
+  // These now come from the server
+  availableStates: string[];
+  availableLgasMap: Record<string, string[]>;
+  availablePriceTypes?: string[];
+  priceRange?: { min?: number; max?: number };
 };
 
 export default function SidebarFilter({
-  products,
   activeCategory,
-  onFiltersChangeAction,
   initialFilters = {},
+  availableStates = [],
+  availableLgasMap = {},
+  availablePriceTypes = ["fixed", "negotiable"],
+  priceRange,
 }: Props) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Local UI state (synced with URL)
   const [minPrice, setMinPrice] = useState<number | "">(initialFilters.minPrice ?? "");
   const [maxPrice, setMaxPrice] = useState<number | "">(initialFilters.maxPrice ?? "");
   const [locationState, setLocationState] = useState<string>(initialFilters.location_state ?? "");
@@ -32,54 +43,59 @@ export default function SidebarFilter({
   const [priceType, setPriceType] = useState<string>(initialFilters.price_type ?? "");
   const [sort, setSort] = useState<string>(initialFilters.sort ?? "recommended");
 
-  // Extract unique states from products (with safety checks)
-  const availableStates = React.useMemo(() => {
-    const states = new Set<string>();
-    products.forEach((p) => {
-      if (p.location_state && typeof p.location_state === 'string' && p.location_state.trim()) {
-        states.add(p.location_state.trim());
-      }
-    });
-    return Array.from(states).sort();
-  }, [products]);
-
-  // Extract unique LGAs based on selected state (with safety checks)
-  const availableLgas = React.useMemo(() => {
-    const lgas = new Set<string>();
-    products.forEach((p) => {
-      // Skip if no LGA
-      if (!p.location_lga || typeof p.location_lga !== 'string' || !p.location_lga.trim()) {
-        return;
-      }
-
-      if (locationState) {
-        // Filter LGAs by selected state
-        if (p.location_state === locationState) {
-          lgas.add(p.location_lga.trim());
-        }
-      } else {
-        // Show all LGAs if no state selected
-        lgas.add(p.location_lga.trim());
-      }
-    });
-    return Array.from(lgas).sort();
-  }, [products, locationState]);
+  // Derived: LGAs for currently selected state
+  const availableLgas = locationState ? availableLgasMap[locationState] || [] : [];
 
   // Reset LGA when state changes
   useEffect(() => {
     setLocationLga("");
   }, [locationState]);
 
-  // Handle filters change
-  const handleFiltersChange = useCallback(() => {
-    onFiltersChangeAction({
-      minPrice: minPrice === "" ? undefined : Number(minPrice),
-      maxPrice: maxPrice === "" ? undefined : Number(maxPrice),
-      location_state: locationState || undefined,
-      location_lga: locationLga || undefined,
-      price_type: priceType ? (priceType as "fixed" | "negotiable") : undefined,
-      sort,
-    });
+  // Build URL with current filters
+  const updateUrl = useCallback(() => {
+    const params = new URLSearchParams(searchParams);
+
+    // Price
+    if (minPrice === "" || minPrice === undefined) {
+      params.delete("minPrice");
+    } else {
+      params.set("minPrice", String(minPrice));
+    }
+    if (maxPrice === "" || maxPrice === undefined) {
+      params.delete("maxPrice");
+    } else {
+      params.set("maxPrice", String(maxPrice));
+    }
+
+    // Location
+    if (locationState) {
+      params.set("state", locationState);
+    } else {
+      params.delete("state");
+      params.delete("lga");
+    }
+    if (locationLga) {
+      params.set("lga", locationLga);
+    } else if (locationState) {
+      params.delete("lga");
+    }
+
+    // Price type
+    if (priceType) {
+      params.set("priceType", priceType);
+    } else {
+      params.delete("priceType");
+    }
+
+    // Sort
+    if (sort && sort !== "recommended") {
+      params.set("sort", sort);
+    } else {
+      params.delete("sort");
+    }
+
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
   }, [
     minPrice,
     maxPrice,
@@ -87,13 +103,15 @@ export default function SidebarFilter({
     locationLga,
     priceType,
     sort,
-    onFiltersChangeAction,
+    pathname,
+    router,
+    searchParams,
   ]);
 
-  // Run every time filters change
+  // Trigger URL update on any filter change
   useEffect(() => {
-    handleFiltersChange();
-  }, [handleFiltersChange]);
+    updateUrl();
+  }, [updateUrl]);
 
   // Clear all filters
   const clearFilters = () => {
@@ -105,22 +123,22 @@ export default function SidebarFilter({
     setSort("recommended");
   };
 
-  // Check if any filters are active
-  const hasActiveFilters = 
-    minPrice !== "" || 
-    maxPrice !== "" || 
-    locationState || 
-    locationLga || 
-    priceType;
+  const hasActiveFilters =
+    minPrice !== "" ||
+    maxPrice !== "" ||
+    locationState ||
+    locationLga ||
+    priceType ||
+    (sort && sort !== "recommended");
 
   return (
-    <aside className="bg-white rounded-2xl shadow p-4 border border-gray-100 max-h-[calc(100vh-6rem)] overflow-y-auto sticky top-20">
-      <div className="flex items-center justify-between mb-4">
+    <aside className="bg-white rounded-2xl shadow p-6 border border-gray-100 max-h-[calc(100vh-6rem)] overflow-y-auto sticky top-20">
+      <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold">Filter Results</h3>
         {hasActiveFilters && (
           <button
             onClick={clearFilters}
-            className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
           >
             Clear all
           </button>
@@ -128,59 +146,56 @@ export default function SidebarFilter({
       </div>
 
       {/* Price Type */}
-      <div className="mb-5">
+      <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Price Type
         </label>
         <select
           value={priceType}
           onChange={(e) => setPriceType(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">All Types</option>
-          <option value="fixed">Fixed Price</option>
-          <option value="negotiable">Negotiable</option>
+          {availablePriceTypes.map((type) => (
+            <option key={type} value={type}>
+              {type === "fixed" ? "Fixed Price" : "Negotiable"}
+            </option>
+          ))}
         </select>
       </div>
 
-      {/* Price range */}
-      <div className="mb-5">
+      {/* Price Range */}
+      <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Price Range (₦)
         </label>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           <input
             type="number"
-            placeholder="Min"
+            placeholder={`Min${priceRange?.min !== undefined ? ` (${priceRange.min})` : ""}`}
             value={minPrice}
-            onChange={(e) =>
-              setMinPrice(e.target.value === "" ? "" : Number(e.target.value))
-            }
-            className="w-1/2 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(e) => setMinPrice(e.target.value === "" ? "" : Number(e.target.value))}
+            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             min="0"
           />
           <input
             type="number"
-            placeholder="Max"
+            placeholder={`Max${priceRange?.max !== undefined ? ` (${priceRange.max})` : ""}`}
             value={maxPrice}
-            onChange={(e) =>
-              setMaxPrice(e.target.value === "" ? "" : Number(e.target.value))
-            }
-            className="w-1/2 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(e) => setMaxPrice(e.target.value === "" ? "" : Number(e.target.value))}
+            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             min="0"
           />
         </div>
       </div>
 
       {/* State */}
-      <div className="mb-5">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          State
-        </label>
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
         <select
           value={locationState}
           onChange={(e) => setLocationState(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">All States</option>
           {availableStates.map((state) => (
@@ -190,24 +205,24 @@ export default function SidebarFilter({
           ))}
         </select>
         {availableStates.length === 0 && (
-          <p className="text-xs text-gray-500 mt-1">
-            No location data available
-          </p>
+          <p className="text-xs text-gray-500 mt-2">No states available</p>
         )}
       </div>
 
       {/* LGA */}
-      <div className="mb-5">
+      <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Local Government Area
         </label>
         <select
           value={locationLga}
           onChange={(e) => setLocationLga(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-          disabled={availableLgas.length === 0}
+          disabled={!locationState || availableLgas.length === 0}
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:cursor-not-allowed"
         >
-          <option value="">All LGAs</option>
+          <option value="">
+            {locationState ? "All LGAs" : "Select State First"}
+          </option>
           {availableLgas.map((lga) => (
             <option key={lga} value={lga}>
               {lga}
@@ -215,13 +230,11 @@ export default function SidebarFilter({
           ))}
         </select>
         {locationState && availableLgas.length === 0 && (
-          <p className="text-xs text-gray-500 mt-1">
-            No LGAs available for this state
-          </p>
+          <p className="text-xs text-gray-500 mt-2">No LGAs in this state</p>
         )}
       </div>
 
-      {/* Sort */}
+      {/* Sort By */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Sort By
@@ -229,7 +242,7 @@ export default function SidebarFilter({
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="recommended">Recommended</option>
           <option value="price-asc">Price: Low to High</option>
