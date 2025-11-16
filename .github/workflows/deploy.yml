@@ -3,7 +3,7 @@ name: Frontend CI/CD Pipeline (Targeted with Rollback)
 on:
   push:
     branches:
-      - main-dev # Change this if your primary branch is different
+      - main # Change this if your primary branch is different
 
 jobs:
   deploy_frontend:
