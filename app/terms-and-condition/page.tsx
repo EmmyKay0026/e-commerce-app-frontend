@@ -23,7 +23,7 @@ function TermsContent() {
     <section className="bg-white text-gray-800">
       <div className="max-w-5xl mx-auto px-6 md:px-8 lg:px-12 py-16 space-y-12">
         <p className="text-base text-gray-500">
-          <strong className="">Last Updated:</strong> November 13, 2025
+          <strong className="">Last Updated:</strong> November 12, 2025
         </p>
 
         <Section
