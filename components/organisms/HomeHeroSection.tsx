@@ -123,7 +123,7 @@ const HomeHeroSection = () => {
         </h2>
         <p className="mt-3 text-lg text-gray-100">
           A platform for easy buying and selling of industrial equipment across
-          the oil & gas industrial sectors
+          the oil & gas industrial sectors.
         </p>
 
         {/* Search bar */}

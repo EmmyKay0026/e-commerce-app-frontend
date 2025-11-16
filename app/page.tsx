@@ -25,6 +25,7 @@ export default function Home() {
       <CategorySection />
       <FeatureSection />
       <CtaSection />
+
       {/* <Testimonial/> */}
     </main>
   );

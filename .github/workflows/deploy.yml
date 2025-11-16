@@ -1,0 +1,108 @@
+name: Frontend CI/CD Pipeline (Targeted with Rollback)
+
+on:
+  push:
+    branches:
+      - main-dev # Change this if your primary branch is different
+
+jobs:
+  deploy_frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Checkout Frontend Repo
+        uses: actions/checkout@v4
+        with:
+          path: frontend
+
+      - name: 2. Deploy via SSH with Rollback Logic
+        uses: appleboy/ssh-action@v1.0.3
+
+        # This injects the .env file content into the script's environment
+        env:
+          DOTENV_CONTENT: ${{ secrets.DOTENV_CONTENT }}
+        with:
+          host: ${{ secrets.HOST_IP }}
+          username: ${{ secrets.HOST_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+          # --- SSH DEPLOYMENT SCRIPT ---
+          script: |
+            # --- CONFIG: REPLACE THESE PATHS WITH YOUR ACTUAL SERVER PATHS ---
+            PROJECT_DIR=~/industrialmart-deployment
+            FRONTEND_DIR=$PROJECT_DIR/e-commerce-app-frontend # Adjusted path based on docker-compose.yml
+            # ----------------------------------------------------------------
+
+            echo "Starting targeted deployment with rollback capability..."
+
+            # Constants used for deployment/rollback logic
+            FRONTEND_SERVICE_NAME="frontend" 
+            FRONTEND_CONTAINER_NAME="frontend-app" 
+            ROLLBACK_TAG="${FRONTEND_SERVICE_NAME}-backup-$(date +%s)"
+
+            # Function to execute rollback if deployment fails
+            rollback() {
+                echo "!!! Deployment FAILED. Initiating Rollback !!!"
+                
+                # 1. Stop and remove the newly deployed (failing) services
+                docker compose stop $FRONTEND_SERVICE_NAME nginx
+                docker compose rm -f $FRONTEND_SERVICE_NAME nginx
+                
+                # 2. Restore the backup image tag to the primary name
+                # This ensures the next `up` command uses the known good image
+                echo "Restoring image $ROLLBACK_TAG to the primary tag..."
+                docker tag $FRONTEND_SERVICE_NAME:$ROLLBACK_TAG $FRONTEND_SERVICE_NAME:latest
+                
+                # 3. Redeploy the backup version
+                echo "Redeploying the previous working version..."
+                # --build is omitted to force use of the restored 'latest' tag
+                docker compose up -d --no-deps $FRONTEND_SERVICE_NAME nginx
+                
+                echo "Rollback Complete. The previous working version is now live."
+                exit 1
+            }
+
+            # Navigate to the main project directory
+            cd $PROJECT_DIR
+
+            # 1. Backup the currently running image
+            echo "1. Saving current working image for potential rollback..."
+            # Get the ID of the image used by the running container
+            CURRENT_IMAGE_ID=$(docker inspect --format='{{.Image}}' $FRONTEND_CONTAINER_NAME 2>/dev/null)
+
+            if [ -n "$CURRENT_IMAGE_ID" ]; then
+                docker tag $CURRENT_IMAGE_ID $FRONTEND_SERVICE_NAME:$ROLLBACK_TAG
+                echo "Backup saved as $FRONTEND_SERVICE_NAME:$ROLLBACK_TAG"
+            else
+                echo "Warning: Could not find a running frontend container. Proceeding without backup."
+            fi
+
+            # 2. Update code and build/deploy new version
+            echo "2. Updating Frontend code in $FRONTEND_DIR and deploying..."
+            cd $FRONTEND_DIR
+            git pull origin main 
+
+            cd $PROJECT_DIR
+            # Deploy the new version (builds the new image, starts new containers)
+            docker compose up -d --no-deps --build $FRONTEND_SERVICE_NAME nginx || { echo "Docker Compose UP failed immediately." && rollback; }
+
+            # 3. Health Check: Wait for the container to stabilize
+            echo "3. Running basic health check (waiting 15 seconds for startup)..."
+            sleep 15
+
+            # Check if the container is running and not in a restarting/exited state
+            STATUS=$(docker inspect --format='{{.State.Status}}' $FRONTEND_CONTAINER_NAME 2>/dev/null)
+
+            if [ "$STATUS" == "running" ]; then
+                echo "Deployment successful. Frontend service is running."
+                
+                # 4. Cleanup: Remove the temporary backup tag
+                if [ -n "$CURRENT_IMAGE_ID" ]; then
+                    # Attempt to remove the backup tag (ignore errors if it's in use)
+                    docker rmi $FRONTEND_SERVICE_NAME:$ROLLBACK_TAG 2>/dev/null || true
+                    echo "Successfully cleaned up temporary backup tag."
+                fi
+            else
+                echo "Health check FAILED. Container status: $STATUS"
+                rollback
+            fi
