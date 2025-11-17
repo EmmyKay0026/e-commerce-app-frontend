@@ -34,7 +34,7 @@ jobs:
             FRONTEND_DIR=$PROJECT_DIR/e-commerce-app-frontend # Adjusted path based on docker-compose.yml
             # ----------------------------------------------------------------
 
-            echo "Starting targeted deployment with rollback capability..."
+            echo "Starting targeted deployment with rollback capability...."
 
             # Constants used for deployment/rollback logic
             FRONTEND_SERVICE_NAME="frontend" 
