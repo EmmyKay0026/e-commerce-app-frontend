@@ -66,7 +66,7 @@ jobs:
             # Navigate to the main project directory
             cd $PROJECT_DIR
             # Inject ALL secrets into the .env file
-            echo "$DOTENV_CONTENT" > .env
+            printf "%s" "$DOTENV_CONTENT" > .env
             echo "Successfully injected secrets into .env file."
             cp .env $FRONTEND_DIR/.env
             echo "Copied .env to frontend repository directory."
