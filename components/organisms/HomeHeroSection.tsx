@@ -108,7 +108,7 @@ const HomeHeroSection = () => {
 
   return (
     <section
-      className="relative w-full h-auto py-20 lg:py-0 lg:h-[100dvh] flex items-center px-5 md:px-10 lg:px-20 text-center bg-fixed bg-cover bg-center bg-no-repeat"
+      className="relative w-full h-auto py-20 lg:py-0 lg:h-dvh flex items-center px-5 md:px-10 lg:px-20 text-center bg-fixed bg-cover bg-center bg-no-repeat"
       style={{
         backgroundImage: `url('/industrial-mart-img (1).webp')`,
       }}
@@ -181,7 +181,7 @@ const HomeHeroSection = () => {
                           href={`/products/${p.slug}`}
                           className="flex items-center gap-3"
                         >
-                          <div className="h-10 w-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                          <div className="h-10 w-10 bg-gray-100 rounded overflow-hidden shrink-0">
                             {p.images && p.images[0] ? (
                               <Image
                                 src={constructImageUrl(p.images[0])}
