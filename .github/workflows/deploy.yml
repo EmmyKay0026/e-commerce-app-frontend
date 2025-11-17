@@ -16,17 +16,17 @@ jobs:
           path: frontend
 
       - name: 2. Deploy via SSH with Rollback Logic
+        env:
+            DOTENV_CONTENT: ${{ secrets.DOTENV_CONTENT }}
+            
         uses: appleboy/ssh-action@v1.0.3
-
+        
         with:
           host: ${{ secrets.HOST_IP }}
           username: ${{ secrets.HOST_USER }}
+          # Fix 1: Keep the key value on the same line (or use correct multi-line syntax)
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-        # This injects the .env file content into the script's environment
-        env:
-          DOTENV_CONTENT: ${{ secrets.DOTENV_CONTENT }}
-
+        
           # --- SSH DEPLOYMENT SCRIPT ---
           script: |
             # --- CONFIG: REPLACE THESE PATHS WITH YOUR ACTUAL SERVER PATHS ---
