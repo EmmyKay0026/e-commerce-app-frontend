@@ -65,7 +65,11 @@ jobs:
 
             # Navigate to the main project directory
             cd $PROJECT_DIR
+            # Inject ALL secrets into the .env file
+            echo "$DOTENV_CONTENT" > .env
+            echo "Successfully injected secrets into .env file."
 
+            
             # 1. Backup the currently running image
             echo "1. Saving current working image for potential rollback..."
             # Get the ID of the image used by the running container
