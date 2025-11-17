@@ -68,7 +68,8 @@ jobs:
             # Inject ALL secrets into the .env file
             echo "$DOTENV_CONTENT" > .env
             echo "Successfully injected secrets into .env file."
-
+            cp .env $FRONTEND_DIR/.env
+            echo "Copied .env to frontend repository directory."
             
             # 1. Backup the currently running image
             echo "1. Saving current working image for potential rollback..."
