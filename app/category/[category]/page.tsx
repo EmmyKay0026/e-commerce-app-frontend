@@ -21,8 +21,8 @@ import {
 } from "@/services/categoryService";
 
 type PageProps = {
-  params: Promise<{ category: string }>;        // AWAIT THIS
-  searchParams: Promise<Record<string, string | undefined>>; // AWAIT THIS
+  params: Promise<{ category: string }>;        
+  searchParams: Promise<Record<string, string | undefined>>;
 };
 
 export default async function CategoryPage({ params, searchParams }: PageProps) {

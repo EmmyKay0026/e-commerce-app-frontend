@@ -1,5 +1,6 @@
 "use client";
-import React, { useEffect } from "react";
+
+import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCategoryStore } from "@/store/useCategoryStore";
 import { Power, X } from "lucide-react";
@@ -10,33 +11,21 @@ interface CategoriesModalProps {
   onClose: () => void;
 }
 
-const CategoriesModal: React.FC<CategoriesModalProps> = ({
-  isOpen,
-  onClose,
-}) => {
-  const { categories, loading, fetchCategories } = useCategoryStore();
-
-  useEffect(() => {
-    if (isOpen) {
-      fetchCategories();
-      // Prevent body scroll when modal is open
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen, fetchCategories]);
+const CategoriesModal: React.FC<CategoriesModalProps> = ({ isOpen, onClose }) => {
+  const categories = useCategoryStore((s) => s.categories);
 
   if (!isOpen) return null;
+
+  // Prevent body scroll when modal is open
+  if (typeof window !== "undefined") {
+    document.body.style.overflow = isOpen ? "hidden" : "unset";
+  }
 
   return (
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop - visible on desktop */}
+          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -72,19 +61,7 @@ const CategoriesModal: React.FC<CategoriesModalProps> = ({
 
               {/* Content */}
               <div className="flex-1 overflow-y-auto px-5 py-4">
-                {loading ? (
-                  <div className="space-y-2">
-                    {Array.from({ length: 8 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center gap-3 p-3 rounded-xl bg-gray-100 animate-pulse"
-                      >
-                        <div className="w-6 h-6 bg-gray-300 rounded-lg flex-shrink-0"></div>
-                        <div className="flex-1 h-4 bg-gray-300 rounded-md"></div>
-                      </div>
-                    ))}
-                  </div>
-                ) : categories.length > 0 ? (
+                {categories.length > 0 ? (
                   <ul className="space-y-1">
                     {categories.map((cat, i) => (
                       <motion.li
@@ -102,7 +79,7 @@ const CategoriesModal: React.FC<CategoriesModalProps> = ({
                             {cat.icon ? (
                               <img
                                 src={cat.icon}
-                                alt=""
+                                alt={cat.name}
                                 className="w-5 h-5 object-contain"
                               />
                             ) : (
@@ -131,10 +108,10 @@ const CategoriesModal: React.FC<CategoriesModalProps> = ({
                 )}
               </div>
 
-              {/* Footer - Optional branding or info */}
+              {/* Footer */}
               <div className="px-5 py-5 border-t border-gray-200 bg-gray-50">
                 <p className="text-xs text-gray-500 text-center">
-                  {categories.length} {categories.length === 1 ? 'category' : 'categories'} available
+                  {categories.length} {categories.length === 1 ? "category" : "categories"} available
                 </p>
               </div>
             </motion.div>

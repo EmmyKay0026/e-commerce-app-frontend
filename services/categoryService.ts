@@ -11,10 +11,22 @@ export interface CategoryTree extends Category {
  */
 export const getAllCategories = async (): Promise<Category[]> => {
   try {
-    const res = await api.get<ServiceResult<Category[]>>("/categories");
-    const data = res.data;
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/categories`,
+      {
+        method: "GET",
+        // Cache for 30 minutes and auto revalidate in background
+        next: { revalidate: 1800 }, 
+      }
+    );
 
-    // Handle different response formats
+    if (!res.ok) {
+      console.error("Failed to fetch categories:", res.statusText);
+      return [];
+    }
+
+    const data = await res.json();
+
     if (Array.isArray(data)) return data;
     if (data?.data && Array.isArray(data.data)) return data.data;
 
@@ -24,6 +36,7 @@ export const getAllCategories = async (): Promise<Category[]> => {
     return [];
   }
 };
+
 
 /**
  * Get single category by ID or slug

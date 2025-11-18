@@ -5,26 +5,24 @@ import ProductCards from "@/components/molecules/ProductCards";
 import ProductFilterSidebar from "@/components/molecules/ProductFilter";
 import { listProducts, getAllCategories } from "@/services/productService";
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: Record<string, string | undefined>;
-}) {
+export default async function Page({ searchParams }: { searchParams: any }) {
+  const resolvedSearchParams = await searchParams;
+
   const parseArray = (p: string | undefined) =>
     p ? p.split(",").filter(Boolean) : undefined;
 
-  const q = searchParams.q ?? "";
-  const sort = searchParams.sort;
-  const page = Math.max(1, Number(searchParams.page ?? 1));
+  const q = resolvedSearchParams.q ?? "";
+  const sort = resolvedSearchParams.sort;
+  const page = Math.max(1, Number(resolvedSearchParams.page ?? 1));
   const perPage = 12;
 
-  const categorySlugs = parseArray(searchParams.category);
-  const locationState = parseArray(searchParams.location_state);
-  const locationLga = parseArray(searchParams.location_lga);
-  const saleType = parseArray(searchParams.sale_type);
-  const minPrice = searchParams.minPrice || undefined;
-  const maxPrice = searchParams.maxPrice || undefined;
-  const priceType = searchParams.price_type || undefined;
+  const categorySlugs = parseArray(resolvedSearchParams.category);
+  const locationState = parseArray(resolvedSearchParams.location_state);
+  const locationLga = parseArray(resolvedSearchParams.location_lga);
+  const saleType = parseArray(resolvedSearchParams.sale_type);
+  const minPrice = resolvedSearchParams.minPrice || undefined;
+  const maxPrice = resolvedSearchParams.maxPrice || undefined;
+  const priceType = resolvedSearchParams.price_type || undefined;
 
   // FETCH CATEGORIES FIRST
   const { success, data } = await getAllCategories();
@@ -137,7 +135,7 @@ export default async function Page({
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {products.map((p: any) => (
                 <ProductCards key={p.id} product={p} />
               ))}

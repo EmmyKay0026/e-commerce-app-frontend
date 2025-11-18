@@ -443,7 +443,7 @@ export default function Navbar() {
                     <List className="w-4 h-4" />
                     <span>Categories</span>
                   </div>
-                  <span className="cursor-pointer">Marketplace</span>
+                  <span className="cursor-pointer"><Link href="/marketplace">Marketplace</Link></span>
                 </motion.div>
               )}
             </AnimatePresence>

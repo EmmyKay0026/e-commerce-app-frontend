@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { List } from "lucide-react";
@@ -24,13 +24,8 @@ const HomeHeroSection = () => {
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
 
-  // ✅ Zustand store usage
-  const { categories, loading, fetchCategories } = useCategoryStore();
-
-  // Fetch categories on mount (only once)
-  useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
+  // ✅ Read categories directly from store (hydrated from server)
+  const categories = useCategoryStore((s) => s.categories);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -109,9 +104,7 @@ const HomeHeroSection = () => {
   return (
     <section
       className="relative w-full h-auto py-20 lg:py-0 lg:h-[100dvh] flex items-center px-5 md:px-10 lg:px-20 text-center bg-fixed bg-cover bg-center bg-no-repeat"
-      style={{
-        backgroundImage: `url('/industrial-mart-img.png')`,
-      }}
+      style={{ backgroundImage: `url('/industrial-mart-img.png')` }}
     >
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/60" />
@@ -127,7 +120,7 @@ const HomeHeroSection = () => {
         </p>
 
         {/* Search bar */}
-        <div id="hero-search" className="mt-6 relative max-w-3xl ">
+        <div id="hero-search" className="mt-6 relative max-w-3xl">
           <div
             ref={searchRef}
             className="flex items-center gap-2 bg-white text-lg rounded-3xl overflow-hidden"
@@ -173,40 +166,37 @@ const HomeHeroSection = () => {
                   No results
                 </div>
               ) : (
-                <>
-                  <ul className="divide-y">
-                    {searchResults.slice(0, 6).map((p) => (
-                      <li key={p.id} className="px-3 py-2 hover:bg-gray-50">
-                        <Link
-                          href={`/products/${p.slug}`}
-                          className="flex items-center gap-3"
-                        >
-                          <div className="h-10 w-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                            {p.images && p.images[0] ? (
-                              <Image
-                                src={constructImageUrl(p.images[0])}
-                                alt={p.name}
-                                width={40}
-                                height={40}
-                                className="h-full w-full object-cover"
-                              />
-                            ) : (
-                              <div className="h-full w-full flex items-center justify-center text-xs text-muted-foreground">
-                                No image
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex-1 text-sm text-black">
-                            <div className="font-medium">{p.name}</div>
-                            <div className="text-xs text-muted-foreground">
-                              {p.price}
+                <ul className="divide-y">
+                  {searchResults.slice(0, 6).map((p) => (
+                    <li key={p.id} className="px-3 py-2 hover:bg-gray-50">
+                      <Link
+                        href={`/products/${p.slug}`}
+                        className="flex items-center gap-3"
+                      >
+                        <div className="h-10 w-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                          {p.images && p.images[0] ? (
+                            <Image
+                              src={constructImageUrl(p.images[0])}
+                              alt={p.name}
+                              width={40}
+                              height={40}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <div className="h-full w-full flex items-center justify-center text-xs text-muted-foreground">
+                              No image
                             </div>
+                          )}
+                        </div>
+                        <div className="flex-1 text-sm text-black">
+                          <div className="font-medium">{p.name}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {p.price}
                           </div>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-
+                        </div>
+                      </Link>
+                    </li>
+                  ))}
                   <div className="p-2 border-t text-center">
                     <Link
                       href={`/products?q=${encodeURIComponent(searchQuery)}`}
@@ -215,7 +205,7 @@ const HomeHeroSection = () => {
                       See all results
                     </Link>
                   </div>
-                </>
+                </ul>
               )}
             </div>
           )}
@@ -231,9 +221,7 @@ const HomeHeroSection = () => {
             All categories
           </Button>
 
-          {loading ? (
-            <span className="text-sm text-white/80">Loading...</span>
-          ) : categories.length > 0 ? (
+          {categories.length > 0 &&
             categories.slice(0, 3).map((cat, i) => (
               <Link
                 key={i}
@@ -251,12 +239,8 @@ const HomeHeroSection = () => {
                 ) : null}
                 {cat.name}
               </Link>
-            ))
-          ) : (
-            <span className="text-sm text-white/80">
-              No categories available
-            </span>
-          )}
+            ))}
+
         </div>
       </div>
 

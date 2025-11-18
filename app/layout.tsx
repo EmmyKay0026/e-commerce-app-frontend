@@ -11,6 +11,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { headers } from "next/headers";
 import Script from "next/script";
 import { preloadCategoryMaps } from "@/services/preloadCategories";
+import { getAllCategories } from "@/services/categoryService";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -88,6 +89,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   await preloadCategoryMaps();
+  const categories = await getAllCategories();
   // useFetchDataOnMount();
   return (
     <html lang="en-NG" className={`${geistSans.variable} ${geistMono.variable}`}>
@@ -142,7 +144,7 @@ export default async function RootLayout({
         <Navbar />
         <Toaster />
         <AuthModal />
-        <LayoutProvider />
+        <LayoutProvider categories={categories} />
         {/* <SignModalManager />
         <RegisterModalManager /> */}
         {children}
