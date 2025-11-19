@@ -396,11 +396,17 @@ export const listProductsByCategory = async (
 ) => {
   try {
     const res = await api.get(`/categories/${categoryId}/products`, {
-      params: filters,
+      params: {
+        minPrice: filters.minPrice,
+        maxPrice: filters.maxPrice,
+        location_state: filters.location_state,
+        location_lga: filters.location_lga,
+        price_type: filters.price_type,
+        sort: filters.sort,
+        q: filters.q,
+      },
     });
 
-    // YOUR BACKEND RETURNS: { success: true, data: [products] }
-    // NOT { data: { products: [...] } }
     const products = Array.isArray(res.data.data) 
       ? res.data.data 
       : [];
@@ -409,7 +415,7 @@ export const listProductsByCategory = async (
       success: true,
       data: { products },
     };
-  } catch (error: any) {
+  } catch (error: any) {  
     console.error("Products fetch failed:", error.response?.data || error.message);
     return { success: false };
   }

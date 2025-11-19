@@ -56,9 +56,9 @@ export const useUserStore = create<UserStore>((set, get) => ({
       const fetchedRes = await getMyProfile();
 
       if (!fetchedRes.success || !fetchedRes.data) {
-        toast.error(
-          `Failed to fetch user profile: ${fetchedRes.error || "Unknown error"}`
-        );
+        // toast.error(
+        //   `Failed to fetch user profile: ${fetchedRes.error || "Unknown error"}`
+        // );
         set({ isLoading: false });
         return;
       }

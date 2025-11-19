@@ -17,7 +17,7 @@ import {
 import {
   getCategoryById,
   listProductsByCategory,
-  getCategoryFilterOptions,
+  // getCategoryFilterOptions,
 } from "@/services/categoryService";
 
 type PageProps = {
@@ -53,25 +53,21 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
     maxPrice: resolvedSearchParams.maxPrice ? Number(resolvedSearchParams.maxPrice) : undefined,
     location_state: resolvedSearchParams.state || undefined,
     location_lga: resolvedSearchParams.lga || undefined,
-    price_type: (resolvedSearchParams.priceType as "fixed" | "negotiable") || undefined,
+    price_type: resolvedSearchParams.price_type || undefined,
     sort: resolvedSearchParams.sort || "recommended",
   };
 
   // Fetch data
-  const [productsRes, filterOptionsRes] = await Promise.all([
-    listProductsByCategory(categoryId, filters),
-    getCategoryFilterOptions(categoryId, filters),
-  ]);
+  const productsRes = await listProductsByCategory(categoryId, filters);
 
   const products: Product[] = productsRes.success && productsRes.data?.products
-    ? productsRes.data.products
-    : [];
+  ? productsRes.data.products
+  : [];
 
-  const opts = filterOptionsRes.success ? filterOptionsRes.data || {} : {};
-  const availableStates = opts.states || [];
-  const availableLgasMap = opts.lgas || {};
-  const availablePriceTypes = opts.price_types || ["fixed", "negotiable"];
-  const priceRange = { min: opts.minPrice, max: opts.maxPrice };
+  const availableStates: any[] = [];
+  const availableLgasMap = {};
+  const availablePriceTypes = ["fixed", "negotiable"];
+  const priceRange = { min: 0, max: 1000000 };
 
   return (
     <div className="min-h-screen bg-gray-50">

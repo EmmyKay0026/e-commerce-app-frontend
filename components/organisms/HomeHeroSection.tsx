@@ -104,7 +104,9 @@ const HomeHeroSection = () => {
   return (
     <section
       className="relative w-full h-auto py-20 lg:py-0 lg:h-[100dvh] flex items-center px-5 md:px-10 lg:px-20 text-center bg-fixed bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: `url('/industrial-mart-img.png')` }}
+      style={{
+        backgroundImage: `url('/industrial-mart-img (1).webp')`,
+      }}
     >
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/60" />
@@ -116,7 +118,7 @@ const HomeHeroSection = () => {
         </h2>
         <p className="mt-3 text-lg text-gray-100">
           A platform for easy buying and selling of industrial equipment across
-          the oil & gas industrial sectors
+          the oil & gas industrial sectors.
         </p>
 
         {/* Search bar */}

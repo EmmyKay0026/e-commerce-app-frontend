@@ -2,6 +2,8 @@
 
 import { Facebook, Instagram } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
+
 
 export default function Footer() {
   return (
@@ -9,17 +11,38 @@ export default function Footer() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Logo & Description */}
         <div>
-          <h2 className="text-xl font-semibold text-blue-400 mb-2">
-            IndustrialMart Nigeria
-          </h2>
+          <Image
+            src="/ind_logo.png"
+            alt="IndustrialMart Logo"
+            width={160}
+            height={50}
+            className="object-cover w-40 h-15 ml-[-16]"
+          />
+
           <p className="text-sm text-gray-400">
             We are proud to be a leading marketer of top-quality industrial
             equipment and tools, catering to the oil & gas industries and other
             vital sectors across Nigeria.
           </p>
           <div className="flex gap-3 mt-4">
-            <Facebook size={20} />
-            <Instagram size={20} />
+            <a
+              href="https://www.facebook.com/confirmemail.php?next=https%3A%2F%2Fwww.facebook.com%2Findustrialmartnigeria#"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Visit IndustrialMart Nigeria on Facebook"
+              className="hover:text-blue-500 transition-colors"
+            >
+              <Facebook size={20} />
+            </a>
+            <a
+              href="https://www.instagram.com/industrialmartnigeria"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Visit IndustrialMart Nigeria on Facebook"
+              className="hover:text-blue-500 transition-colors"
+            >
+              <Instagram size={20} />
+            </a>
           </div>
         </div>
 
@@ -28,17 +51,30 @@ export default function Footer() {
           <h3 className="font-semibold mb-3">Our Company</h3>
           <ul className="space-y-2 text-gray-400 text-sm">
             <li>
-              <Link href={"/"}>Home</Link>
+              <Link
+                href={"/"}
+                className="hover:text-blue-500 transition-colors"
+              >
+                Home
+              </Link>
             </li>
             <li>
-              <Link href={"/about-us"}>About Us</Link>
+              <Link
+                href={"/about-us"}
+                className="hover:text-blue-500 transition-colors"
+              >
+                About Us
+              </Link>
             </li>
             <li>
-              <Link href={"/markeplace"}>Marketplace</Link>
+              <Link
+                href={"/markeplace"}
+                className="hover:text-blue-500 transition-colors"
+              >
+                Marketplace
+              </Link>
             </li>
-            <li>
-              {/* <Link href={"/"}>Contact Us</Link> */}
-            </li>
+            <li>{/* <Link href={"/"}>Contact Us</Link> */}</li>
           </ul>
         </div>
 
@@ -48,14 +84,38 @@ export default function Footer() {
           <ul className="space-y-2 text-gray-400 text-sm">
             <li></li>
             <li>
-              <Link href={"/guide/creating-a-business-account"}>How to be a vendor</Link>
-              </li>
+              <Link
+                href={"/guide/creating-a-business-account"}
+                className="hover:text-blue-500 transition-colors"
+              >
+                How to be a vendor
+              </Link>
+            </li>
             <li>
-              <Link href={"/guide/how-to-sell"}>How to start selling</Link>
-              </li>
+              <Link
+                href={"/guide/how-to-sell"}
+                className="hover:text-blue-500 transition-colors"
+              >
+                How to start selling
+              </Link>
+            </li>
             {/* <li>Shipping Policy</li> */}
-            <li>Terms and Conditions</li>
-            <li>Privacy Policy</li>
+            <li>
+              <Link
+                href={"/terms-and-condition"}
+                className="hover:text-blue-500 transition-colors"
+              >
+                Terms and Conditions
+              </Link>
+            </li>
+            <li>
+              <Link
+                href={"/privacy-policy"}
+                className="hover:text-blue-500 transition-colors"
+              >
+                Privacy Policy
+              </Link>
+            </li>
           </ul>
         </div>
 

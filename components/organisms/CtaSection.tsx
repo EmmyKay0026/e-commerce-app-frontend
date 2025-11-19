@@ -1,5 +1,6 @@
 "use client";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export default function CtaSection() {
@@ -7,7 +8,7 @@ export default function CtaSection() {
     <section
       className="relative h-[60vh] flex flex-col items-center w-full justify-center text-center px-4"
       style={{
-        backgroundImage: "url('/industrial-mart-img.png')",
+        backgroundImage: "url('/industrial-bg.png')",
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
@@ -32,9 +33,12 @@ export default function CtaSection() {
             placeholder="Search products..."
             className="bg-transparent border-none text-white placeholder:text-gray-300 focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-0 focus:outline-none shadow-none focus:border-none"
           /> */}
-          <Button className="bg-[#c68311] hover:bg-[#a86f0e] text-[18px] text-white rounded-full px-10  py-5">
+          <Link href={"/sell"}>
+            <Button className="bg-[#c68311] hover:bg-[#a86f0e] text-[18px] text-white rounded-full px-10  py-5">
             Start selling
           </Button>
+          </Link>
+          
         </div>
       </div>
     </section>

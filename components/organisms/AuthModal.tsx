@@ -5,9 +5,11 @@ import { X } from "lucide-react";
 import { useAuthModal } from "@/store/useAuthModal";
 import { formatPhoneNumber } from "@/lib/utils";
 import { toast } from "sonner";
+import { useUserStore } from "@/store/useUserStore";
 
 const AuthModal = () => {
   const toogle = useAuthModal((s) => s.toggle);
+  const getMe = useUserStore((s) => s.getMe);
   const isOpen = useAuthModal((s) => s.isOpen);
   const setIsOpen = useAuthModal((s) => s.setIsOpen);
   const [email, setEmail] = useState("");
@@ -43,6 +45,7 @@ const AuthModal = () => {
       setIsOpen(false);
       toast("✅ Logged in successfully!");
       setMessage("✅ Logged in successfully!");
+      getMe();
     }
     setLoading(false);
   };
@@ -57,6 +60,7 @@ const AuthModal = () => {
 
     if (error) toast(error.message);
     setLoading(false);
+    getMe();
   };
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -84,6 +88,7 @@ const AuthModal = () => {
     } else toast("✅ Account created! Check your email for confirmation.");
     setMessage("✅ Account created! Check your email for confirmation.");
     setLoading(false);
+
     setIsSignUp(false);
     setPassword("");
   };

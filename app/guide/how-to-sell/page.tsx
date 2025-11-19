@@ -1,5 +1,6 @@
 // app/how to be a vendor/page.tsx
 import React from "react";
+import Link from "next/link";
 import Hero from "@/components/organisms/SharedHeroSection";
 
 export default function VendorPage() {
@@ -37,15 +38,17 @@ function StartSellingContent() {
             Step 1: Upload your product image
           </h2>
           <p className="text-base md:text-lg text-black/90 leading-relaxed">
-            Add a clear, <strong>high-quality photo</strong> of the product
-            you're selling. Make sure the image shows the product clearly so
-            buyers know exactly what they're getting.
+            Show customers exactly what you’re selling. Upload clear,
+            <strong> high-quality images</strong> of your product and{" "}
+            <strong> select the right category</strong> so buyers can easily
+            find it. Tip: Use bright, uncluttered photos that highlight your
+            product’s best features.
           </p>
         </div>
         <div className="md:w-2/5 flex justify-center">
           <img
-            src="/start-to-sell.png"
-            alt="Step 1 - Vendor Identity"
+            src="/start-selling-img.png"
+            alt="Step 1 - Upload your product image"
             className="w-full max-w-sm h-auto rounded-lg shadow-md object-cover"
           />
         </div>
@@ -55,18 +58,19 @@ function StartSellingContent() {
       <div className="relative z-20 flex flex-col md:flex-row-reverse items-center justify-center gap-10 max-w-6xl mx-auto px-6 md:px-8 lg:px-12 mb-16">
         <div className="md:w-3/5 text-left">
           <h2 className="text-xl md:text-2xl font-semibold text-[#0861C1] mb-4">
-            Step 2: Select your product category
+            Step 2: Your Business Location
           </h2>
           <p className="text-base md:text-lg text-black/90 leading-relaxed">
-            Choose the <strong>category</strong> that best matches your product
-            (e.g., Safety Equipment, Machinery, Tools, Lubricants). This helps
-            buyers find your product when they search.
+            Add <strong> your business location</strong> so customers know where
+            you operate from. This helps improve trust and makes delivery or
+            pickup easier. Once you’ve entered your location,{" "}
+            <strong> click Next</strong> to continue.
           </p>
         </div>
         <div className="md:w-2/5 flex justify-center">
           <img
-            src="/start-to-sell(2).png"
-            alt="Step 2 - Business Slug"
+            src="/start-selling-img(2).png"
+            alt="Step 2 - Your Business Location"
             className="w-full max-w-sm h-auto rounded-lg shadow-md object-cover"
           />
         </div>
@@ -76,18 +80,20 @@ function StartSellingContent() {
       <div className="relative z-20 flex flex-col md:flex-row items-center justify-center gap-10 max-w-6xl mx-auto px-6 md:px-8 lg:px-12 mb-16">
         <div className="md:w-3/5 text-left">
           <h2 className="text-xl md:text-2xl font-semibold text-[#0861C1] mb-4">
-            Step 3: Add your location
+            Step 3: Set Your Product Price
           </h2>
           <p className="text-base md:text-lg text-black/90 leading-relaxed">
-            Enter the <strong>location</strong> where the product is available.
-            This helps buyers know where the item is coming from and estimate
-            delivery times.
+            Add your <strong> product’s price details</strong> to help buyers
+            make quick decisions. Choose your <strong> price type</strong>{" "}
+            (fixed or negotiable) and select your <strong> sales type</strong>{" "}
+            (wholesale or retail). Be sure your pricing reflects the value and
+            quantity you’re offering.
           </p>
         </div>
         <div className="md:w-2/5 flex justify-center">
           <img
-            src="/start-to-sell(3).png"
-            alt="Step 3 - Product Upload"
+            src="/start-selling-img(3).png"
+            alt="Step 3 - Set Your Product Price"
             className="w-full max-w-sm h-auto rounded-lg shadow-md object-cover"
           />
         </div>
@@ -100,19 +106,16 @@ function StartSellingContent() {
             Step 4: Fill in Product Details
           </h2>
           <p className="text-base md:text-lg text-black/90 leading-relaxed">
-            Complete all the information based on the category you selected.
-            Enter a <strong>clear product name</strong> and write a detailed
-            description that highlights key features and specifications. Set a
-            fair price in Naira, choose your <strong>sales type</strong>{" "}
-            (wholesale or retail), and let buyers know if your price is
-            negotiable or fixed. Double-check everything before moving to the
-            next step.
+            Give your product <strong> a clear name and description</strong> so
+            buyers understand exactly what you’re offering.{" "}
+            <strong> Be specific</strong> about key features, materials, or
+            uses, this helps your product stand out and builds buyer confidence.
           </p>
         </div>
         <div className="md:w-2/5 flex justify-center">
           <img
-            src="/start-to-sell(4).png"
-            alt="Step 4 - Business Verification"
+            src="/start-selling-img(4).png"
+            alt="Step 4 - Fill in Product Details"
             className="w-full max-w-sm h-auto rounded-lg shadow-md object-cover"
           />
         </div>
@@ -122,18 +125,18 @@ function StartSellingContent() {
       <div className="relative z-20 flex flex-col md:flex-row items-center justify-center gap-10 max-w-6xl mx-auto px-6 md:px-8 lg:px-12 mb-12">
         <div className="md:w-3/5 text-left">
           <h2 className="text-xl md:text-2xl font-semibold text-[#0861C1] mb-4">
-            Step 5: Add Your Contact Information
+            Step 5: Business Information
           </h2>
           <p className="text-base md:text-lg text-black/90 leading-relaxed">
-            Provide your <strong>phone number</strong> and{" "}
-            <strong>WhatsApp number</strong> so buyers can reach you directly
-            for inquiries and orders.
+            Enter your <strong> business name and contact number</strong> so buyers can easily
+            identify and reach you. Once everything looks good, click Next to
+            continue.
           </p>
         </div>
         <div className="md:w-2/5 flex justify-center">
           <img
-            src="/start-to-sell(5).png"
-            alt="Step 5 - Start Selling"
+            src="/start-selling-img(5).png"
+            alt="Step 5 - Business Information"
             className="w-full max-w-sm h-auto rounded-lg shadow-md object-cover"
           />
         </div>
@@ -145,17 +148,16 @@ function StartSellingContent() {
             Step 6: Submit Your Product
           </h2>
           <p className="text-base md:text-lg text-black/90 leading-relaxed">
-            Once you've filled in all the details, <strong>click submit</strong>
-            . Our team will review your product listing to ensure it meets our
-            quality standards. This usually take 1-2 business days and we'll
-            notify you via email once your product is approved and live on the
-            marketplace.
+            <strong> Review all your product details</strong> to make sure
+            everything is accurate. Once you’re satisfied,{" "}
+            <strong> click Submit Product</strong> to send it for review and get
+            one step closer to selling on IndustrialMart.
           </p>
         </div>
         <div className="md:w-2/5 flex justify-center">
           <img
-            src="/start-to-sell(6).png"
-            alt="Step 4 - Business Verification"
+            src="/start-selling-img(6).png"
+            alt="Step 4 - Submit Your Product"
             className="w-full max-w-sm h-auto rounded-lg shadow-md object-cover"
           />
         </div>
@@ -165,10 +167,10 @@ function StartSellingContent() {
         className="
     relative h-[50vh] flex flex-col items-center justify-center 
     w-full text-center px-4 overflow-hidden
-    bg-cover bg-no-repeat bg-[position:center_top_20%]
+    bg-cover bg-no-repeat bg-[position:center]
   "
         style={{
-          backgroundImage: "url('/hero-sections-img.png')",
+          backgroundImage: "url('/industrial-bg.png')",
         }}
       >
         {/* Overlay (Behind Content) */}
@@ -181,21 +183,24 @@ function StartSellingContent() {
           </h3>
           <p className="text-base md:text-lg text-white leading-relaxed mb-6">
             After approval, your product will be visible to thousands of buyers
-          across Nigeria. You'll start receiving inquiries and can manage your
-          listings from your vendor dashboard.
-          <br />
-          Questions? Contact our vendor support team at{" "}
-          <a
-            href="mailto:vendorsupport@industrialmart.com"
-            className="text-[#ffffff] font-medium underline"
-          >
-            examplesupport@industrialmart.com
-          </a>
+            across Nigeria. You'll start receiving inquiries and can manage your
+            listings from your vendor dashboard.
+            <br />
+            Questions? Contact our vendor support team at{" "}
+            <a
+              href="mailto:support@industrialmart.ng"
+              className="text-[#ffffff] font-medium underline"
+            >
+              <br />
+              support@industrialmart.ng
+            </a>
             .
           </p>
-          <button className="bg-[#0861C1] text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-[#074a96] transition">
-            Start Selling
-          </button>
+          <Link href={"/sell"}>
+            <button className="bg-[#0861C1] text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-[#074a96] transition">
+              Start Selling
+            </button>
+          </Link>
         </div>
       </div>
     </section>
