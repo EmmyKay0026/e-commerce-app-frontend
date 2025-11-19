@@ -67,6 +67,7 @@ export interface Product {
   price_type: "fixed" | "negotiable"; // use For filter
   metadata: Record<string, any>; // to contain more description of the item
   view_count?: string;
+  features?: string[];
   business: {
     id: string;
     business_name: string;

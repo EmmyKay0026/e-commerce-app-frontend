@@ -43,6 +43,8 @@ export function ProductForm() {
       description: "",
       price: "",
       price_input_mode: "enter",
+      item_condition: undefined,
+      amount_in_stock: "0",
       priceType: undefined,
       saleType: undefined,
       features: "",
@@ -56,39 +58,39 @@ export function ProductForm() {
     };
   }, [imagePreviews]);
 
-    const validateStep = async (step: number): Promise<boolean> => {
+  const validateStep = async (step: number): Promise<boolean> => {
+    let fieldsToValidate: (keyof ProductFormData)[] = [];
 
-      let fieldsToValidate: (keyof ProductFormData)[] = [];
+    if (step === 1) {
+      fieldsToValidate = [
+        "images",
+        "category",
+        "location_state",
+        "location_lga",
+      ];
+    } else if (step === 2) {
+      fieldsToValidate = [
+        "name",
+        "description",
+        "price",
+        "features",
+        "amount_in_stock",
+        "item_condition",
+        "priceType",
+        "saleType",
+      ];
+    }
 
-      if (step === 1) {
+    const result = await form.trigger(fieldsToValidate);
 
-        fieldsToValidate = ["images", "category", "location_state", "location_lga"];
+    if (!result) {
+      toast.error("Please fill in all required fields correctly.");
 
-      } else if (step === 2) {
+      return false;
+    }
 
-        fieldsToValidate = ["name", "description", "price", "features", "priceType", "saleType"];
-
-      }
-
-  
-
-      const result = await form.trigger(fieldsToValidate);
-
-  
-
-      if (!result) {
-
-        toast.error("Please fill in all required fields correctly.");
-
-        return false;
-
-      }
-
-  
-
-      return true;
-
-    };
+    return true;
+  };
 
   const handleNext = async () => {
     const isValid = await validateStep(currentStep);
@@ -122,6 +124,8 @@ export function ProductForm() {
         category: data.category,
         location_lga: data.location_lga,
         location_state: data.location_state,
+        item_condition: data.item_condition,
+        amount_in_stock: data.amount_in_stock,
         features: data.features,
         price_input_mode: data.price_input_mode,
         price_type: data.priceType ?? null,

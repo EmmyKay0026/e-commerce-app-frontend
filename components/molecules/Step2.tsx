@@ -63,7 +63,7 @@ export function Step2({ form }: Step2Props) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="features">Features *</Label>
+        <Label htmlFor="features">Features </Label>
         <Textarea
           id="features"
           placeholder="Enter features separated by | (e.g., Fast Charging | Water Resistant | 5G Compatible)"
@@ -76,6 +76,60 @@ export function Step2({ form }: Step2Props) {
         {form.formState.errors.features && (
           <p className="text-sm text-destructive">
             {form.formState.errors.features.message}
+          </p>
+        )}
+      </div>
+      {/* No in stock */}
+      <div className="space-y-2">
+        <Label htmlFor="amount_in_stock">Number in stock *</Label>
+        <Input
+          id="amount_in_stock"
+          type="number"
+          placeholder="Enter the number of items in stock "
+          {...form.register("amount_in_stock")}
+        />
+        {form.formState.errors.amount_in_stock && (
+          <p className="text-sm text-destructive">
+            {form.formState.errors.amount_in_stock.message}
+          </p>
+        )}
+      </div>
+
+      {/* Product condition */}
+      <div className="space-y-2 mt-6">
+        <Label>Item condition</Label>
+        <div className="flex gap-4 mt-1">
+          <label className="flex items-center space-x-2">
+            <input
+              type="radio"
+              value="new"
+              {...form.register("item_condition")}
+              className="w-4 h-4 text-primary border-muted"
+            />
+            <span>New</span>
+          </label>
+          <label className="flex items-center space-x-2">
+            <input
+              type="radio"
+              value="used"
+              {...form.register("item_condition")}
+              className="w-4 h-4 text-primary border-muted"
+            />
+            <span>Used</span>
+          </label>
+          <label className="flex items-center space-x-2">
+            <input
+              type="radio"
+              value="refurbished"
+              {...form.register("item_condition")}
+              className="w-4 h-4 text-primary border-muted"
+            />
+            <span>Refurbished</span>
+          </label>
+        </div>
+        {form.formState.errors.item_condition && (
+          <p className="text-sm text-destructive">
+            {form.formState.errors?.item_condition?.message}
           </p>
         )}
       </div>

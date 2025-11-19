@@ -147,14 +147,17 @@ const CategorySection: React.FC = () => {
       useEffect(() => {
         if (expanded && categoryHasChildren && children.length === 0) {
           setLoadingChildren(true);
-          getCategoryChildren(cat.id).then((childCats) => {
-            setChildren(childCats);
-          }).catch((err) => {
-            console.error("Failed to load children for", cat.id, err);
-            setChildren([]); // prevent infinite retry
-          }).finally(() => {
-            setLoadingChildren(false);
-          });
+          getCategoryChildren(cat.id)
+            .then((childCats) => {
+              setChildren(childCats);
+            })
+            .catch((err) => {
+              console.error("Failed to load children for", cat.id, err);
+              setChildren([]); // prevent infinite retry
+            })
+            .finally(() => {
+              setLoadingChildren(false);
+            });
         }
       }, [expanded, categoryHasChildren, cat.id, children.length]);
 
@@ -208,7 +211,9 @@ const CategorySection: React.FC = () => {
                   <MobileItem key={child.id} cat={child} depth={depth + 1} />
                 ))
               ) : categoryHasChildren ? (
-                <li className="px-4 py-2 text-sm text-gray-400">No subcategories</li>
+                <li className="px-4 py-2 text-sm text-gray-400">
+                  No subcategories
+                </li>
               ) : null}
             </ul>
           )}
@@ -302,7 +307,7 @@ const CategorySection: React.FC = () => {
               ))}
             </div>
           ) : products.length ? (
-            <div className="grid grid-cols-2 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-2 gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {products.map((p) => (
                 <ProductCards key={p.id} product={p} />
               ))}

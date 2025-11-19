@@ -101,7 +101,7 @@ export function Step1({
     fetchLgas();
   }, [selectedState]);
 
- const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
@@ -113,10 +113,12 @@ export function Step1({
       return;
     }
 
-    form.setValue("images", [...currentFiles, ...files], { shouldValidate: true });
+    form.setValue("images", [...currentFiles, ...files], {
+      shouldValidate: true,
+    });
 
-    const newPreviews = files.map(file => URL.createObjectURL(file));
-    setImagePreviews(prev => [...prev, ...newPreviews]);
+    const newPreviews = files.map((file) => URL.createObjectURL(file));
+    setImagePreviews((prev) => [...prev, ...newPreviews]);
   };
 
   const handleRemoveImage = (indexToRemove: number) => {
@@ -125,7 +127,7 @@ export function Step1({
     form.setValue("images", newFiles, { shouldValidate: true });
 
     // Revoke the object URL to prevent memory leaks
-    URL.revokeObjectURL(imagePreviews[indexToRemove]); 
+    URL.revokeObjectURL(imagePreviews[indexToRemove]);
     const newPreviews = imagePreviews.filter((_, i) => i !== indexToRemove);
     setImagePreviews(newPreviews);
   };
@@ -240,7 +242,7 @@ export function Step1({
 
       <div className="space-y-2">
         <Label>Location *</Label>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Select
             onValueChange={(value) => {
               setSelectedState(value);

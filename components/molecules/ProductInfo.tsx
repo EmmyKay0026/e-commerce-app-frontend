@@ -34,7 +34,7 @@ interface ProductInfoProps {
   soldCount?: number;
   inStock?: number;
   dateOfPosting: string;
-  metadata?: Record<string, any>;
+  features?: string[];
   vendor?: BusinessProfile;
   product_id: string;
 }
@@ -49,7 +49,7 @@ export function ProductInfo({
   minOrder = 1,
   product_id,
   inStock,
-  metadata,
+  features,
   dateOfPosting,
   vendor,
 }: ProductInfoProps) {
@@ -81,9 +81,9 @@ export function ProductInfo({
     // console.log(res);
   };
 
-  const handleShare = () => {
-    toast.success("Product link copied to clipboard!");
-  };
+  // const handleShare = () => {
+  //   toast.success("Product link copied to clipboard!");
+  // };
 
   return (
     <div className="space-y-6 mt-2">
@@ -107,7 +107,7 @@ export function ProductInfo({
                 "transition-all duration-300",
                 isSaved
                   ? "fill-black group-hover:fill-white group-hover:text-white "
-                  : "  group-hover:text-white "
+                  : "group-hover:text-white "
               )}
             />
           </span>
@@ -118,7 +118,6 @@ export function ProductInfo({
           </Badge>
         )}
       </div>
-
       {/* Description */}
       {product.description && (
         <div>
@@ -128,7 +127,6 @@ export function ProductInfo({
           </p>
         </div>
       )}
-
       {/* Price Section */}
       <div className="space-y-2">
         <div className="flex items-baseline gap-2">
@@ -145,7 +143,6 @@ export function ProductInfo({
           {/* <span className="text-2xl text-muted-foreground">/unit</span> */}
         </div>
       </div>
-
       <Separator />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {product.sale_type && (
@@ -178,7 +175,24 @@ export function ProductInfo({
           </div>
         )}
       </div>
-
+      <div className="w-full block lg:hidden">
+        <Separator />
+        <h4 className="text-[24px] font-bold">Product features</h4>
+        <ul className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4 w-full">
+          {features && features?.length > 0 ? (
+            features.map((feature, index) => (
+              <li key={index} className="text-muted-foreground">
+                {feature}
+              </li>
+            ))
+          ) : (
+            // <p className="whitespace-pre-line">{productDetails.features}</p>
+            <p className="text-muted-foreground">
+              No features added for this product.
+            </p>
+          )}
+        </ul>
+      </div>
       <Separator />
       {/* Product Description */}
       {/* {metadata && (
@@ -248,9 +262,9 @@ export function ProductInfo({
                 <Phone className="w-5 h-5 mr-2" />
                 Show contact
               </Button> */}
-              <Button size="lg" variant="outline" onClick={handleShare}>
+              {/* <Button size="lg" variant="outline" onClick={handleShare}>
                 <Share2 className="w-5 h-5" />
-              </Button>
+              </Button> */}
             </div>
           </div>
         </>
