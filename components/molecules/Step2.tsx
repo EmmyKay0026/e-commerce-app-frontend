@@ -13,10 +13,10 @@ interface Step2Props {
 }
 
 export function Step2({ form }: Step2Props) {
-  const category = form.watch("category")?.name;
+  const categories = form.watch("categories");
   const user = useUserStore((s) => s.user);
 
-  if (!category) {
+  if (!categories || categories.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
         Please select a category in Step 1
@@ -263,7 +263,7 @@ export function Step2({ form }: Step2Props) {
               className="opacity-80"
               disabled
               value={user?.business_profile?.business_name || ""}
-              // {...form.register("price")}
+            // {...form.register("price")}
             />
           </div>
 
@@ -276,7 +276,7 @@ export function Step2({ form }: Step2Props) {
               className="opacity-80"
               disabled
               value={user?.phone_number || ""}
-              // {...form.register("price")}
+            // {...form.register("price")}
             />
           </div>
         </div>

@@ -105,11 +105,15 @@ export function Step3({ form, onEdit }: Step3Props) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <h4 className="text-sm font-medium text-muted-foreground">
-                Category
+                Categories
               </h4>
-              <Badge variant="secondary" className="mt-1">
-                {formData.category?.name}
-              </Badge>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {formData.categories?.map((category) => (
+                  <Badge key={category.id} variant="secondary">
+                    {category.name}
+                  </Badge>
+                ))}
+              </div>
             </div>
             <div>
               <h4 className="text-sm font-medium text-muted-foreground">
