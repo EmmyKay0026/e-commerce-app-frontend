@@ -1,5 +1,6 @@
 import { uploadImagesToCloudflare } from "@/lib/cloudflareImageUpload";
 import api from "@/config/api";
+import qs from 'qs';
 
 import {
   Product,
@@ -296,6 +297,9 @@ export async function getBusinessProducts(
  * GET /products
  * Accepts query params: page, perPage, q, tag, sort, plus any filter keys
  */
+// services/productService.ts  ← ONLY CHANGE THIS PART
+
+// ← REPLACE this entire function (or just the params building part)
 export async function listProducts(
   options: {
     page?: number;
@@ -303,19 +307,10 @@ export async function listProducts(
     q?: string;
     tag?: string;
     sort?: string;
-    // arbitrary additional filters, e.g. { price_gte: 10 }
-    filters?: Record<string, string | number | boolean | undefined>;
-    /** Optional AbortSignal to cancel the request */
+    filters?: Record<string, string | number | boolean | string[] | undefined>;
     signal?: AbortSignal;
   } = {}
-): Promise<
-  ServiceResult<{
-    page: number;
-    perPage: number;
-    products: Product[];
-    total: number | null;
-  }>
-> {
+) {
   try {
     const {
       page = 1,
@@ -327,31 +322,38 @@ export async function listProducts(
       signal,
     } = options;
 
-    // enforce backend limits
     const normalizedPerPage = Math.min(100, Math.max(1, Math.floor(perPage)));
     const normalizedPage = Math.max(1, Math.floor(page));
 
-    const params: Record<string, any> = {
-      page: normalizedPage,
-      perPage: normalizedPerPage,
-    };
+    // Use URLSearchParams so we can properly append repeated keys
+    const params = new URLSearchParams();
 
-    if (q) params.q = q;
-    if (tag) params.tag = tag;
-    if (sort) params.sort = sort;
+      params.set("page", normalizedPage.toString());
+      params.set("perPage", normalizedPerPage.toString());
+      if (q) params.set("q", q);
+      if (tag) params.set("tag", tag);
+      if (sort) params.set("sort", sort);
 
-    // merge in filters (caller should provide correctly-named filter keys)
-    for (const [k, v] of Object.entries(filters)) {
-      if (v !== undefined && v !== null) params[k] = v;
-    }
+      // THIS IS THE ONLY CHANGE THAT WORKS WITH YOUR BACKEND
+      for (const [key, value] of Object.entries(filters)) {
+        if (value === undefined || value === null) continue;
+
+        if (Array.isArray(value)) {
+          if (value.length > 0) {
+            params.set(key, value.join(","));  // ← comma-separated, single param
+          }
+        } else {
+          params.set(key, String(value));
+        }
+      }
 
     const res = await api.get("/products", {
       params,
       ...(signal ? { signal } : {}),
     });
 
+    // ... rest unchanged
     if (res.status === 200) {
-      // expected shape: { page, perPage, products, total }
       const body = res.data || {};
       return {
         success: true,
@@ -360,8 +362,7 @@ export async function listProducts(
           page: body.page ?? normalizedPage,
           perPage: body.perPage ?? normalizedPerPage,
           products: body.products ?? body.data ?? [],
-          total:
-            typeof body.total === "number" ? body.total : body.count ?? null,
+          total: typeof body.total === "number" ? body.total : body.count ?? null,
         },
       };
     }
@@ -373,14 +374,12 @@ export async function listProducts(
       error: res.data?.message || `Unexpected status ${res.status}`,
     };
   } catch (err: any) {
-    const status = err?.response?.status || 500;
-    const msg =
-      err?.response?.data?.message ||
-      err?.response?.data?.error ||
-      err?.message ||
-      "Failed to list products";
-
-    return { success: false, status, data: null, error: msg };
+    return {
+      success: false,
+      status: err?.response?.status || 500,
+      data: null,
+      error: err?.response?.data?.message || err?.message || "Failed to list products",
+    };
   }
 }
 
@@ -614,9 +613,15 @@ export async function getAllCategories(): Promise<ServiceResult<Category[]>> {
       return {
         success: true,
         status: res.status,
-        data: res.data.categories,
+        data: res.data.data,
       };
     }
+
+    // console.log("=== getAllCategories API Response ===");
+    // console.log("Full response:", res);
+    // console.log("res.data:", res.data);
+    // console.log("res.data.categories:", res.data.categories);
+    // console.log("res.data.data:", res.data.data);
 
     return {
       success: false,

@@ -96,9 +96,9 @@ const AuthModal = () => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center  min-h-screen  min-w-screen ">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center  min-h-screen  max-w-screen ">
       <div className=" bg-white overflow-y-auto  max-h-screen shadow-xl rounded-2xl  ">
-        <div className="w-full min-w-md  p-8">
+        <div className="w-full p-8">
           <span className="flex justify-between items-center mb-4">
             <X onClick={() => toogle()} className="cursor-pointer text-right" />
           </span>
