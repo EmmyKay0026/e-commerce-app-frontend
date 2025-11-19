@@ -8,7 +8,7 @@ export default function PrivacyPolicy() {
       <Hero
         title="Privacy Policy"
         subtitle="Learn how IndustrialMart Nigeria collects, uses, and protects your personal information."
-        backgroundImage="/hero-sections-img.png"
+        backgroundImage="/hero-sections-img.webp"
       />
 
       {/* Main Content */}

@@ -11,7 +11,7 @@ export default function VendorPage() {
         title="How to Sell on IndustrialMart"
         subtitle="Ready to list your products and connect with buyers? Follow these
             simple steps to get started."
-        backgroundImage="/hero-sections-img.png"
+        backgroundImage="/hero-sections-img.webp"
       />
 
       {/* Main Content */}
@@ -170,7 +170,7 @@ function StartSellingContent() {
     bg-cover bg-no-repeat bg-[position:center]
   "
         style={{
-          backgroundImage: "url('/industrial-bg.png')",
+          backgroundImage: "url('/industrial-bg.webp')",
         }}
       >
         {/* Overlay (Behind Content) */}

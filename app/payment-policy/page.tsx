@@ -8,7 +8,7 @@ export default function PaymentPolicy() {
       <Hero
         title="Payment Policy"
         subtitle="Understand how payments are handled on IndustrialMart Nigeria and the responsibilities of both buyers and sellers."
-        backgroundImage="/hero-sections-img.png"
+        backgroundImage="/hero-sections-img.webp"
       />
 
       {/* Main Content */}

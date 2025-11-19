@@ -185,7 +185,7 @@ export default function CreateBusinessAccountPage() {
       <Hero
         title="Create Your Business Account"
         subtitle="Join IndustrialMart Nigeria and showcase your industrial products to a wider audience."
-        backgroundImage="/hero-sections-img.png"
+        backgroundImage="/hero-sections-img.webp"
       />
       <div className="min-h-screen flex items-center justify-center py-12 px-4">
         <div className="w-full max-w-2xl bg-white rounded-lg shadow p-6">
