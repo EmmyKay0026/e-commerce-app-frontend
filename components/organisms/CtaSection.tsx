@@ -8,7 +8,7 @@ export default function CtaSection() {
     <section
       className="relative h-[60vh] flex flex-col items-center w-full justify-center text-center px-4"
       style={{
-        backgroundImage: "url('/industrial-bg.png')",
+        backgroundImage: "url('/industrial-bg.webp')",
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}

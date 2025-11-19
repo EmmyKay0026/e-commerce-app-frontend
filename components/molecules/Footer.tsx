@@ -26,7 +26,7 @@ export default function Footer() {
           </p>
           <div className="flex gap-3 mt-4">
             <a
-              href="https://www.facebook.com/confirmemail.php?next=https%3A%2F%2Fwww.facebook.com%2Findustrialmartnigeria#"
+              href="https://www.facebook.com/share/17WTTNEaSV/"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Visit IndustrialMart Nigeria on Facebook"
@@ -128,9 +128,9 @@ export default function Footer() {
             Port Harcourt, Rivers State.
           </p>
           <p className="text-sm mt-3 text-gray-400">
-            Email: sales@industrialmartnigeria.com
+            Email: support@industrialmart.ng
           </p>
-          <p className="text-sm mt-2 text-gray-400">Call us: +234-7078581059</p>
+          {/* <p className="text-sm mt-2 text-gray-400">Call us: +234-7078581059</p> */}
         </div>
       </div>
 

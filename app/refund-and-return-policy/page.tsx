@@ -17,7 +17,7 @@ export default function RefundPolicy() {
       <Hero
         title="Refund and Return Policy"
         subtitle="Our guidelines on refunds, returns, and dispute handling between buyers and sellers on IndustrialMart Nigeria."
-        backgroundImage="/hero-sections-img.png"
+        backgroundImage="/hero-sections-img.webp"
       />
 
       <section className="bg-white text-gray-800">

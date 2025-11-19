@@ -17,7 +17,7 @@ export default function BuyerPolicy() {
       <Hero
         title="Buyer Policy"
         subtitle="Your rights, responsibilities, and guidelines as a buyer on IndustrialMart Nigeria."
-        backgroundImage="/hero-sections-img.png"
+        backgroundImage="/hero-sections-img.webp"
       />
 
       <section className="bg-white text-gray-800">
