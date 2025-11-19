@@ -54,6 +54,7 @@ export interface Product {
   images: string[]; // URLs to Google Storage
   category_id?: string; // FK -> Category.id
   category?: CategoryInfo;
+  categories?: { category: Category }[];
   parentCategories?: CategoryInfo[];
   tags?: string[];
   status: "active" | "inactive" | "deleted" | "pending_review";

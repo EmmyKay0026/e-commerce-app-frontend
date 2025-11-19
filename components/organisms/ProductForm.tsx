@@ -36,7 +36,7 @@ export function ProductForm() {
     mode: "onChange",
     defaultValues: {
       images: [],
-      category: undefined,
+      categories: [],
       location_lga: "",
       location_state: "",
       name: "",
@@ -64,7 +64,7 @@ export function ProductForm() {
     if (step === 1) {
       fieldsToValidate = [
         "images",
-        "category",
+        "categories",
         "location_state",
         "location_lga",
       ];
@@ -121,7 +121,10 @@ export function ProductForm() {
         description: data.description,
         price: data.price ?? "",
         images: imageKeys,
-        category: data.category,
+        price: data.price ?? "",
+        images: imageKeys,
+        category_ids: data.categories.map((c) => c.id),
+        location_lga: data.location_lga,
         location_lga: data.location_lga,
         location_state: data.location_state,
         item_condition: data.item_condition,

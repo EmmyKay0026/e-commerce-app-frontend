@@ -8,7 +8,7 @@ export const step1Schema = z.object({
   images: z
     .array(z.instanceof(File))
     .min(1, "At least 1 image is required")
-    .max(3, "You can upload up to 3 images"),
+    .max(5, "You can upload up to 5 images"),
   category: z.enum(["Electronics", "Furniture", "Clothing"], {
     error: "Please select a category",
   }),
@@ -44,11 +44,16 @@ export const productFormSchema = z
     images: z
       .array(z.instanceof(File))
       .min(1, "At least 1 image is required")
-      .max(3, "You can upload up to 3 images"),
-    category: z.object({
-      id: z.string().min(1, "Please select a category"),
-      name: z.string(),
-    }),
+      .max(5, "You can upload up to 5 images"),
+    categories: z
+      .array(
+        z.object({
+          id: z.string(),
+          name: z.string(),
+        })
+      )
+      .min(1, "Please select at least one category")
+      .max(5, "You can select up to 5 categories"),
     location_state: z.string().min(2, "Select a state"),
     location_lga: z.string().min(2, "Select a local government area"),
 

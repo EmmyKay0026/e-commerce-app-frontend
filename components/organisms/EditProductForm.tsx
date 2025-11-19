@@ -25,7 +25,7 @@ interface EditProductFormProps {
 }
 
 const editProductSchema = productFormSchema.extend({
-  images: z.array(z.instanceof(File)).max(10).optional(),
+  images: z.array(z.instanceof(File)).max(5).optional(),
 });
 
 export function EditProductForm({ product }: EditProductFormProps) {
@@ -52,10 +52,11 @@ export function EditProductForm({ product }: EditProductFormProps) {
         description: product.description,
         price: product.price,
         images: [], // New images only
-        category:
-          product.category_id && product.category
-            ? { id: product.category_id, name: product.category.name }
-            : undefined,
+        categories:
+          product.categories?.map((c) => ({
+            id: c.category.id,
+            name: c.category.name,
+          })) || [],
         location_lga: product.location_lga || "",
         location_state: product.location_state || "",
         features: (product.metadata?.features as string) || "",
@@ -82,7 +83,7 @@ export function EditProductForm({ product }: EditProductFormProps) {
     if (step === 1) {
       fieldsToValidate = [
         "images",
-        "category",
+        "categories",
         "location_state",
         "location_lga",
       ];
@@ -143,13 +144,13 @@ export function EditProductForm({ product }: EditProductFormProps) {
       //
       const result = await updateProduct(product.id, {
         name: data.name,
-        description: data.description,
+        description: data.description || "",
         price: data.price ?? "",
         images: finalImageKeys,
-        category: data.category.id,
+        category_ids: data.categories.map((c) => c.id),
         location_lga: data.location_lga,
         location_state: data.location_state,
-        features: data.features,
+        features: data.features || "",
         price_input_mode: data.price_input_mode,
         price_type: data.priceType ?? null,
         sale_type: data.saleType ?? null,
