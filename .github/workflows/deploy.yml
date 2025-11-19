@@ -25,7 +25,6 @@ jobs:
         with:
           host: ${{ secrets.HOST_IP }}
           username: ${{ secrets.HOST_USER }}
-          # Fix 1: Keep the key value on the same line (or use correct multi-line syntax)
           key: ${{ secrets.SSH_PRIVATE_KEY }}
 
           # 'script:' must be indented under 'with:'
@@ -60,10 +59,19 @@ jobs:
             # Navigate to the main project directory
             cd $PROJECT_DIR
 
-            # 1. Backup the currently running image
-            echo "1. Saving current working image for potential rollback..."
-            # Get the ID of the image used by the running container
+            # --- CRITICAL FIX: INJECT SECRETS DIRECTLY INTO THE SHELL ---
+            # This is the most reliable way to pass multi-line secrets to Docker Compose.
+            echo "1. Injecting secrets directly into the shell environment..."
+            # This pipes the multi-line secret string through sed to prepend 'export ' to every line,
+            # then executes the resulting lines as shell commands.
+            echo "$DOTENV_CONTENT" | sed 's/^/export /' | bash
+            echo "Secrets are now available in the shell environment."
+            # -------------------------------------------------------------
+
+            # 2. Backup current image (using the robust status check from previous steps)
+            echo "2. Saving current working image for potential rollback..."
             CURRENT_IMAGE_ID=$(docker inspect --format='{{.Image}}' $FRONTEND_CONTAINER_NAME 2>/dev/null)
+
             if [ -n "$CURRENT_IMAGE_ID" ]; then
                 docker tag $CURRENT_IMAGE_ID $FRONTEND_SERVICE_NAME:$ROLLBACK_TAG
                 echo "Backup saved as $FRONTEND_SERVICE_NAME:$ROLLBACK_TAG"
@@ -84,7 +92,6 @@ jobs:
             echo "4. Running basic health check (waiting 15 seconds for startup)..."
             sleep 15
 
-            # Check if the container is running and not in a restarting/exited state
             STATUS=$(docker inspect --format='{{.State.Status}}' $FRONTEND_CONTAINER_NAME 2>/dev/null)
 
             if [ "$STATUS" == "running" ]; then
