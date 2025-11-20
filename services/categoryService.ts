@@ -404,22 +404,33 @@ export const listProductsByCategory = async (
         price_type: filters.price_type,
         sort: filters.sort,
         q: filters.q,
+        limit: filters.limit,   // ← ADD THIS
       },
     });
 
-    const products = Array.isArray(res.data.data) 
-      ? res.data.data 
-      : [];
+    const products =
+      res?.data?.data?.products && Array.isArray(res.data.data.products)
+        ? res.data.data.products
+        : [];
 
     return {
       success: true,
-      data: { products },
+      data: {
+        products,
+        total: res.data.data?.total ?? 0,
+        page: res.data.data?.page ?? 1,
+        limit: res.data.data?.limit ?? filters.limit ?? 50,
+      },
     };
-  } catch (error: any) {  
-    console.error("Products fetch failed:", error.response?.data || error.message);
+  } catch (error: any) {
+    console.error(
+      "Products fetch failed:",
+      error.response?.data || error.message
+    );
     return { success: false };
   }
-}
+};
+
 
 export const getCategoryFilterOptions = async (categoryId: string, filters = {}) => {
   try {
