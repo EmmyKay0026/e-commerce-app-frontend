@@ -5,7 +5,10 @@ export type ProductCategory = "Electronics" | "Furniture" | "Clothing";
 
 // Base schema for Step 1
 export const step1Schema = z.object({
-  images: z.array(z.instanceof(File)).min(1, "At least one image is required"),
+  images: z
+    .array(z.instanceof(File))
+    .min(1, "At least 1 image is required")
+    .max(5, "You can upload up to 5 images"),
   category: z.enum(["Electronics", "Furniture", "Clothing"], {
     error: "Please select a category",
   }),
@@ -40,20 +43,29 @@ export const productFormSchema = z
     // Step 1
     images: z
       .array(z.instanceof(File))
-      .min(3, "At least 3 image is required")
-      .max(10, "You can upload up to 10 images"),
-    category: z.object({
-      id: z.string().min(1, "Please select a category"),
-      name: z.string(),
-    }),
+      .min(1, "At least 1 image is required")
+      .max(5, "You can upload up to 5 images"),
+    categories: z
+      .array(
+        z.object({
+          id: z.string(),
+          name: z.string(),
+        })
+      )
+      .min(1, "Please select at least one category")
+      .max(5, "You can select up to 5 categories"),
     location_state: z.string().min(2, "Select a state"),
     location_lga: z.string().min(2, "Select a local government area"),
 
     // Step 2 - Product Details
-    name: z.string().min(2, "Product name must be at least 2 characters"),
+    name: z
+      .string()
+      .min(2, "Product name must be at least 2 characters")
+      .max(20, "Product name must be at most 20 characters"),
     description: z
       .string()
-      .min(10, "Description must be at least 10 characters"),
+      .min(100, "Description must be at least 100 characters")
+      .optional(),
     price: z.string().optional(),
     price_input_mode: z.enum(["enter", "quote"]).default("enter"),
     priceType: z
@@ -64,7 +76,16 @@ export const productFormSchema = z
       .enum(["wholesale", "retail"])
       .describe("Please indicate if the price is negotiable")
       .optional(),
-    features: z.string().min(1, "At least one feature is required"),
+    item_condition: z
+      .enum(["new", "refurbished", "used"])
+      .describe("Please indicate if the condition of the item")
+      .optional(),
+    amount_in_stock: z
+      .string()
+      .min(1, "Amount in stock must be at least 1")
+      .describe("Please indicate the amount in stock")
+      .optional(),
+    features: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.price_input_mode === "enter" && !data.price) {

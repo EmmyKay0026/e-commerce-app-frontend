@@ -1,9 +1,9 @@
 "use client";
 
-import { Facebook, Instagram } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-
+import { FaInstagram } from "react-icons/fa";
+import { LuFacebook } from "react-icons/lu";
 
 export default function Footer() {
   return (
@@ -26,13 +26,13 @@ export default function Footer() {
           </p>
           <div className="flex gap-3 mt-4">
             <a
-              href="https://www.facebook.com/confirmemail.php?next=https%3A%2F%2Fwww.facebook.com%2Findustrialmartnigeria#"
+              href="https://www.facebook.com/share/17WTTNEaSV/"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Visit IndustrialMart Nigeria on Facebook"
               className="hover:text-blue-500 transition-colors"
             >
-              <Facebook size={20} />
+              <LuFacebook size={20} />
             </a>
             <a
               href="https://www.instagram.com/industrialmartnigeria"
@@ -41,7 +41,8 @@ export default function Footer() {
               aria-label="Visit IndustrialMart Nigeria on Facebook"
               className="hover:text-blue-500 transition-colors"
             >
-              <Instagram size={20} />
+              <FaInstagram size={20} />
+
             </a>
           </div>
         </div>
@@ -68,7 +69,7 @@ export default function Footer() {
             </li>
             <li>
               <Link
-                href={"/markeplace"}
+                href={"/marketplace"}
                 className="hover:text-blue-500 transition-colors"
               >
                 Marketplace
@@ -127,10 +128,14 @@ export default function Footer() {
             <br />
             Port Harcourt, Rivers State.
           </p>
-          <p className="text-sm mt-3 text-gray-400">
-            Email: sales@industrialmartnigeria.com
-          </p>
-          <p className="text-sm mt-2 text-gray-400">Call us: +234-7078581059</p>
+          <Link
+            href={"mailto:support@industrialmart.ng"}
+            className="hover:text-blue-500"
+          >
+            <p className="text-sm mt-3 text-gray-400">
+              Email: support@industrialmart.ng
+            </p>
+          </Link>
         </div>
       </div>
 

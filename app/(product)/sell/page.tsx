@@ -45,7 +45,7 @@ export default function ProductSubmissionPage() {
   //         subtitle="Join IndustrialMart Nigeria and showcase your industrial products to a wider audience."
   //         backgroundImage="/hero-sections-img.png"
   //       />
-        // <CreateBusinessAccountForm />
+  // <CreateBusinessAccountForm />
   //     </>
   //   )
   // }
@@ -54,10 +54,10 @@ export default function ProductSubmissionPage() {
   return (
     <>
       <Hero
-          title="List Your Product on IndustrialMart"
-          subtitle="Fill out the product details below to reach verified buyers across Nigeria."
-          backgroundImage="/hero-sections-img.png"
-        />
+        title="List Your Product on IndustrialMart"
+        subtitle="Fill out the product details below to reach verified buyers across Nigeria."
+        backgroundImage="/hero-sections-img.png"
+      />
       <ProductForm />
     </>
   );

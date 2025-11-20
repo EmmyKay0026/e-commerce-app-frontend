@@ -8,7 +8,7 @@ import {
   getAllCategories,
   listProductsByCategory,
 } from "@/services/categoryService";
-import MobileDropdown from "@/components/molecules/MobileDropDown"
+import MobileDropdown from "@/components/molecules/MobileDropDown";
 
 // Preload slug → ID map
 await preloadCategoryMaps();
@@ -125,7 +125,7 @@ export function MobileItem({ cat, depth }: { cat: Category; depth: number }) {
 
 export default function CategoryExplorer() {
   return (
-    <section className="bg-gray-50 w-full max-w-[100dvw] py-16">
+    <section className="bg-gray-50 w-full max-w-dvw py-16">
       {/* Header */}
       <div className="text-center mb-10 px-5 md:px-10">
         <h3 className="text-3xl font-bold text-gray-900 md:text-4xl">
@@ -173,7 +173,7 @@ export default function CategoryExplorer() {
           </div>
 
           {products.length ? (
-            <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-3">
+            <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
               {products.map((p) => (
                 <ProductCards key={p.id} product={p} />
               ))}
@@ -186,4 +186,3 @@ export default function CategoryExplorer() {
     </section>
   );
 }
-

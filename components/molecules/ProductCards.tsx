@@ -36,13 +36,13 @@ const ProductCards = ({
         href={`/products/${product.slug}`}
         className="no-underline cursor-pointer"
       >
-        <span className="block text-secondary italic text-[12px]">
-          Posted {convertedDate?.dayWithSuffix} {convertedDate?.monthOfYear},{" "}
-          {convertedDate?.year}
+        <span className="block text-gray italic text-[12px]">
+          Posted {convertedDate?.dayWithSuffix}{" "}
+          {convertedDate?.shortMonthOfYear}, {convertedDate?.year}
         </span>
 
         {product.price_input_mode == "enter" ? (
-          <p className="font-bold text-xl">
+          <p className="font-bold text-lg lg:text-xl">
             {currency}
             {Number(product.price).toLocaleString()} -{" "}
             <span className="italic capitalize text-[14px] font-normal">
@@ -50,10 +50,17 @@ const ProductCards = ({
             </span>
           </p>
         ) : (
-          <p className="font-bold text-xl">Contact Seller for Price</p>
+          <p className="font-bold text-lg lg:text-xl">
+            Contact Seller for Price -{" "}
+            <span className="italic capitalize text-[14px] font-normal">
+              {product.sale_type ?? "Retail"}
+            </span>
+          </p>
         )}
 
-        <h3 className="text-base font-krub font-[500]">{product.name}</h3>
+        <h3 className="text-[14px] lg:text-base font-krub font-[500] line-clamp-3">
+          {product.name}
+        </h3>
       </Link>
     </div>
   );

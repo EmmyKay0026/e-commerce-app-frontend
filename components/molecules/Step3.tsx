@@ -102,14 +102,18 @@ export function Step3({ form, onEdit }: Step3Props) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <h4 className="text-sm font-medium text-muted-foreground">
-                Category
+                Categories
               </h4>
-              <Badge variant="secondary" className="mt-1">
-                {formData.category?.name}
-              </Badge>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {formData.categories?.map((category) => (
+                  <Badge key={category.id} variant="secondary">
+                    {category.name}
+                  </Badge>
+                ))}
+              </div>
             </div>
             <div>
               <h4 className="text-sm font-medium text-muted-foreground">
@@ -139,7 +143,7 @@ export function Step3({ form, onEdit }: Step3Props) {
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Name and Price */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
               <h4 className="text-sm font-medium text-muted-foreground">
                 Product Name
@@ -148,13 +152,21 @@ export function Step3({ form, onEdit }: Step3Props) {
             </div>
             <div>
               <h4 className="text-sm font-medium text-muted-foreground">
-                Price
+                Item condition
               </h4>
-              {formData.price_input_mode === "enter" ? (
-                <p className="mt-1 font-medium text-lg">₦{formData.price}</p>
-              ) : (
-                "Contact seller for price"
-              )}
+
+              <p className="mt-1 font-medium text-lg capitalize">
+                {formData.item_condition}
+              </p>
+            </div>
+            <div>
+              <h4 className="text-sm font-medium text-muted-foreground">
+                Number in stock
+              </h4>
+
+              <p className="mt-1 font-medium text-lg capitalize">
+                {formData.amount_in_stock}
+              </p>
             </div>
           </div>
 
@@ -163,7 +175,40 @@ export function Step3({ form, onEdit }: Step3Props) {
             <h4 className="text-sm font-medium text-muted-foreground">
               Description
             </h4>
-            <p className="mt-1 whitespace-pre-wrap">{formData.description}</p>
+            <p className="mt-1  whitespace-wrap">{formData.description}</p>
+          </div>
+          {/* Pricing details */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <h4 className="text-sm font-medium text-muted-foreground">
+                Price
+              </h4>
+              {formData.price_input_mode === "enter" ? (
+                <p className="mt-1 font-medium text-lg">
+                  ₦{Number(formData.price).toLocaleString()}
+                </p>
+              ) : (
+                "Contact seller for price"
+              )}
+            </div>
+
+            <div>
+              <h4 className="text-sm font-medium text-muted-foreground">
+                Pricing type
+              </h4>
+              <p className="mt-1 font-medium text-lg capitalize">
+                {formData.priceType}
+              </p>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-medium text-muted-foreground">
+                Sale type
+              </h4>
+              <p className="mt-1 font-medium text-lg capitalize">
+                {formData.saleType}
+              </p>
+            </div>
           </div>
 
           {/* Features */}
@@ -173,7 +218,11 @@ export function Step3({ form, onEdit }: Step3Props) {
             </h4>
             <div className="mt-2 flex flex-wrap gap-2">
               {formData.features?.split("|").map((feature, index) => (
-                <Badge key={index} variant="secondary">
+                <Badge
+                  className="whitespace-break-spaces"
+                  key={index}
+                  variant="secondary"
+                >
                   {feature.trim()}
                 </Badge>
               ))}

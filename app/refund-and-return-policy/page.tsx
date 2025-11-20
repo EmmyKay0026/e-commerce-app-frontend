@@ -17,17 +17,17 @@ export default function RefundPolicy() {
       <Hero
         title="Refund and Return Policy"
         subtitle="Our guidelines on refunds, returns, and dispute handling between buyers and sellers on IndustrialMart Nigeria."
-        backgroundImage="/hero-sections-img.png"
+        backgroundImage="/hero-sections-img.webp"
       />
 
       <section className="bg-white text-gray-800">
         <div className="max-w-5xl mx-auto px-6 md:px-8 lg:px-12 py-16 space-y-12">
           <p className="text-gray-700">
-            <strong>Last Updated:</strong> November 12, 2025
+            <strong className="">Last Updated:</strong> November 12, 2025
           </p>
           <p className="text-gray-700">
-            Welcome to IndustrialMart Nigeria (“IndustrialMart,” “we,” “our,”
-            or “us”). This Refund and Return Policy explains how refunds,
+            Welcome to IndustrialMart Nigeria (“IndustrialMart,” “we,” “our,” or
+            “us”). This Refund and Return Policy explains how refunds,
             exchanges, and returns are handled on our platform
             <a href="https://www.industrialmart.ng" className="text-blue-600">
               {" "}

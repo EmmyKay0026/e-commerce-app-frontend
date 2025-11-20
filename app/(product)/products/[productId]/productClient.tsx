@@ -120,11 +120,11 @@ export default function ProductClient({ slug }: ProductClientProps) {
   ].filter((c): c is CategoryInfo => c !== null && c !== undefined);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background">
+    <div className="min-h-screen bg-linear-to-b from-primary/5 to-background">
       {/* ---------- HEADER ---------- */}
       <div className="bg-primary/10 border-b">
         <div className="container mx-auto px-4 py-15 w-[90%] lg:w-[75%] text-center">
-          <h1 className="text-4xl font-bold text-balance mb-5 leading-[3.2rem]">
+          <h1 className="text-[28px]  lg:text-4xl font-bold text-balance mb-5 lg:leading-[3.2rem]">
             {productDetails.name}
           </h1>
 
@@ -190,6 +190,26 @@ export default function ProductClient({ slug }: ProductClientProps) {
               images={productDetails?.images || []}
               productName={productDetails.name}
             />
+
+            <div className="border-t my-8" />
+            <div className="w-full hidden lg:block">
+              <h4 className="text-[24px] font-bold">Product features</h4>
+              <ul className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4 w-full">
+                {productDetails.features &&
+                productDetails.features?.length > 0 ? (
+                  productDetails.features.map((feature, index) => (
+                    <li key={index} className="text-muted-foreground">
+                      {feature}
+                    </li>
+                  ))
+                ) : (
+                  // <p className="whitespace-pre-line">{productDetails.features}</p>
+                  <p className="text-muted-foreground">
+                    No features added for this product.
+                  </p>
+                )}
+              </ul>
+            </div>
           </div>
 
           {/* Right - Info */}
@@ -200,7 +220,7 @@ export default function ProductClient({ slug }: ProductClientProps) {
               price={productDetails.price ?? ""}
               description={productDetails.description}
               category={productDetails?.category?.name}
-              metadata={productDetails.metadata}
+              features={productDetails.features}
               vendor={productDetails.business}
               dateOfPosting={productDetails.created_at}
               product_id={productDetails.id}

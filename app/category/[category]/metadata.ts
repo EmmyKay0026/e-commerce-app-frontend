@@ -1,88 +1,145 @@
-// // app/category/[category]/metadata.ts
-// import { Metadata } from "next";
-// import { getCategoryByIdOrSlug } from "@/services/categoryService";
+import { Metadata } from "next";
+import type { Category } from "@/types/models";
+import {
+  getCategoryIdFromSlug,
+  getCategoryFromSlug,
+  preloadCategoryMaps,
+} from "@/services/preloadCategories";
+import { getCategoryById } from "@/services/categoryService";
 
-// type Props = { params: { category: string } };
+type Props = { params: { category: string } };
 
-// export async function generateMetadata({ params }: Props): Promise<Metadata> {
-//   const { category } = params;
-//   const catRes = await getCategoryByIdOrSlug(category);
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const slug = params.category.toLowerCase().trim();
 
-//   if (!catRes) {
-//     return {
-//       title: "Category Not Found | Industrial Mart NG",
-//       description: "The category you are looking for does not exist.",
-//       robots: { index: false, follow: false },
-//     };
-//   }
+  // Preload categories
+  await preloadCategoryMaps();
+  const categoryId = getCategoryIdFromSlug(slug);
+  if (!categoryId) return { title: "Category Not Found | Industrial Mart NG" };
 
-//   const { name, description, image, slug } = catRes;
+  // Fetch category from cache or API
+  let activeCategory: Category | null = getCategoryFromSlug(slug);
+  if (!activeCategory) {
+    const res = await getCategoryById(categoryId);
+    if (!res.success || !res.data) return { title: "Category Not Found | Industrial Mart NG" };
+    activeCategory = res.data;
+  }
 
-//   return {
-//     title: `${name} - Industrial Equipment & Tools | Industrial Mart NG`,
-//     description:
-//       description ||
-//       `Browse verified suppliers for ${name} in Nigeria. Wholesale prices, fast delivery, quality guaranteed.`,
-//     metadataBase: new URL("https://industrialmart.ng"),
-//     alternates: {
-//       canonical: `https://industrialmart.ng/category/${slug}`,
-//     },
-//     openGraph: {
-//       title: `${name} - Industrial Mart Nigeria`,
-//       description: `Top ${name} from trusted Nigerian suppliers`,
-//       images: [
-//         {
-//           url: image || "/default-category.jpg",
-//           width: 1200,
-//           height: 630,
-//           alt: `${name} category`,
-//         },
-//       ],
-//       url: `https://industrialmart.ng/category/${slug}`,
-//       type: "website",
-//     },
-//     twitter: {
-//       card: "summary_large_image",
-//       title: `${name} - Industrial Mart NG`,
-//       description: `Browse ${name} from verified suppliers`,
-//       images: [image || "/default-category.jpg"],
-//     },
-//     robots: {
-//       index: true,
-//       follow: true,
-//       "max-image-preview": "large",
-//       "max-snippet": -1,
-//     },
-//   };
-// }
+  const siteUrl = "https://industrialmart.ng";
+  const canonical = `${siteUrl}/category/${activeCategory.slug}`;
 
-// // Optional: Export schema for reuse
-// export async function generateCategorySchema(params: { category: string }) {
-//   const cat = await getCategoryByIdOrSlug(params.category);
-//   if (!cat) return null;
+  // Category Schema
+  const categorySchema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: activeCategory.name,
+    description: activeCategory.description || `Browse ${activeCategory.name} products`,
+    url: canonical,
+    breadcrumb: {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: siteUrl,
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: activeCategory.name,
+          item: canonical,
+        },
+      ],
+    },
+  };
 
-//   return {
-//     "@context": "https://schema.org",
-//     "@type": "CollectionPage",
-//     name: cat.name,
-//     description: cat.description || `Browse ${cat.name} products`,
-//     url: `https://industrialmart.ng/category/${cat.slug}`,
-//     breadcrumb: {
-//       "@type": "BreadcrumbList",
-//       itemListElement: [
-//         {
-//           "@type": "ListItem",
-//           position: 1,
-//           name: "Home",
-//           item: "https://industrialmart.ng",
-//         },
-//         {
-//           "@type": "ListItem",
-//           position: 2,
-//           name: cat.name,
-//           item: `https://industrialmart.ng/category/${cat.slug}`,
-//         },
-//       ],
-//     },
-//   };
-// }
+  return {
+    title: `${activeCategory.name} - Industrial Equipment & Tools | Industrial Mart NG`,
+    description:
+      activeCategory.description ||
+      `Browse verified suppliers for ${activeCategory.name} in Nigeria. Wholesale prices, fast delivery, quality guaranteed.`,
+    metadataBase: new URL(siteUrl),
+    alternates: { canonical },
+    openGraph: {
+      title: `${activeCategory.name} - Industrial Mart NG`,
+      description: `Top ${activeCategory.name} from trusted Nigerian suppliers`,
+      url: canonical,
+      type: "website",
+      images: [
+        {
+          url: activeCategory.image || "/default-category.jpg",
+          width: 1200,
+          height: 630,
+          alt: `${activeCategory.name} category`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${activeCategory.name} - Industrial Mart NG`,
+      description: `Browse ${activeCategory.name} from verified suppliers`,
+      images: [activeCategory.image || "/default-category.jpg"],
+    },
+    robots: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+    other: {
+      "ld+json": JSON.stringify(categorySchema),
+    },
+  };
+}
+
+
+// ----------------------------
+// CATEGORY SCHEMA (OPTION B)
+// ----------------------------
+
+export async function generateCategorySchema(params: { category: string }) {
+  const slug = params.category.toLowerCase().trim();
+
+  // Ensure preload data is available
+  await preloadCategoryMaps();
+
+  // Resolve slug → ID
+  const categoryId = getCategoryIdFromSlug(slug);
+  if (!categoryId) return null;
+
+  // Try preload cache
+  let cat = getCategoryFromSlug(slug);
+
+  // Fallback to API
+  if (!cat) {
+    const res = await getCategoryById(categoryId);
+    if (!res.success || !res.data) return null;
+    cat = res.data;
+  }
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: cat.name,
+    description: cat.description || `Browse ${cat.name} products`,
+    url: `https://industrialmart.ng/category/${cat.slug}`,
+    breadcrumb: {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: "https://industrialmart.ng",
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: cat.name,
+          item: `https://industrialmart.ng/category/${cat.slug}`,
+        },
+      ],
+    },
+  };
+}

@@ -393,7 +393,7 @@ export async function updateProduct(
     description: string;
     price: string;
     images: string[];
-    category: string;
+    category_ids: string[];
     location_lga: string;
     location_state?: string;
     price_input_mode?: "enter" | "quote" | undefined;
@@ -426,7 +426,7 @@ export async function updateProduct(
       description: data.description,
       price: data.price,
       images: imageUrls,
-      category_id: data.category,
+      category_ids: data.category_ids,
       location_lga: data.location_lga,
       location_state: data.location_state,
       features: featuresList,
@@ -502,16 +502,15 @@ export function transformProduct(product: any): TransformedProduct {
  */
 export async function createProduct(data: {
   name: string;
-  description: string;
+  description: string | undefined;
   price: string;
   images: string[]; // Changed from File[] to string[]
-  category: {
-    id: string;
-    name: string;
-  };
+  category_ids: string[];
   location_lga: string;
   location_state: string;
-  features: string;
+  item_condition: string | undefined;
+  amount_in_stock: string | undefined;
+  features: string | undefined;
   price_input_mode: "enter" | "quote";
   price_type: "fixed" | "negotiable" | null;
   sale_type: "wholesale" | "retail" | null;
@@ -522,9 +521,11 @@ export async function createProduct(data: {
 
     // Prepare the features as an array
     const featuresList = data.features
-      .split("|")
-      .map((feature) => feature.trim())
-      .filter(Boolean);
+      ? data.features
+        .split("|")
+        .map((feature) => feature.trim())
+        .filter(Boolean)
+      : null;
 
     // Format data for the API
     const productData = {
@@ -532,10 +533,12 @@ export async function createProduct(data: {
       description: data.description,
       price: data.price,
       images: imageKeys,
-      category_id: data.category.id,
+      category_ids: data.category_ids,
       location_lga: data.location_lga,
       location_state: data.location_state,
       features: featuresList,
+      amount_in_stock: data.amount_in_stock,
+      item_condition: data.item_condition,
       price_input_mode: data.price_input_mode,
       price_type: data.price_type,
       sale_type: data.sale_type,

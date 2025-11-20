@@ -8,7 +8,7 @@ export default function TermsAndConditions() {
       <Hero
         title="Terms and Conditions"
         subtitle="Please read these terms carefully before using IndustrialMart Nigeria or any of our services."
-        backgroundImage="/hero-sections-img.png"
+        backgroundImage="/hero-sections-img.webp"
       />
 
       {/* Main Content */}
@@ -23,7 +23,7 @@ function TermsContent() {
     <section className="bg-white text-gray-800">
       <div className="max-w-5xl mx-auto px-6 md:px-8 lg:px-12 py-16 space-y-12">
         <p className="text-base text-gray-500">
-          <strong>Last Updated:</strong> November 12, 2025
+          <strong className="">Last Updated:</strong> November 12, 2025
         </p>
 
         <Section

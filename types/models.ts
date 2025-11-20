@@ -53,7 +53,8 @@ export interface Product {
   price: string | undefined; // use for filter (lowest to highest or highest)
   images: string[]; // URLs to Google Storage
   category_id?: string; // FK -> Category.id
-  category?: CategoryInfo; // use for filter
+  category?: CategoryInfo;
+  categories?: { category: Category }[];
   parentCategories?: CategoryInfo[];
   tags?: string[];
   status: "active" | "inactive" | "deleted" | "pending_review";
@@ -67,6 +68,7 @@ export interface Product {
   price_type: "fixed" | "negotiable"; // use For filter
   metadata: Record<string, any>; // to contain more description of the item
   view_count?: string;
+  features?: string[];
   business: {
     id: string;
     business_name: string;

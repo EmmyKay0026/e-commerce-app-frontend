@@ -103,7 +103,7 @@ const HomeHeroSection = () => {
 
   return (
     <section
-      className="relative w-full h-auto py-20 lg:py-0 lg:h-[100dvh] flex items-center px-5 md:px-10 lg:px-20 text-center bg-fixed bg-cover bg-center bg-no-repeat"
+      className="relative w-full h-auto py-20 lg:py-0 lg:h-dvh flex items-center px-5 md:px-10 lg:px-20 text-center bg-fixed bg-cover bg-center bg-no-repeat"
       style={{
         backgroundImage: `url('/industrial-mart-img (1).webp')`,
       }}
@@ -143,6 +143,7 @@ const HomeHeroSection = () => {
               placeholder="Search products..."
               className="flex-1 border-none rounded-2xl focus:ring-0 focus:outline-none shadow-none focus:border-none text-black px-6"
             />
+
             <Button
               onClick={() =>
                 router.push(`/products?q=${encodeURIComponent(searchQuery)}`)
@@ -160,45 +161,45 @@ const HomeHeroSection = () => {
               className="absolute left-0 right-0 mt-1 bg-white rounded-lg shadow-lg z-40 max-h-72 overflow-auto"
             >
               {isSearching ? (
-                <div className="p-3 text-sm text-muted-foreground">
-                  Searching...
-                </div>
+                <div className="p-3 text-sm text-muted-foreground">Searching...</div>
               ) : searchResults.length === 0 ? (
-                <div className="p-3 text-sm text-muted-foreground">
-                  No results
-                </div>
+                <div className="p-3 text-sm text-muted-foreground">No results</div>
               ) : (
-                <ul className="divide-y">
-                  {searchResults.slice(0, 6).map((p) => (
-                    <li key={p.id} className="px-3 py-2 hover:bg-gray-50">
-                      <Link
-                        href={`/products/${p.slug}`}
-                        className="flex items-center gap-3"
-                      >
-                        <div className="h-10 w-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                          {p.images && p.images[0] ? (
-                            <Image
-                              src={constructImageUrl(p.images[0])}
-                              alt={p.name}
-                              width={40}
-                              height={40}
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <div className="h-full w-full flex items-center justify-center text-xs text-muted-foreground">
-                              No image
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex-1 text-sm text-black">
-                          <div className="font-medium">{p.name}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {p.price}
+                <>
+                  <ul className="divide-y">
+                    {searchResults.slice(0, 6).map((p) => (
+                      <li key={p.id} className="px-3 py-2 hover:bg-gray-50">
+                        <Link
+                          href={`/products/${p.slug}`}
+                          className="flex items-center gap-3"
+                        >
+                          <div className="h-10 w-10 bg-gray-100 rounded overflow-hidden shrink-0">
+                            {p.images?.[0] ? (
+                              <Image
+                                src={constructImageUrl(p.images[0])}
+                                alt={p.name}
+                                width={40}
+                                height={40}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <div className="h-full w-full flex items-center justify-center text-xs text-muted-foreground">
+                                No image
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      </Link>
-                    </li>
-                  ))}
+
+                          <div className="flex-1 text-sm text-black">
+                            <div className="font-medium">{p.name}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {p.price}
+                            </div>
+                          </div>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+
                   <div className="p-2 border-t text-center">
                     <Link
                       href={`/products?q=${encodeURIComponent(searchQuery)}`}
@@ -207,11 +208,12 @@ const HomeHeroSection = () => {
                       See all results
                     </Link>
                   </div>
-                </ul>
+                </>
               )}
             </div>
           )}
         </div>
+
 
         {/* Categories buttons */}
         <div className="mt-5 text-left flex items-center flex-wrap gap-6">

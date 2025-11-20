@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { MultiSelect } from "@/components/ui/multi-select";
 import { Upload, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
@@ -101,22 +102,24 @@ export function Step1({
     fetchLgas();
   }, [selectedState]);
 
- const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
     const currentFiles = form.getValues("images") || [];
     const totalImages = currentFiles.length + files.length;
 
-    if (totalImages > 15) {
-      toast.error("Maximum 15 images allowed");
+    if (totalImages > 5) {
+      toast.error("Maximum 5 images allowed");
       return;
     }
 
-    form.setValue("images", [...currentFiles, ...files], { shouldValidate: true });
+    form.setValue("images", [...currentFiles, ...files], {
+      shouldValidate: true,
+    });
 
-    const newPreviews = files.map(file => URL.createObjectURL(file));
-    setImagePreviews(prev => [...prev, ...newPreviews]);
+    const newPreviews = files.map((file) => URL.createObjectURL(file));
+    setImagePreviews((prev) => [...prev, ...newPreviews]);
   };
 
   const handleRemoveImage = (indexToRemove: number) => {
@@ -125,7 +128,7 @@ export function Step1({
     form.setValue("images", newFiles, { shouldValidate: true });
 
     // Revoke the object URL to prevent memory leaks
-    URL.revokeObjectURL(imagePreviews[indexToRemove]); 
+    URL.revokeObjectURL(imagePreviews[indexToRemove]);
     const newPreviews = imagePreviews.filter((_, i) => i !== indexToRemove);
     setImagePreviews(newPreviews);
   };
@@ -191,56 +194,38 @@ export function Step1({
       )}
 
       <div className="space-y-2">
-        <Label htmlFor="category">Category *</Label>
-        <Select
-          value={form.watch("category")?.id || ""}
-          onValueChange={(value) => {
-            const selectedCategory = categories.find((cat) => cat.id === value);
-            if (selectedCategory) {
-              form.setValue(
-                "category",
-                {
-                  id: selectedCategory.id,
-                  name: selectedCategory.name,
-                },
-                { shouldValidate: true }
-              );
+        <Label htmlFor="category">Categories *</Label>
+        <MultiSelect
+          options={categories.map((c) => ({ label: c.name, value: c.id }))}
+          selected={
+            form.watch("categories")?.map((c) => ({
+              label: c.name,
+              value: c.id,
+            })) || []
+          }
+          onChange={(selected) => {
+            if (selected.length > 5) {
+              toast.error("You can select up to 5 categories only.");
+              return;
             }
+            form.setValue(
+              "categories",
+              selected.map((s) => ({ id: s.value, name: s.label })),
+              { shouldValidate: true }
+            );
           }}
-        >
-          <SelectTrigger id="category" disabled={isLoadingCategories}>
-            <SelectValue
-              placeholder={
-                isLoadingCategories
-                  ? "Loading categories..."
-                  : "Select a category"
-              }
-            />
-          </SelectTrigger>
-          <SelectContent>
-            {categories.length === 0 && !isLoadingCategories ? (
-              <div className="p-2 text-sm text-muted-foreground text-center">
-                No categories found
-              </div>
-            ) : (
-              categories.map((category) => (
-                <SelectItem key={category.id} value={category.id}>
-                  {category.name}
-                </SelectItem>
-              ))
-            )}
-          </SelectContent>
-        </Select>
-        {form.formState.errors.category && (
+          placeholder="Select categories"
+        />
+        {form.formState.errors.categories && (
           <p className="text-sm text-destructive">
-            {form.formState.errors.category.message}
+            {form.formState.errors.categories.message}
           </p>
         )}
       </div>
 
       <div className="space-y-2">
         <Label>Location *</Label>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Select
             onValueChange={(value) => {
               setSelectedState(value);

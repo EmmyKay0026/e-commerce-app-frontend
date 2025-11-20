@@ -10,7 +10,7 @@ interface HeroProps {
 const Hero: React.FC<HeroProps> = ({
   title,
   subtitle,
-  backgroundImage = "/hero-industrialmart.png", // Default image
+  backgroundImage = "/hero-industrialmart.webp", // Default image
 }) => {
   return (
     <section

@@ -1,5 +1,3 @@
-// app/(categories)/[category]/page.tsx
-
 import { notFound } from "next/navigation";
 import SidebarFilter from "@/components/molecules/SidebarFilter";
 import ProductCards from "@/components/molecules/ProductCards";
@@ -17,11 +15,12 @@ import {
 import {
   getCategoryById,
   listProductsByCategory,
-  // getCategoryFilterOptions,
 } from "@/services/categoryService";
 
+import { generateCategorySchema } from "./metadata";   // ✅ ADD THIS
+
 type PageProps = {
-  params: Promise<{ category: string }>;        
+  params: Promise<{ category: string }>;
   searchParams: Promise<Record<string, string | undefined>>;
 };
 
@@ -60,9 +59,15 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   // Fetch data
   const productsRes = await listProductsByCategory(categoryId, filters);
 
-  const products: Product[] = productsRes.success && productsRes.data?.products
-  ? productsRes.data.products
-  : [];
+  const products: Product[] =
+    productsRes.success && productsRes.data?.products
+      ? productsRes.data.products
+      : [];
+
+  // ===========================================================
+  // ✅ GENERATE JSON-LD SCHEMA FOR SEO
+  // ===========================================================
+  const schema = await generateCategorySchema({ category: slug });
 
   const availableStates: any[] = [];
   const availableLgasMap = {};
@@ -70,69 +75,81 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   const priceRange = { min: 0, max: 1000000 };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-10 py-10 pb-20">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-8">
-          <div className="flex items-center justify-between gap-4">
-            <h1 className="text-2xl md:text-3xl font-bold capitalize">
-              {activeCategory.name}
-            </h1>
+    <>
+      {/* =====================================================
+          ✅ Inject JSON-LD Schema into <head> of the page
+          ===================================================== */}
+      {schema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        />
+      )}
 
-            <div className="flex items-center gap-3">
-              <div className="hidden md:block w-80">
-                <SearchInput defaultValue={resolvedSearchParams.q || ""} />
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-10 py-10 pb-20">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-8">
+            <div className="flex items-center justify-between gap-4">
+              <h1 className="text-2xl md:text-3xl font-bold capitalize">
+                {activeCategory.name}
+              </h1>
+
+              <div className="flex items-center gap-3">
+                <div className="hidden md:block w-80">
+                  <SearchInput defaultValue={resolvedSearchParams.q || ""} />
+                </div>
+
+                <MobileFilterSheet
+                  activeCategory={slug}
+                  initialFilters={filters}
+                  availableStates={availableStates}
+                  availableLgasMap={availableLgasMap}
+                  availablePriceTypes={availablePriceTypes}
+                  priceRange={priceRange}
+                >
+                  <button className="md:hidden p-2.5 border rounded-full hover:bg-gray-100 transition">
+                    <Filter size={22} />
+                  </button>
+                </MobileFilterSheet>
               </div>
+            </div>
 
-              <MobileFilterSheet
+            <div className="mt-4 md:hidden">
+              <SearchInput defaultValue={resolvedSearchParams.q || ""} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="hidden md:block">
+              <SidebarFilter
                 activeCategory={slug}
                 initialFilters={filters}
                 availableStates={availableStates}
                 availableLgasMap={availableLgasMap}
                 availablePriceTypes={availablePriceTypes}
                 priceRange={priceRange}
-              >
-                <button className="md:hidden p-2.5 border rounded-full hover:bg-gray-100 transition">
-                  <Filter size={22} />
-                </button>
-              </MobileFilterSheet>
+              />
             </div>
-          </div>
 
-          <div className="mt-4 md:hidden">
-            <SearchInput defaultValue={resolvedSearchParams.q || ""} />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="hidden md:block">
-            <SidebarFilter
-              activeCategory={slug}
-              initialFilters={filters}
-              availableStates={availableStates}
-              availableLgasMap={availableLgasMap}
-              availablePriceTypes={availablePriceTypes}
-              priceRange={priceRange}
-            />
-          </div>
-
-          <div className="md:col-span-3">
-            {products.length === 0 ? (
-              <div className="text-center py-20">
-                <p className="text-gray-600 text-lg font-medium">No products found</p>
-                <p className="text-gray-500 text-sm mt-2">
-                  Try adjusting your filters or search term.
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {products.map((product) => (
-                  <ProductCards key={product.id} product={product} />
-                ))}
-              </div>
-            )}
+            <div className="md:col-span-3">
+              {products.length === 0 ? (
+                <div className="text-center py-20">
+                  <p className="text-gray-600 text-lg font-medium">No products found</p>
+                  <p className="text-gray-500 text-sm mt-2">
+                    Try adjusting your filters or search term.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {products.map((product) => (
+                    <ProductCards key={product.id} product={product} />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
