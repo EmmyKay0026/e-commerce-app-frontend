@@ -1,6 +1,5 @@
 import { create } from "zustand";
-// import { categoryService } from "@/services/categoryService";
-import { Category } from "@/types/models";
+import type { Category } from "@/types/models";
 import { getAllCategories } from "@/services/categoryService";
 
 interface CategoryState {
@@ -8,20 +7,25 @@ interface CategoryState {
   loading: boolean;
   error: string | null;
   fetchCategories: () => Promise<void>;
+  setCategories: (categories: Category[]) => void; // <-- added
 }
 
 export const useCategoryStore = create<CategoryState>((set, get) => ({
   categories: [],
   loading: false,
   error: null,
+
+  // NEW: Allows hydration from server
+  setCategories: (categories) => set({ categories }),
+
+  // OLD: Your original client-side fetch logic (kept)
   fetchCategories: async () => {
     if (get().categories.length === 0 && !get().loading) {
       set({ loading: true, error: null });
+
       try {
         const categories = await getAllCategories();
-        // if (categories.data) {
-        set({ categories: categories, loading: false });
-        // }
+        set({ categories, loading: false });
       } catch (error) {
         set({ loading: false, error: "Failed to fetch categories" });
       }
