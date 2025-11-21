@@ -1,6 +1,6 @@
 import { uploadImagesToCloudflare } from "@/lib/cloudflareImageUpload";
 import api from "@/config/api";
-import qs from 'qs';
+
 
 import {
   Product,
@@ -64,7 +64,7 @@ export async function getProductBySlug(slug: string) {
     );
 
     if (res.status === 200) {
-      console.log(res.data.product);
+      // console.log(res.data.product);
 
       return {
         success: true,
@@ -254,18 +254,51 @@ export const getRelatedProducts = async (categoryId: string) => {
  * GET /api/businessProfile/vendor/:vendorId
  */
 export async function getBusinessProducts(
-  businessId: string
-): Promise<ServiceResult<{ data: Product[] }>> {
+  businessId: string,
+  options?: {
+    page?: number;
+    perPage?: number;
+    sort?: "latest" | "price_asc" | "price_desc";
+    search?: string;
+  }
+): Promise<ServiceResult<{
+  data: Product[];
+  page: number;
+  perPage: number;
+  total: number;
+  hasMore: boolean;
+}>> {
   try {
+    const {
+      page = 1,
+      perPage = 30,
+      sort = "latest",
+      search,
+    } = options || {};
+
+    // Build query parameters
+    const params = new URLSearchParams();
+    params.set("page", page.toString());
+    params.set("perPage", perPage.toString());
+    if (sort) params.set("sort", sort);
+    if (search) params.set("q", search);
+
     const res = await api.get(
-      `/products/business/${encodeURIComponent(businessId)}`
+      `/products/business/${encodeURIComponent(businessId)}`,
+      { params }
     );
 
     if (res.status === 200) {
       return {
         success: true,
         status: res.status,
-        data: res.data,
+        data: {
+          data: res.data.data || [],
+          page: res.data.page || page,
+          perPage: res.data.perPage || perPage,
+          total: res.data.total || 0,
+          hasMore: res.data.hasMore || false,
+        },
       };
     }
 
@@ -328,24 +361,24 @@ export async function listProducts(
     // Use URLSearchParams so we can properly append repeated keys
     const params = new URLSearchParams();
 
-      params.set("page", normalizedPage.toString());
-      params.set("perPage", normalizedPerPage.toString());
-      if (q) params.set("q", q);
-      if (tag) params.set("tag", tag);
-      if (sort) params.set("sort", sort);
+    params.set("page", normalizedPage.toString());
+    params.set("perPage", normalizedPerPage.toString());
+    if (q) params.set("q", q);
+    if (tag) params.set("tag", tag);
+    if (sort) params.set("sort", sort);
 
-      // THIS IS THE ONLY CHANGE THAT WORKS WITH YOUR BACKEND
-      for (const [key, value] of Object.entries(filters)) {
-        if (value === undefined || value === null) continue;
+    // THIS IS THE ONLY CHANGE THAT WORKS WITH YOUR BACKEND
+    for (const [key, value] of Object.entries(filters)) {
+      if (value === undefined || value === null) continue;
 
-        if (Array.isArray(value)) {
-          if (value.length > 0) {
-            params.set(key, value.join(","));  // ← comma-separated, single param
-          }
-        } else {
-          params.set(key, String(value));
+      if (Array.isArray(value)) {
+        if (value.length > 0) {
+          params.set(key, value.join(","));  // ← comma-separated, single param
         }
+      } else {
+        params.set(key, String(value));
       }
+    }
 
     const res = await api.get("/products", {
       params,
@@ -400,6 +433,8 @@ export async function updateProduct(
     features: string;
     price_type: "fixed" | "negotiable" | null;
     sale_type: "wholesale" | "retail" | null;
+    item_condition?: "new" | "refurbished" | "used" | undefined;
+    amount_in_stock?: string | undefined;
   }
 ): Promise<ServiceResult<Product>> {
   try {
@@ -433,6 +468,8 @@ export async function updateProduct(
       price_input_mode: data.price_input_mode,
       price_type: data.price_type,
       sale_type: data.sale_type,
+      item_condition: data.item_condition,
+      amount_in_stock: data.amount_in_stock,
     };
 
     const response = await api.patch(`/products/${productId}`, productData);
@@ -663,4 +700,156 @@ export async function getAllProductsForSitemap(): Promise<Product[]> {
   }
 
   return allProducts;
+}
+
+/**
+ * Fetch top ranking products (sorted by views_count)
+ */
+export async function getTopRankingProducts(
+  limit: number = 10
+): Promise<ServiceResult<Product[]>> {
+  try {
+    const res = await api.get<{ success: boolean; data: Product[] }>(
+      `/products/top-ranking`,
+      { params: { limit } }
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        status: res.status,
+        data: res.data.data || [],
+      };
+    }
+
+    return {
+      success: false,
+      status: res.status,
+      data: null,
+      error: (res.data as any)?.message || `Failed to fetch top ranking products`,
+    };
+  } catch (err: any) {
+    return {
+      success: false,
+      status: err?.response?.status || 500,
+      data: null,
+      error: err?.message || "Failed to fetch top ranking products",
+    };
+  }
+}
+
+/**
+ * Fetch new arrival products (sorted by created_at)
+ */
+export async function getNewArrivals(
+  limit: number = 10
+): Promise<ServiceResult<Product[]>> {
+  try {
+    const res = await api.get<{ success: boolean; data: Product[] }>(
+      `/products/new-arrivals`,
+      { params: { limit } }
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        status: res.status,
+        data: res.data.data || [],
+      };
+    }
+
+    return {
+      success: false,
+      status: res.status,
+      data: null,
+      error: (res.data as any)?.message || `Failed to fetch new arrivals`,
+    };
+  } catch (err: any) {
+    return {
+      success: false,
+      status: err?.response?.status || 500,
+      data: null,
+      error: err?.message || "Failed to fetch new arrivals",
+    };
+  }
+}
+
+/**
+ * Fetch top deals products (sorted by price or other criteria)
+ */
+export async function getTopDeals(
+  limit: number = 10,
+  sort: "price_asc" | "price_desc" | "newest" = "price_asc"
+): Promise<ServiceResult<Product[]>> {
+  try {
+    const res = await api.get<{ success: boolean; data: Product[] }>(
+      `/products/top-deals`,
+      { params: { limit, sort } }
+    );
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        status: res.status,
+        data: res.data.data || [],
+      };
+    }
+
+    return {
+      success: false,
+      status: res.status,
+      data: null,
+      error: (res.data as any)?.message || `Failed to fetch top deals`,
+    };
+  } catch (err: any) {
+    return {
+      success: false,
+      status: err?.response?.status || 500,
+      data: null,
+      error: err?.message || "Failed to fetch top deals",
+    };
+  }
+}
+
+/**
+ * Fetch products by an array of IDs
+ */
+export async function fetchProductsByIds(
+  productIds: string[] | undefined
+): Promise<ServiceResult<Product[]>> {
+  if (!productIds || productIds.length === 0) {
+    return {
+      success: true,
+      status: 200,
+      data: [],
+    };
+  }
+
+  try {
+    const productPromises = productIds.map((id) =>
+      api.get<{ success: boolean; product: Product }>(`/products/${id}`)
+    );
+
+    const responses = await Promise.allSettled(productPromises);
+
+    const products: Product[] = responses
+      .filter(
+        (result): result is PromiseFulfilledResult<any> =>
+          result.status === "fulfilled" && result.value.status === 200
+      )
+      .map((result) => result.value.data.product);
+
+    return {
+      success: true,
+      status: 200,
+      data: products,
+    };
+  } catch (err: any) {
+    return {
+      success: false,
+      status: err?.response?.status || 500,
+      data: null,
+      error: err?.message || "Failed to fetch products by IDs",
+    };
+  }
 }

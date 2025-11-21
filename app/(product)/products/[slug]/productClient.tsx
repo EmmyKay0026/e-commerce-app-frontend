@@ -86,13 +86,13 @@ export default function ProductClient({ slug }: ProductClientProps) {
 
   useEffect(() => {
     const getParentOfCategoryWithId = async () => {
-      console.log("here");
+      // console.log("here");
 
       const categoryId = productDetails?.category_id;
       if (!categoryId) return;
 
       const parents = await getCategoryWithParentCategories(categoryId);
-      console.log("parent_categories", parents.data);
+      // console.log("parent_categories", parents.data);
 
       if (parents && productDetails) {
         setProductDetails({
@@ -145,15 +145,13 @@ export default function ProductClient({ slug }: ProductClientProps) {
                   </BreadcrumbItem>
 
                   {allCategories.map((cat, index) => {
-                    console.log("productDetails", productDetails);
-                    console.log("allCategories", allCategories);
                     if (!cat) return null;
-                    const href = `/category/${allCategories
-                      .slice(0, index + 1)
-                      .map((c) => c.slug)
-                      .join("/")}`;
+
+                    // Link each category individually instead of building nested path
+                    const href = `/category/${cat.slug}`;
+
                     return (
-                      <React.Fragment key={cat.slug}>
+                      <React.Fragment key={`${cat.slug}-${index}`}>
                         <BreadcrumbSeparator />
                         <BreadcrumbItem>
                           <BreadcrumbLink href={href}>
@@ -196,9 +194,9 @@ export default function ProductClient({ slug }: ProductClientProps) {
               <h4 className="text-[24px] font-bold">Product features</h4>
               <ul className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4 w-full">
                 {productDetails.features &&
-                productDetails.features?.length > 0 ? (
+                  productDetails.features?.length > 0 ? (
                   productDetails.features.map((feature, index) => (
-                    <li key={index} className="text-muted-foreground">
+                    <li key={index} className="text-muted-foreground list-disc">
                       {feature}
                     </li>
                   ))

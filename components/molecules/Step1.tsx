@@ -20,6 +20,7 @@ import { State, LGA } from "@/types/location";
 import { toast } from "sonner";
 import { getAllCategories } from "@/services/categoryService";
 import { listStates, listLgas } from "@/services/locationService";
+import { constructImageUrl } from "@/lib/utils";
 
 interface Step1Props {
   form: UseFormReturn<ProductFormData>;
@@ -172,7 +173,7 @@ export function Step1({
             <div key={index} className="relative group">
               <div className="aspect-square rounded-lg overflow-hidden border border-border">
                 <Image
-                  src={previewUrl}
+                  src={constructImageUrl(previewUrl)}
                   alt={`Preview ${index + 1}`}
                   width={200}
                   height={200}

@@ -22,6 +22,7 @@ export default async function Page({
   const locationState = parseArray(searchParams.location_state);
   const locationLga = parseArray(searchParams.location_lga);
   const saleType = parseArray(searchParams.sale_type);
+  const itemCondition = parseArray(searchParams.item_condition);
   const minPrice = searchParams.minPrice || undefined;
   const maxPrice = searchParams.maxPrice || undefined;
   const priceType = searchParams.price_type || undefined;
@@ -30,17 +31,17 @@ export default async function Page({
   const { success, data } = await getAllCategories();
   const categories = success && data
     ? data.map((c: any) => ({
-        id: c.id,
-        name: c.name,
-        slug: c.slug,
-      }))
+      id: c.id,
+      name: c.name,
+      slug: c.slug,
+    }))
     : [];
 
   // NOW SAFE: Convert slugs → IDs (after categories exist)
   const categoryIds = categorySlugs
     ? categorySlugs
-        .map(slug => categories.find(c => c.slug === slug)?.id)
-        .filter(Boolean) as string[]
+      .map(slug => categories.find(c => c.slug === slug)?.id)
+      .filter(Boolean) as string[]
     : undefined;
 
   // Build filters for API (sends real IDs)
@@ -52,6 +53,7 @@ export default async function Page({
     sale_type: saleType,
     location_state: locationState,
     location_lga: locationLga,
+    item_condition: itemCondition,
   };
 
   // Fetch data
@@ -69,19 +71,27 @@ export default async function Page({
     listProducts({ q: q || undefined, sort, page, perPage, filters }),
   ]);
 
-  // Extract states & LGAs
+  // Extract states & LGAs - USE NAMES instead of IDs
   const states: string[] = [];
   if (statesRes.success) {
     const set = new Set<string>();
-    statesRes.data?.products?.forEach((p: any) => p.location_state && set.add(p.location_state));
+    statesRes.data?.products?.forEach((p: any) => p.state_name && set.add(p.state_name));
     states.push(...Array.from(set).sort());
   }
 
   const lgas: string[] = [];
   if (lgasRes.success) {
     const set = new Set<string>();
-    lgasRes.data?.products?.forEach((p: any) => p.location_lga && set.add(p.location_lga));
+    lgasRes.data?.products?.forEach((p: any) => p.lga_name && set.add(p.lga_name));
     lgas.push(...Array.from(set).sort());
+  }
+
+  // Extract item conditions
+  const itemConditions: string[] = [];
+  if (productsRes.success) {
+    const set = new Set<string>();
+    productsRes.data?.products?.forEach((p: any) => p.item_condition && set.add(p.item_condition));
+    itemConditions.push(...Array.from(set).sort());
   }
 
   if (!productsRes.success) {
@@ -107,6 +117,7 @@ export default async function Page({
     if (locationState?.length) p.set("location_state", locationState.join(","));
     if (locationLga?.length) p.set("location_lga", locationLga.join(","));
     if (saleType?.length) p.set("sale_type", saleType.join(","));
+    if (itemCondition?.length) p.set("item_condition", itemCondition.join(","));
 
     // Use slugs for clean URLs
     if (categoryIds?.length) {
@@ -121,7 +132,7 @@ export default async function Page({
 
   return (
     <div className="flex min-h-screen">
-      <ProductFilterSidebar categories={categories} states={states} lgas={lgas} />
+      <ProductFilterSidebar categories={categories} states={states} lgas={lgas} itemConditions={itemConditions} />
 
       <div className="flex-1 p-8">
         <h1 className="text-3xl font-bold mb-6">
@@ -137,7 +148,7 @@ export default async function Page({
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {products.map((p: any) => (
                 <ProductCards key={p.id} product={p} />
               ))}

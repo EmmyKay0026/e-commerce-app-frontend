@@ -62,12 +62,16 @@ export interface Product {
   updated_at?: string;
   location_lga?: string; // use for filter
   location_state?: string; // use for filter
+  state_name?: string;
+  lga_name?: string;
   slug: string; // URL-friendly identifier
   price_input_mode?: "enter" | "quote";
   sale_type: "wholesale" | "retail";
   price_type: "fixed" | "negotiable"; // use For filter
   metadata: Record<string, any>; // to contain more description of the item
   view_count?: string;
+  item_condition?: "new" | "refurbished" | "used";
+  amount_in_stock?: string;
   features?: string[];
   business: {
     id: string;
@@ -112,7 +116,7 @@ export type ServiceResult<T> = {
   success: boolean;
   status?: number;
   data?: T | null;
-  error?: string | null;
+  error?: string | { message?: string; detail?: string } | null;
 };
 
 export type CategoryName =

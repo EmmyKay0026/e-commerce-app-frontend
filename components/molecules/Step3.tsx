@@ -10,9 +10,11 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 
 import { listStates, getLga } from "@/services/locationService";
+import { constructImageUrl } from "@/lib/utils";
 
 interface Step3Props {
   form: UseFormReturn<ProductFormData>;
+
   onEdit: (step: number) => void;
 }
 
@@ -91,7 +93,7 @@ export function Step3({ form, onEdit }: Step3Props) {
                   className="aspect-square rounded-lg overflow-hidden border border-border"
                 >
                   <Image
-                    src={preview || "/placeholder.svg"}
+                    src={constructImageUrl(preview) || "/placeholder.svg"}
                     alt={`Product ${index + 1}`}
                     width={100}
                     height={100}

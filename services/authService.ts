@@ -23,7 +23,7 @@ export async function sendResetEmail(email: string) {
     console.error("Error sending password reset email:", error.message);
     // Handle the error (e.g., show an alert)
   } else {
-    console.log("Password reset email sent:", data);
+    // console.log("Password reset email sent:", data);
     // Notify the user to check their email
   }
 }

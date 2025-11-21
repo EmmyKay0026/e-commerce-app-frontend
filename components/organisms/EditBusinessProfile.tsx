@@ -84,7 +84,7 @@ function BusinessForm({ className }: React.ComponentProps<"form">) {
   // const rawUser = useUserStore((s) => s.user) as any;
   const setUser = useUserStore((s) => s.setUser);
   const user = useUserStore((s) => s.user);
-  console.log(user);
+  // console.log(user);
 
   const altBusName = user?.first_name + "'s business";
   // const user = React.useMemo(

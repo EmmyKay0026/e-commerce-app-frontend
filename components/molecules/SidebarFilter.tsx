@@ -10,6 +10,8 @@ export type FilterState = {
   location_lga?: string;
   price_type?: "fixed" | "negotiable";
   sort?: string;
+  item_condition?: "new" | "refurbished" | "used";
+  amount_in_stock?: number;
 };
 
 type Props = {
@@ -42,6 +44,8 @@ export default function SidebarFilter({
   const [locationLga, setLocationLga] = useState<string>(initialFilters.location_lga ?? "");
   const [priceType, setPriceType] = useState<string>(initialFilters.price_type ?? "");
   const [sort, setSort] = useState<string>(initialFilters.sort ?? "recommended");
+  const [itemCondition, setItemCondition] = useState<string>(initialFilters.item_condition ?? "");
+  const [amountInStock, setAmountInStock] = useState<number | "">(initialFilters.amount_in_stock ?? "");
 
   // Derived: LGAs for currently selected state
   const availableLgas = locationState ? availableLgasMap[locationState] || [] : [];
@@ -87,6 +91,20 @@ export default function SidebarFilter({
       params.delete("priceType");
     }
 
+    // Item Condition
+    if (itemCondition) {
+      params.set("item_condition", itemCondition);
+    } else {
+      params.delete("item_condition");
+    }
+
+    // Amount In Stock
+    if (amountInStock === "" || amountInStock === undefined) {
+      params.delete("amount_in_stock");
+    } else {
+      params.set("amount_in_stock", String(amountInStock));
+    }
+
     // Sort
     if (sort && sort !== "recommended") {
       params.set("sort", sort);
@@ -103,6 +121,8 @@ export default function SidebarFilter({
     locationLga,
     priceType,
     sort,
+    itemCondition,
+    amountInStock,
     pathname,
     router,
     searchParams,
@@ -121,6 +141,8 @@ export default function SidebarFilter({
     setLocationLga("");
     setPriceType("");
     setSort("recommended");
+    setItemCondition("");
+    setAmountInStock("");
   };
 
   const hasActiveFilters =
@@ -129,6 +151,8 @@ export default function SidebarFilter({
     locationState ||
     locationLga ||
     priceType ||
+    itemCondition ||
+    amountInStock !== "" ||
     (sort && sort !== "recommended");
 
   return (
@@ -189,17 +213,49 @@ export default function SidebarFilter({
         </div>
       </div>
 
+      {/* Item Condition */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Item Condition
+        </label>
+        <select
+          value={itemCondition}
+          onChange={(e) => setItemCondition(e.target.value)}
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">Any Condition</option>
+          <option value="new">New</option>
+          <option value="refurbished">Refurbished</option>
+          <option value="used">Used</option>
+        </select>
+      </div>
+
+      {/* Minimum Stock */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Min Stock Quantity
+        </label>
+        <input
+          type="number"
+          placeholder="e.g. 5"
+          value={amountInStock}
+          onChange={(e) => setAmountInStock(e.target.value === "" ? "" : Number(e.target.value))}
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          min="1"
+        />
+      </div>
+
       {/* State */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
         <select
           value={locationState}
           onChange={(e) => setLocationState(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-gray-300 capitalize rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">All States</option>
           {availableStates.map((state) => (
-            <option key={state} value={state}>
+            <option className="capitalize" key={state} value={state}>
               {state}
             </option>
           ))}
@@ -218,9 +274,9 @@ export default function SidebarFilter({
           value={locationLga}
           onChange={(e) => setLocationLga(e.target.value)}
           disabled={!locationState || availableLgas.length === 0}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:cursor-not-allowed"
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm capitalize focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:cursor-not-allowed"
         >
-          <option value="">
+          <option value="capitalize">
             {locationState ? "All LGAs" : "Select State First"}
           </option>
           {availableLgas.map((lga) => (

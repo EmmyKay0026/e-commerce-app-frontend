@@ -112,7 +112,7 @@ export function MultiSelect({
                                             onChange([...selected, option]);
                                         }}
                                         onMouseDown={(e) => {
-                                            console.log("MultiSelect onMouseDown triggered for:", option);
+                                            // console.log("MultiSelect onMouseDown triggered for:", option);
                                             e.preventDefault();
                                             e.stopPropagation();
                                         }}

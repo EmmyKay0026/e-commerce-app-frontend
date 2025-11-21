@@ -41,7 +41,7 @@ const LeftBar = () => {
     const getViewedUserDetails = async () => {
       const res = await getPublicProfileByProfileLink(profileLink);
       if (res.status === 200 && res.data) {
-        console.log("Res", res);
+        // console.log("Res", res);
 
         setProfileDetails(res.data);
       } else {

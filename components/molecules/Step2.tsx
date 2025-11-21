@@ -24,6 +24,7 @@ export function Step2({ form }: Step2Props) {
     );
   }
 
+
   return (
     <div className="space-y-6">
       <div className="mb-4">

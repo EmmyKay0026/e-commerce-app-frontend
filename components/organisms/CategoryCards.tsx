@@ -32,9 +32,15 @@ const CategoryCards = ({
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
-        {categoryProduct.slice(0, 5).map((product) => (
-          <ProductCards key={product.id} product={product} />
-        ))}
+        {Array.isArray(categoryProduct) && categoryProduct.length > 0 ? (
+          categoryProduct.slice(0, 5).map((product) => (
+            <ProductCards key={product.id} product={product} />
+          ))
+        ) : (
+          <p className="col-span-full text-center text-muted-foreground py-8">
+            No products available in this category
+          </p>
+        )}
       </div>
     </section>
   );
