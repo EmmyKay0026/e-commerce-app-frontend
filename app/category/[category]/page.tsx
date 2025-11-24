@@ -17,7 +17,7 @@ import {
   listProductsByCategory,
 } from "@/services/categoryService";
 
-import { generateCategorySchema } from "./metadata";   // ✅ ADD THIS
+import { generateCategorySchema } from "./metadata";
 
 type PageProps = {
   params: Promise<{ category: string }>;

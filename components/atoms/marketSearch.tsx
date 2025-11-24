@@ -23,6 +23,24 @@ export default function MarketplaceSearchBar({ initialQuery = "" }: Props) {
   const searchRef = useRef<HTMLDivElement | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
+  const barRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const isVisible = entry.isIntersecting;
+        // Dispatch event to navbar
+        window.dispatchEvent(new CustomEvent("marketplace-search-visible", { detail: isVisible }));
+      },
+      { threshold: 0.1 }
+    );
+
+    if (barRef.current) observer.observe(barRef.current);
+    return () => {
+      if (barRef.current) observer.unobserve(barRef.current);
+    };
+  }, []);
+
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -74,7 +92,15 @@ export default function MarketplaceSearchBar({ initialQuery = "" }: Props) {
   };
 
   return (
-    <div className="relative mt-8 mb-12 max-w-2xl mx-auto" ref={searchRef}>
+    <div
+      id="hero-search"
+      className="relative mt-8 mb-12 max-w-2xl mx-auto"
+      ref={(el) => {
+        searchRef.current = el;
+        barRef.current = el;
+      }}
+    >
+
       <div className="flex items-center gap-2 bg-white border border-blue-600 rounded-3xl overflow-hidden">
         <Input
           value={searchQuery}
@@ -96,7 +122,7 @@ export default function MarketplaceSearchBar({ initialQuery = "" }: Props) {
           onClick={() =>
             router.push(`/marketplace?q=${encodeURIComponent(searchQuery)}`)
           }
-          className="bg-primary text-white rounded-3xl px-6 py-3 hover:bg-[#0852a2]"
+          className="bg-primary text-white rounded-3xl m-1 px-6 py-3 hover:bg-[#0852a2]"
         >
           Search
         </Button>
