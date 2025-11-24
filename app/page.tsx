@@ -21,10 +21,11 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center m-0 p-0">
       <HomeHeroSection />
-      {/* <BusinessOpportunities /> */}
+      <BusinessOpportunities />
       <CategorySection />
       <FeatureSection />
       <CtaSection />
+
       {/* <Testimonial/> */}
     </main>
   );

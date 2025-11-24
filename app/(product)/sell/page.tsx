@@ -37,18 +37,18 @@ export default function ProductSubmissionPage() {
 
   // If the logged-in user has a plain user role, show the business creation form
   // inside the product flow so they can create a business account first.
-  // if (user.role === "user") {
-  //   return(
-  //     <>
-  //       <Hero
-  //         title="Create Your Business Account"
-  //         subtitle="Join IndustrialMart Nigeria and showcase your industrial products to a wider audience."
-  //         backgroundImage="/hero-sections-img.png"
-  //       />
-        // <CreateBusinessAccountForm />
-  //     </>
-  //   )
-  // }
+  if (user.role === "user") {
+    return (
+      <>
+        <Hero
+          title="Create Your Business Account"
+          subtitle="Join IndustrialMart Nigeria and showcase your industrial products to a wider audience."
+          backgroundImage="/hero-sections-img.png"
+        />
+        <CreateBusinessAccountForm />
+      </>
+    )
+  }
 
   // vendor or other roles can access the ProductForm directly
   return (

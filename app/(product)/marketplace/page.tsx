@@ -54,6 +54,7 @@ const MarketPlace = () => {
 
         const prodMap: Record<string, Product[]> = {};
         productsEntries.forEach(([catId, prods]) => {
+
           prodMap[catId] = prods;
         });
 
@@ -128,7 +129,7 @@ const MarketPlace = () => {
       if (abortControllerRef.current) {
         try {
           abortControllerRef.current.abort();
-        } catch {}
+        } catch { }
         abortControllerRef.current = null;
       }
       const controller = new AbortController();

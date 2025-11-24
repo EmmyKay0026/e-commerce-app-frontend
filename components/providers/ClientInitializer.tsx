@@ -20,7 +20,7 @@ export default function ClientInitializer({
       const token = params.get("access_token");
 
       if (token) {
-        console.log("💾 Saving token from hash:", token);
+        // console.log("💾 Saving token from hash:", token);
         localStorage.setItem("auth_token", token);
 
         // ✅ Remove token from URL after saving
@@ -30,11 +30,11 @@ export default function ClientInitializer({
 
     // ✅ 2. Use token from localStorage
     const token = localStorage.getItem("auth_token");
-    console.log("🔍 Token from storage:", token);
+    // console.log("🔍 Token from storage:", token);
 
     // ✅ 3. Fetch user data if token exists but no user loaded
     if (token && !user) {
-      console.log("✅ Found saved token, fetching user data...");
+      // console.log("✅ Found saved token, fetching user data...");
       // fetchAllUserData(api)
       //   .then((fetchedUser) => {
       //     if (fetchedUser && fetchedUser._id) {

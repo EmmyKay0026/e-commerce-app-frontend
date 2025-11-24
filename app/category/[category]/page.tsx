@@ -1,181 +1,142 @@
-"use client";
-import React, { useMemo, useState, useCallback, useEffect, use } from "react";
+// app/(categories)/[category]/page.tsx
+
+import { notFound } from "next/navigation";
 import SidebarFilter from "@/components/molecules/SidebarFilter";
 import ProductCards from "@/components/molecules/ProductCards";
-import { Filter, X } from "lucide-react";
+import SearchInput from "@/components/atoms/SearchInput";
+import MobileFilterSheet from "@/components/molecules/MobileFilterSheet";
+import { Filter } from "lucide-react";
 import type { Product, Category } from "@/types/models";
-import { listProducts } from "@/services/productService";
-import { useCategoryStore } from "@/store/useCategoryStore";
 
-export default function CategoryPage({
-  params,
-}: {
-  params: Promise<{ category: string }>;
-}) {
-  const { category } = use(params);
-  const { categories, fetchCategories, loading: loadingCats } = useCategoryStore();
+import {
+  getCategoryIdFromSlug,
+  getCategoryFromSlug,
+  preloadCategoryMaps,
+} from "@/services/preloadCategories";
 
-  const [activeCategory, setActiveCategory] = useState<Category | null>(null);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loadingProducts, setLoadingProducts] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+import {
+  getCategoryById,
+  listProductsByCategory,
+  getCategoryFilterOptions,
+} from "@/services/categoryService";
 
-  const [filters, setFilters] = useState<{
-    brands: string[];
-    minPrice?: number;
-    maxPrice?: number;
-    location?: string;
-    sort?: string;
-  }>({ brands: [] });
+type PageProps = {
+  params: Promise<{ category: string }>;        // AWAIT THIS
+  searchParams: Promise<Record<string, string | undefined>>; // AWAIT THIS
+};
 
-  const [showFilter, setShowFilter] = useState(false);
+export default async function CategoryPage({ params, searchParams }: PageProps) {
+  // AWAIT BOTH PARAMS AND SEARCHPARAMS
+  const { category } = await params;
+  const resolvedSearchParams = await searchParams;
 
-  const handleFiltersChange = useCallback((f: typeof filters) => {
-    setFilters(f);
-  }, []);
+  const slug = category.toLowerCase().trim();
 
-  useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
+  // Preload slug → ID map
+  await preloadCategoryMaps();
 
-  // Set active category based on slug
-  useEffect(() => {
-    const cat = categories.find((c) => c.slug === category);
-    setActiveCategory(cat ?? null);
-  }, [categories, category]);
+  const categoryId = getCategoryIdFromSlug(slug);
+  // console.log(categoryId);
 
-  // Fetch products for the active category with filters
-  useEffect(() => {
-    if (!activeCategory?.id) {
-      setProducts([]);
-      return;
-    }
+  if (!categoryId) notFound();
 
-    let mounted = true;
-    setLoadingProducts(true);
-    setError(null);
+  // Get category from cache or API
+  let activeCategory: Category | null = getCategoryFromSlug(slug);
+  if (!activeCategory) {
+    const res = await getCategoryById(categoryId);
+    // console.log(res);
 
-    (async () => {
-      try {
-        const list = await listProducts({
-          filters: {
-            category_id: activeCategory.id,
-            price_gte: filters.minPrice,
-            price_lte: filters.maxPrice,
-            brand: filters.brands.join(','),
-            location: filters.location,
-          },
-          sort: filters.sort,
-        });
-        if (mounted) setProducts(list.data?.products ?? []);
-      } catch (err: any) {
-        if (mounted) {
-          setError(err?.message ?? "Failed to fetch products");
-          setProducts([]);
-        }
-      } finally {
-        if (mounted) setLoadingProducts(false);
-      }
-    })();
+    if (!res.success || !res.data) notFound();
+    activeCategory = res.data;
+  }
 
-    return () => {
-      mounted = false;
-    };
-  }, [activeCategory, filters]);
+  // Build filters
+  const filters = {
+    q: resolvedSearchParams.q?.trim() || undefined,
+    minPrice: resolvedSearchParams.minPrice ? Number(resolvedSearchParams.minPrice) : undefined,
+    maxPrice: resolvedSearchParams.maxPrice ? Number(resolvedSearchParams.maxPrice) : undefined,
+    location_state: resolvedSearchParams.state || undefined,
+    location_lga: resolvedSearchParams.lga || undefined,
+    price_type: (resolvedSearchParams.priceType as "fixed" | "negotiable") || undefined,
+    sort: resolvedSearchParams.sort || "recommended",
+    amount_in_stock: resolvedSearchParams.amount_in_stock ? Number(resolvedSearchParams.amount_in_stock) : undefined,
+    item_condition: (resolvedSearchParams.item_condition as "new" | "refurbished" | "used") || undefined,
+  };
+
+  // Fetch data
+  const [productsRes, filterOptionsRes] = await Promise.all([
+    listProductsByCategory(categoryId, filters),
+    getCategoryFilterOptions(categoryId, filters),
+  ]);
+
+  const products: Product[] = productsRes.success && productsRes.data?.products
+    ? productsRes.data.products
+    : [];
+
+  const opts = filterOptionsRes.success ? filterOptionsRes.data || {} : {};
+  const availableStates = opts.states || [];
+  const availableLgasMap = opts.lgas || {};
+  const availablePriceTypes = opts.price_types || ["fixed", "negotiable"];
+  const priceRange = { min: opts.minPrice, max: opts.maxPrice };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-10 py-10 pb-12">
-        {/* Header */}
-        <div className="bg-white p-4 rounded-2xl mb-6 border border-gray-100 relative">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-10 py-10 pb-20">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-8">
           <div className="flex items-center justify-between gap-4">
-            <h1 className="text-2xl font-bold capitalize">
-              {activeCategory?.name ?? category.replace(/-/g, " ")}
+            <h1 className="text-2xl md:text-3xl font-bold capitalize">
+              {activeCategory.name}
             </h1>
 
-            <div className="flex items-center gap-2">
-              <input
-                placeholder="Search inside category..."
-                className="border rounded-lg px-3 py-2 w-80 hidden md:block"
-              />
+            <div className="flex items-center gap-3">
+              <div className="hidden md:block w-80">
+                <SearchInput defaultValue={resolvedSearchParams.q || ""} />
+              </div>
 
-              <button
-                onClick={() => setShowFilter((prev) => !prev)}
-                className="md:hidden text-gray-600 border rounded-full p-2 hover:bg-gray-100 transition"
-                aria-label="Toggle filter menu"
+              <MobileFilterSheet
+                activeCategory={slug}
+                initialFilters={filters}
+                availableStates={availableStates}
+                availableLgasMap={availableLgasMap}
+                availablePriceTypes={availablePriceTypes}
+                priceRange={priceRange}
               >
-                {showFilter ? <X size={20} /> : <Filter size={20} />}
-              </button>
+                <button className="md:hidden p-2.5 border rounded-full hover:bg-gray-100 transition">
+                  <Filter size={22} />
+                </button>
+              </MobileFilterSheet>
             </div>
           </div>
 
-          {showFilter && activeCategory && (
-            <div className="absolute left-0 right-0 mt-3 bg-white rounded-xl shadow-lg border border-gray-200 z-20 p-4 md:hidden">
-              <SidebarFilter
-                products={products}
-                activeCategory={category}
-                onFiltersChangeAction={handleFiltersChange}
-              />
-            </div>
-          )}
+          <div className="mt-4 md:hidden">
+            <SearchInput defaultValue={resolvedSearchParams.q || ""} />
+          </div>
         </div>
 
-        {/* Main Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Sidebar (Desktop) */}
           <div className="hidden md:block">
             <SidebarFilter
-              products={products}
-              activeCategory={category}
-              onFiltersChangeAction={handleFiltersChange}
+              activeCategory={slug}
+              initialFilters={filters}
+              availableStates={availableStates}
+              availableLgasMap={availableLgasMap}
+              availablePriceTypes={availablePriceTypes}
+              priceRange={priceRange}
             />
           </div>
 
-          {/* Product Grid */}
           <div className="md:col-span-3">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex gap-3 items-center text-sm text-gray-600">
-                <span className="px-3 py-1 bg-gray-100 rounded-full">
-                  View: Grid
-                </span>
-                <span className="text-sm">Sort:</span>
-                <select
-                  className="border rounded px-2 py-1 text-sm"
-                  value={filters.sort ?? "newest"}
-                  onChange={(e) =>
-                    setFilters((s) => ({ ...s, sort: e.target.value }))
-                  }
-                >
-                  <option value="newest">Newest</option>
-                  <option value="price_asc">Price low-high</option>
-                  <option value="price_desc">Price high-low</option>
-                  <option value="popular">Popular</option>
-                </select>
-              </div>
-              <div className="text-sm text-gray-500">
-                results ({products.length})
-              </div>
-            </div>
-
-            {loadingProducts ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="h-48 bg-white rounded shadow animate-pulse"
-                  />
-                ))}
-              </div>
-            ) : error ? (
-              <p className="text-red-600 text-sm mb-4">{error}</p>
-            ) : products.length === 0 ? (
-              <div className="text-gray-600 py-20 bg-white rounded-2xl p-6 border border-gray-100">
-                No products found with current filters.
+            {products.length === 0 ? (
+              <div className="text-center py-20">
+                <p className="text-gray-600 text-lg font-medium">No products found</p>
+                <p className="text-gray-500 text-sm mt-2">
+                  Try adjusting your filters or search term.
+                </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {products.map((p) => (
-                  <ProductCards key={p.id} product={p} />
+                {products.map((product) => (
+                  <ProductCards key={product.id} product={product} />
                 ))}
               </div>
             )}

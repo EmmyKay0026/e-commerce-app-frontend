@@ -82,7 +82,7 @@ const SaveForLaterPage = () => {
 
       const res = await fetchProductsByIds(user?.saved_items);
       if (res.success && res.data) {
-        console.log("Saved items", res.data);
+        // console.log("Saved items", res.data);
 
         setBusinessProducts(res.data);
       }
@@ -92,6 +92,7 @@ const SaveForLaterPage = () => {
 
     getBusniessProducts();
   }, [user]);
+
 
   return (
     <div className="py-4 w-full">

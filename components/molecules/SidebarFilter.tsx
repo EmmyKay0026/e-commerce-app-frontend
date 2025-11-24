@@ -1,185 +1,310 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import type { Product } from "@/types/models"; // ✅ consistent import with CategoryPage
+import React, { useCallback, useEffect, useState } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
-type FilterState = {
-  brands: string[];
+export type FilterState = {
   minPrice?: number;
   maxPrice?: number;
-  location?: string;
-  condition?: string;
-  powerSource?: string;
+  location_state?: string;
+  location_lga?: string;
+  price_type?: "fixed" | "negotiable";
   sort?: string;
+  item_condition?: "new" | "refurbished" | "used";
+  amount_in_stock?: number;
 };
 
 type Props = {
-  products: Product[];
   activeCategory: string;
-  onFiltersChangeAction: (filters: FilterState) => void;
+  initialFilters?: FilterState;
+
+  // These now come from the server
+  availableStates: string[];
+  availableLgasMap: Record<string, string[]>;
+  availablePriceTypes?: string[];
+  priceRange?: { min?: number; max?: number };
 };
 
 export default function SidebarFilter({
-  products,
   activeCategory,
-  onFiltersChangeAction,
+  initialFilters = {},
+  availableStates = [],
+  availableLgasMap = {},
+  availablePriceTypes = ["fixed", "negotiable"],
+  priceRange,
 }: Props) {
-  const [minPrice, setMinPrice] = useState<number | "">("");
-  const [maxPrice, setMaxPrice] = useState<number | "">("");
-  const [location, setLocation] = useState<string>("");
-  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
-  const [condition, setCondition] = useState<string>("");
-  const [powerSource, setPowerSource] = useState<string>("");
-  const [sort, setSort] = useState<string>("recommended");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  // ✅ Handle filters change
-  const handleFiltersChange = useCallback(() => {
-    onFiltersChangeAction({
-      brands: selectedBrands,
-      minPrice: minPrice === "" ? undefined : Number(minPrice),
-      maxPrice: maxPrice === "" ? undefined : Number(maxPrice),
-      location: location || undefined,
-      condition: condition || undefined,
-      powerSource: powerSource || undefined,
-      sort,
-    });
+  // Local UI state (synced with URL)
+  const [minPrice, setMinPrice] = useState<number | "">(initialFilters.minPrice ?? "");
+  const [maxPrice, setMaxPrice] = useState<number | "">(initialFilters.maxPrice ?? "");
+  const [locationState, setLocationState] = useState<string>(initialFilters.location_state ?? "");
+  const [locationLga, setLocationLga] = useState<string>(initialFilters.location_lga ?? "");
+  const [priceType, setPriceType] = useState<string>(initialFilters.price_type ?? "");
+  const [sort, setSort] = useState<string>(initialFilters.sort ?? "recommended");
+  const [itemCondition, setItemCondition] = useState<string>(initialFilters.item_condition ?? "");
+  const [amountInStock, setAmountInStock] = useState<number | "">(initialFilters.amount_in_stock ?? "");
+
+  // Derived: LGAs for currently selected state
+  const availableLgas = locationState ? availableLgasMap[locationState] || [] : [];
+
+  // Reset LGA when state changes
+  useEffect(() => {
+    setLocationLga("");
+  }, [locationState]);
+
+  // Build URL with current filters
+  const updateUrl = useCallback(() => {
+    const params = new URLSearchParams(searchParams);
+
+    // Price
+    if (minPrice === "" || minPrice === undefined) {
+      params.delete("minPrice");
+    } else {
+      params.set("minPrice", String(minPrice));
+    }
+    if (maxPrice === "" || maxPrice === undefined) {
+      params.delete("maxPrice");
+    } else {
+      params.set("maxPrice", String(maxPrice));
+    }
+
+    // Location
+    if (locationState) {
+      params.set("state", locationState);
+    } else {
+      params.delete("state");
+      params.delete("lga");
+    }
+    if (locationLga) {
+      params.set("lga", locationLga);
+    } else if (locationState) {
+      params.delete("lga");
+    }
+
+    // Price type
+    if (priceType) {
+      params.set("priceType", priceType);
+    } else {
+      params.delete("priceType");
+    }
+
+    // Item Condition
+    if (itemCondition) {
+      params.set("item_condition", itemCondition);
+    } else {
+      params.delete("item_condition");
+    }
+
+    // Amount In Stock
+    if (amountInStock === "" || amountInStock === undefined) {
+      params.delete("amount_in_stock");
+    } else {
+      params.set("amount_in_stock", String(amountInStock));
+    }
+
+    // Sort
+    if (sort && sort !== "recommended") {
+      params.set("sort", sort);
+    } else {
+      params.delete("sort");
+    }
+
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
   }, [
-    selectedBrands,
     minPrice,
     maxPrice,
-    location,
-    condition,
-    powerSource,
+    locationState,
+    locationLga,
+    priceType,
     sort,
-    onFiltersChangeAction,
+    itemCondition,
+    amountInStock,
+    pathname,
+    router,
+    searchParams,
   ]);
 
-  // ✅ Run every time filters change
+  // Trigger URL update on any filter change
   useEffect(() => {
-    handleFiltersChange();
-  }, [handleFiltersChange]);
+    updateUrl();
+  }, [updateUrl]);
 
-  // ✅ Toggle brand selection
-  const toggleBrand = (b: string) => {
-    setSelectedBrands((prev) =>
-      prev.includes(b) ? prev.filter((x) => x !== b) : [...prev, b]
-    );
+  // Clear all filters
+  const clearFilters = () => {
+    setMinPrice("");
+    setMaxPrice("");
+    setLocationState("");
+    setLocationLga("");
+    setPriceType("");
+    setSort("recommended");
+    setItemCondition("");
+    setAmountInStock("");
   };
 
+  const hasActiveFilters =
+    minPrice !== "" ||
+    maxPrice !== "" ||
+    locationState ||
+    locationLga ||
+    priceType ||
+    itemCondition ||
+    amountInStock !== "" ||
+    (sort && sort !== "recommended");
+
   return (
-    <aside className="bg-white rounded-2xl shadow p-4 border border-gray-100 max-h-[calc(100vh-6rem)] overflow-y-auto sticky top-20">
-      <h3 className="text-lg font-semibold mb-4">Filter Results</h3>
-
-      {/* Condition */}
-      <div className="mb-5">
-        <label className="block text-sm text-gray-600 mb-2">Condition</label>
-        <select
-          value={condition}
-          onChange={(e) => setCondition(e.target.value)}
-          className="w-full border rounded px-2 py-1 text-sm"
-        >
-          <option value="">All</option>
-          <option value="new">New</option>
-          <option value="used">Used</option>
-          <option value="refurbished">Refurbished</option>
-        </select>
+    <aside className="bg-white rounded-2xl shadow p-6 border border-gray-100 max-h-[calc(100vh-6rem)] overflow-y-auto sticky top-20">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-lg font-semibold">Filter Results</h3>
+        {hasActiveFilters && (
+          <button
+            onClick={clearFilters}
+            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+          >
+            Clear all
+          </button>
+        )}
       </div>
 
-      {/* Power Source */}
-      <div className="mb-5">
-        <label className="block text-sm text-gray-600 mb-2">Power Source</label>
-        <select
-          value={powerSource}
-          onChange={(e) => setPowerSource(e.target.value)}
-          className="w-full border rounded px-2 py-1 text-sm"
-        >
-          <option value="">All</option>
-          <option value="electric">Electric</option>
-          <option value="diesel">Diesel</option>
-          <option value="hydraulic">Hydraulic</option>
-          <option value="manual">Manual</option>
-        </select>
-      </div>
-
-      {/* Price range */}
-      <div className="mb-5">
-        <label className="block text-sm text-gray-600 mb-2">
-          Price range (₦)
+      {/* Price Type */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Price Type
         </label>
-        <div className="flex gap-2">
-          <input
-            type="number"
-            placeholder="min"
-            value={minPrice}
-            onChange={(e) =>
-              setMinPrice(e.target.value === "" ? "" : Number(e.target.value))
-            }
-            className="w-1/2 border rounded px-2 py-1 text-sm"
-          />
-          <input
-            type="number"
-            placeholder="max"
-            value={maxPrice}
-            onChange={(e) =>
-              setMaxPrice(e.target.value === "" ? "" : Number(e.target.value))
-            }
-            className="w-1/2 border rounded px-2 py-1 text-sm"
-          />
-        </div>
-      </div>
-
-      {/* Location */}
-      {/* <div className="mb-5">
-        <label className="block text-sm text-gray-600 mb-2">Location</label>
         <select
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          className="w-full border rounded px-2 py-1 text-sm"
+          value={priceType}
+          onChange={(e) => setPriceType(e.target.value)}
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="">All Nigeria</option>
-          {locations.map((loc) => (
-            <option key={loc} value={loc}>
-              {loc}
+          <option value="">All Types</option>
+          {availablePriceTypes.map((type) => (
+            <option key={type} value={type}>
+              {type === "fixed" ? "Fixed Price" : "Negotiable"}
             </option>
           ))}
         </select>
-      </div> */}
+      </div>
 
-      {/* Brand */}
-      {/* <div className="mb-5">
-        <label className="block text-sm text-gray-600 mb-2">
-          Manufacturer / Brand
+      {/* Price Range */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Price Range (₦)
         </label>
-        <div className="space-y-2">
-          {brands.length === 0 ? (
-            <div className="text-sm text-gray-500">No brands listed</div>
-          ) : (
-            brands.map((b) => (
-              <label key={b} className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={selectedBrands.includes(b)}
-                  onChange={() => toggleBrand(b)}
-                />
-                <span>{b}</span>
-              </label>
-            ))
-          )}
+        <div className="flex gap-3">
+          <input
+            type="number"
+            placeholder={`Min${priceRange?.min !== undefined ? ` (${priceRange.min})` : ""}`}
+            value={minPrice}
+            onChange={(e) => setMinPrice(e.target.value === "" ? "" : Number(e.target.value))}
+            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            min="0"
+          />
+          <input
+            type="number"
+            placeholder={`Max${priceRange?.max !== undefined ? ` (${priceRange.max})` : ""}`}
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(e.target.value === "" ? "" : Number(e.target.value))}
+            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            min="0"
+          />
         </div>
-      </div> */}
+      </div>
 
-      {/* Sort */}
+      {/* Item Condition */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Item Condition
+        </label>
+        <select
+          value={itemCondition}
+          onChange={(e) => setItemCondition(e.target.value)}
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">Any Condition</option>
+          <option value="new">New</option>
+          <option value="refurbished">Refurbished</option>
+          <option value="used">Used</option>
+        </select>
+      </div>
+
+      {/* Minimum Stock */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Min Stock Quantity
+        </label>
+        <input
+          type="number"
+          placeholder="e.g. 5"
+          value={amountInStock}
+          onChange={(e) => setAmountInStock(e.target.value === "" ? "" : Number(e.target.value))}
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          min="1"
+        />
+      </div>
+
+      {/* State */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
+        <select
+          value={locationState}
+          onChange={(e) => setLocationState(e.target.value)}
+          className="w-full border border-gray-300 capitalize rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">All States</option>
+          {availableStates.map((state) => (
+            <option className="capitalize" key={state} value={state}>
+              {state}
+            </option>
+          ))}
+        </select>
+        {availableStates.length === 0 && (
+          <p className="text-xs text-gray-500 mt-2">No states available</p>
+        )}
+      </div>
+
+      {/* LGA */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Local Government Area
+        </label>
+        <select
+          value={locationLga}
+          onChange={(e) => setLocationLga(e.target.value)}
+          disabled={!locationState || availableLgas.length === 0}
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm capitalize focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:cursor-not-allowed"
+        >
+          <option value="capitalize">
+            {locationState ? "All LGAs" : "Select State First"}
+          </option>
+          {availableLgas.map((lga) => (
+            <option key={lga} value={lga}>
+              {lga}
+            </option>
+          ))}
+        </select>
+        {locationState && availableLgas.length === 0 && (
+          <p className="text-xs text-gray-500 mt-2">No LGAs in this state</p>
+        )}
+      </div>
+
+      {/* Sort By */}
       <div className="mb-4">
-        <label className="block text-sm text-gray-600 mb-2">Sort by</label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Sort By
+        </label>
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value)}
-          className="w-full border rounded px-2 py-1 text-sm"
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="recommended">Recommended</option>
-          <option value="price-asc">Price: Low to high</option>
-          <option value="price-desc">Price: High to low</option>
-          <option value="newest">Newest</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
         </select>
       </div>
     </aside>

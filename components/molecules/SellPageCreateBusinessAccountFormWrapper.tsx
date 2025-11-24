@@ -148,10 +148,18 @@ export default function SellPageCreateBusinessAccountFormWrapper() {
 
         router.push(`/shop/${finalSlug}`);
       } else {
-        setError(resp.error || "Failed to create business profile.");
+        // Handle both string errors and PostgreSQL error objects
+        const errorMessage = typeof resp.error === 'string'
+          ? resp.error
+          : resp.error?.message || resp.error?.detail || "Failed to create business profile.";
+        setError(errorMessage);
       }
     } catch (err: any) {
-      setError(err?.message || "An unexpected error occurred.");
+      // Handle both string errors and PostgreSQL error objects
+      const errorMessage = typeof err === 'string'
+        ? err
+        : err?.message || err?.detail || "An unexpected error occurred.";
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

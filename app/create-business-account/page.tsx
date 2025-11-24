@@ -171,7 +171,11 @@ export default function CreateBusinessAccountPage() {
 
         router.push(`/shop/${finalSlug}`);
       } else {
-        setError(resp.error || "Failed to create business profile.");
+        // Handle error which can be string or object
+        const errorMessage = typeof resp.error === "string"
+          ? resp.error
+          : resp.error?.message || resp.error?.detail || "Failed to create business profile.";
+        setError(errorMessage);
       }
     } catch (err: any) {
       setError(err?.message || "An unexpected error occurred.");

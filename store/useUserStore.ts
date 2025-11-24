@@ -56,9 +56,9 @@ export const useUserStore = create<UserStore>((set, get) => ({
       const fetchedRes = await getMyProfile();
 
       if (!fetchedRes.success || !fetchedRes.data) {
-        toast.error(
-          `Failed to fetch user profile: ${fetchedRes.error || "Unknown error"}`
-        );
+        // toast.error(
+        //   `Failed to fetch user profile: ${fetchedRes.error || "Unknown error"}`
+        // );
         set({ isLoading: false });
         return;
       }
@@ -70,6 +70,9 @@ export const useUserStore = create<UserStore>((set, get) => ({
 
       // console.log("Get me is running:", fetchedRes);
       set({ user: fetchedRes.data, isLoading: false, error: null });
+
+      // console.log(get().user);
+
       // get().updateIsOwner(params?.id as string);
       // console.log("Params", params);
       // console.log("Get user result", get().user);
@@ -83,7 +86,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
           // console.log("User params:", id);
 
           get().updateIsOwner(id as string);
-          console.log("User params updated isOwner:", get().isOwner);
+          // console.log("User params updated isOwner:", get().isOwner);
         }
       }
     } catch (err: any) {

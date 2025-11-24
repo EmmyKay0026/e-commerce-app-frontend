@@ -38,6 +38,8 @@ export interface User {
   suspended_status_release_date?: string;
 }
 
+export type VendorProfile = BusinessProfile & { user: User };
+
 export interface CategoryInfo {
   name: string;
   slug: string;
@@ -48,22 +50,29 @@ export interface Product {
   product_owner_id: string; // FK -> VendorProfile.id
   name: string;
   description: string;
-  price: string | undefined; // for display only (not transactions)
+  price: string | undefined; // use for filter (lowest to highest or highest)
   images: string[]; // URLs to Google Storage
   category_id?: string; // FK -> Category.id
   category?: CategoryInfo;
+  categories?: { category: Category }[];
   parentCategories?: CategoryInfo[];
   tags?: string[];
   status: "active" | "inactive" | "deleted" | "pending_review";
   created_at: string;
-  location_lga?: string;
-  location_state?: string;
+  updated_at?: string;
+  location_lga?: string; // use for filter
+  location_state?: string; // use for filter
+  state_name?: string;
+  lga_name?: string;
   slug: string; // URL-friendly identifier
   price_input_mode?: "enter" | "quote";
   sale_type: "wholesale" | "retail";
-  price_type: "fixed" | "negotiable";
+  price_type: "fixed" | "negotiable"; // use For filter
   metadata: Record<string, any>; // to contain more description of the item
   view_count?: string;
+  item_condition?: "new" | "refurbished" | "used";
+  amount_in_stock?: string;
+  features?: string[];
   business: {
     id: string;
     business_name: string;
@@ -107,7 +116,7 @@ export type ServiceResult<T> = {
   success: boolean;
   status?: number;
   data?: T | null;
-  error?: string | null;
+  error?: string | { message?: string; detail?: string } | null;
 };
 
 export type CategoryName =

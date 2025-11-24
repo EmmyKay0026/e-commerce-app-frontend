@@ -233,7 +233,7 @@ function ProfileForm({ className }: React.ComponentProps<"form">) {
       // PATCH users/me (API expects authenticated request; useApi attaches token)
       const res = await updateProfile(body);
       // api.patch<any>("users/me", body);
-      console.log(res.data);
+      // console.log(res.data);
 
       // update client store if setter exists
       try {

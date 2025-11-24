@@ -8,6 +8,7 @@ import {
   Search,
   Store,
   X,
+  Loader2,
 } from "lucide-react";
 import {
   Popover,
@@ -33,38 +34,106 @@ import { BusinessProfile, Product, User } from "@/types/models";
 import ProductCards from "../molecules/ProductCards";
 import ProductList from "../molecules/ProductList";
 import { getBusinessProducts } from "@/services/productService";
-// import { ProductCardCompact } from "@/components/product-card-compact";
+import Link from "next/link";
+import { useUserStore, useFetchDataOnMount } from "@/store/useUserStore";
 
 export function ProductsGrid({
   vendor,
 }: {
   vendor: BusinessProfile & { user: User };
 }) {
+  useFetchDataOnMount();
+
+  const { user: currentUser, isOwner, isLoading } = useUserStore();
   const [isActive, setIsActive] = useState<"grid" | "list">("list");
   const [showSearch, setShowSearch] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>("");
   const [isPageLoading, setIsPageLoading] = useState<boolean>(false);
-  const [businessProducts, setBusinessProducts] = useState<Product[] | null>(
-    null
-  );
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [sortBy, setSortBy] = useState<"latest" | "price_asc" | "price_desc">("latest");
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalProducts, setTotalProducts] = useState<number>(0);
+  const [hasMore, setHasMore] = useState<boolean>(false);
+
+  const isMyShop = isOwner === true;
+
+  // Fetch products function
+  const fetchProducts = async (page: number, append: boolean = false) => {
+    if (!vendor || !vendor.id) return;
+
+    if (append) {
+      setIsLoadingMore(true);
+    } else {
+      setIsPageLoading(true);
+    }
+
+    try {
+      const res = await getBusinessProducts(vendor.id, {
+        page,
+        perPage: 30,
+        sort: sortBy,
+        search: searchValue.trim() || undefined,
+      });
+
+      if (res.success && res.data) {
+        const responseData = res.data;
+        if (append) {
+          setAllProducts((prev) => [...prev, ...responseData.data]);
+        } else {
+          setAllProducts(responseData.data);
+        }
+        setTotalProducts(responseData.total);
+        setHasMore(responseData.hasMore);
+        setCurrentPage(page);
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      toast.error("Failed to load products");
+    } finally {
+      if (append) {
+        setIsLoadingMore(false);
+      } else {
+        setIsPageLoading(false);
+      }
+    }
+  };
+
+  // Initial load
+  useEffect(() => {
+    fetchProducts(1, false);
+  }, [vendor.id]);
+
+  // Handle search change with debounce effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setCurrentPage(1);
+      fetchProducts(1, false);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchValue]);
+
+  // Handle sort change
+  useEffect(() => {
+    setCurrentPage(1);
+    fetchProducts(1, false);
+  }, [sortBy]);
 
   useEffect(() => {
-    const getBusniessProducts = async () => {
-      if (!vendor || !vendor.id) return;
-      setIsPageLoading(true);
+    if (vendor?.user?.id) {
+      useUserStore.getState().updateIsOwner(vendor.user.id);
+    }
+  }, [vendor?.user?.id]);
 
-      const res = await getBusinessProducts(vendor.id);
-      if (res.success && res.data) {
-        // console.log(res.data);
-
-        setBusinessProducts(res.data.data);
-      }
-      // console.log(res);
-      setIsPageLoading(false);
-    };
-
-    getBusniessProducts();
-  }, []);
+  // Load more handler
+  const handleLoadMore = () => {
+    if (!isLoadingMore && hasMore) {
+      fetchProducts(currentPage + 1, true);
+    }
+  };
 
   return (
     <section id="products" className="px-2 lg:px-8 py-16 md:py-24">
@@ -78,33 +147,45 @@ export function ProductsGrid({
           </p>
         </div>
 
-        <article className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {" "}
-            <LucideGrid3X3
-              className={`text-lg cursor-pointer ${
-                isActive === "grid" ? "text-primary" : ""
-              }`}
-              onClick={() => setIsActive("grid")}
-            />{" "}
-            <List
-              className={`text-lg cursor-pointer ${
-                isActive === "list" ? "text-primary" : ""
-              }`}
-              onClick={() => setIsActive("list")}
-            />
+        <article className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <LucideGrid3X3
+                className={`text-lg cursor-pointer ${isActive === "grid" ? "text-primary" : ""
+                  }`}
+                onClick={() => setIsActive("grid")}
+              />
+              <List
+                className={`text-lg cursor-pointer ${isActive === "list" ? "text-primary" : ""
+                  }`}
+                onClick={() => setIsActive("list")}
+              />
+            </div>
+
+            {/* Product count */}
+            <div className="text-sm text-muted-foreground">
+              {isPageLoading ? (
+                "Loading..."
+              ) : (
+                <>
+                  Showing {allProducts.length}
+                  {totalProducts > 0 && allProducts.length !== totalProducts && (
+                    <span> of {totalProducts}</span>
+                  )} product{allProducts.length !== 1 ? "s" : ""}
+                </>
+              )}
+            </div>
           </div>
 
-          {/* Sort Popover */}
+          {/* Sort and Search Controls */}
           <article className="flex items-center gap-4">
             {/* Search Bar with Icon and Animation */}
             <div className="relative flex items-center">
               <input
                 type="text"
                 placeholder="Search items..."
-                className={`border rounded px-3 py-2 transition-all duration-300 ml-2 ${
-                  showSearch ? "w-64 opacity-100" : "w-0 opacity-0 p-0"
-                }`}
+                className={`border rounded px-3 py-2 transition-all duration-300 ml-2 ${showSearch ? "w-64 opacity-100" : "w-0 opacity-0 p-0"
+                  }`}
                 style={{ minWidth: showSearch ? "10rem" : "0" }}
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
@@ -112,7 +193,12 @@ export function ProductsGrid({
               <button
                 type="button"
                 className="p-2"
-                onClick={() => setShowSearch((prev) => !prev)}
+                onClick={() => {
+                  if (showSearch && searchValue) {
+                    setSearchValue("");
+                  }
+                  setShowSearch((prev) => !prev);
+                }}
               >
                 {showSearch ? (
                   <X className="h-5 w-5 text-gray-500 cursor-pointer" />
@@ -123,103 +209,132 @@ export function ProductsGrid({
             </div>
 
             <Popover>
-              <PopoverTrigger className="flex items-center gap-2 border rounded px-3 py-2 cursor-pointer">
+              <PopoverTrigger className="flex items-center gap-2 border rounded px-3 py-2 cursor-pointer hover:bg-gray-50">
                 Sort <ArrowUpDown className="text-md" />
               </PopoverTrigger>
-              <PopoverContent className="p-4">
+              <PopoverContent className="p-4 bg-white border rounded-lg shadow-lg z-50">
                 <div className="flex flex-col gap-2">
-                  {["Latest", "Price: Low to High", "Price: High to Low"].map(
-                    (label) => (
-                      <PopoverClose asChild key={label}>
-                        <button
-                          onClick={() => toast(`${label} was clicked`)}
-                          className="text-left w-full cursor-pointer"
-                        >
-                          {label}
-                        </button>
-                      </PopoverClose>
-                    )
-                  )}
+                  <PopoverClose asChild>
+                    <button
+                      onClick={() => setSortBy("latest")}
+                      className={`text-left w-full cursor-pointer px-3 py-2 rounded hover:bg-gray-100 ${sortBy === "latest" ? "bg-gray-100 font-semibold" : ""
+                        }`}
+                    >
+                      Latest
+                    </button>
+                  </PopoverClose>
+                  <PopoverClose asChild>
+                    <button
+                      onClick={() => setSortBy("price_asc")}
+                      className={`text-left w-full cursor-pointer px-3 py-2 rounded hover:bg-gray-100 ${sortBy === "price_asc" ? "bg-gray-100 font-semibold" : ""
+                        }`}
+                    >
+                      Price: Low to High
+                    </button>
+                  </PopoverClose>
+                  <PopoverClose asChild>
+                    <button
+                      onClick={() => setSortBy("price_desc")}
+                      className={`text-left w-full cursor-pointer px-3 py-2 rounded hover:bg-gray-100 ${sortBy === "price_desc" ? "bg-gray-100 font-semibold" : ""
+                        }`}
+                    >
+                      Price: High to Low
+                    </button>
+                  </PopoverClose>
                 </div>
               </PopoverContent>
             </Popover>
           </article>
-          {/* <div className=""></div> */}
         </article>
 
         <section className="">
-          {businessProducts?.length === 0 && (
+          {allProducts.length === 0 && !isPageLoading && (
             <Empty className="border border-dashed">
               <EmptyHeader>
                 <EmptyMedia variant="icon">
                   <Store />
                 </EmptyMedia>
                 <EmptyTitle>
-                  {`
-                      ${
-                        vendor?.business_name || vendor?.user.first_name
-                      }'s store is empty`}
+                  {searchValue
+                    ? `No products found for "${searchValue}"`
+                    : `${vendor?.business_name || vendor?.user.first_name}'s store is empty`}
                 </EmptyTitle>
                 <EmptyDescription>
-                  Add products to your store to start selling.
+                  {searchValue
+                    ? "Try adjusting your search terms"
+                    : isMyShop
+                      ? "Add products to your store to start selling."
+                      : "Check out other great items on the marketplace."}
                 </EmptyDescription>
               </EmptyHeader>
+
               <EmptyContent>
-                <Button variant="outline" size="sm">
-                  Continue shopping
-                </Button>
+                {searchValue ? (
+                  <Button
+                    onClick={() => setSearchValue("")}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Clear search
+                  </Button>
+                ) : isMyShop ? (
+                  <Button asChild variant="outline" size="sm">
+                    <Link href="/sell">Add products</Link>
+                  </Button>
+                ) : (
+                  <Button asChild variant="outline" size="sm">
+                    <Link href="/products">Continue shopping</Link>
+                  </Button>
+                )}
               </EmptyContent>
             </Empty>
           )}
           {isActive === "grid" ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-6">
-              {businessProducts &&
-                businessProducts?.length > 0 &&
-                businessProducts?.map((product) =>
-                  isPageLoading ? (
-                    <ProductCardGridViewSkeleton key={product.id} />
-                  ) : (
-                    <ProductCards key={product.id} product={product} />
-                  )
-                )}
+              {isPageLoading && allProducts.length === 0 ? (
+                Array.from({ length: 8 }).map((_, i) => (
+                  <ProductCardGridViewSkeleton key={i} />
+                ))
+              ) : (
+                allProducts.map((product) => (
+                  <ProductCards key={product.id} product={product} />
+                ))
+              )}
             </div>
           ) : (
             <div className="flex flex-col gap-4 p-6">
-              {businessProducts &&
-                businessProducts?.length > 0 &&
-                businessProducts.map((product) =>
-                  isPageLoading ? (
-                    <ProductCardListViewSkeleton key={product.id} />
-                  ) : (
-                    <ProductList key={product.id} product={product} />
-                    // <ProductCardList
-                    //   id={product.id}
-                    //   key={product.id}
-                    //   name={product?.name!}
-                    //   description={product?.description!}
-                    //   price={product?.price!}
-                    //   image={product?.images[0]!}
-                    //   estimatedDelivery={""}
-                    //   minOrder={0}
-                    //   soldCount={0}
-                    //   supplier={{
-                    //     name: "",
-                    //     yearsActive: 0,
-                    //     country: "",
-                    //     //   countryCode: "",
-                    //   }}
-                    // />
-                  )
-                )}
+              {isPageLoading && allProducts.length === 0 ? (
+                Array.from({ length: 8 }).map((_, i) => (
+                  <ProductCardListViewSkeleton key={i} />
+                ))
+              ) : (
+                allProducts.map((product) => (
+                  <ProductList key={product.id} product={product} />
+                ))
+              )}
             </div>
           )}
         </section>
 
-        <div className="mt-12 text-center">
-          <Button size="lg" variant="outline">
-            Load More Products
-          </Button>
-        </div>
+        {hasMore && (
+          <div className="mt-12 text-center">
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={handleLoadMore}
+              disabled={isLoadingMore}
+            >
+              {isLoadingMore ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                "Load More Products"
+              )}
+            </Button>
+          </div>
+        )}
       </div>
     </section>
   );

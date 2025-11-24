@@ -5,9 +5,11 @@ import { X } from "lucide-react";
 import { useAuthModal } from "@/store/useAuthModal";
 import { formatPhoneNumber } from "@/lib/utils";
 import { toast } from "sonner";
+import { useUserStore } from "@/store/useUserStore";
 
 const AuthModal = () => {
   const toogle = useAuthModal((s) => s.toggle);
+  const getMe = useUserStore((s) => s.getMe);
   const isOpen = useAuthModal((s) => s.isOpen);
   const setIsOpen = useAuthModal((s) => s.setIsOpen);
   const [email, setEmail] = useState("");
@@ -43,6 +45,7 @@ const AuthModal = () => {
       setIsOpen(false);
       toast("✅ Logged in successfully!");
       setMessage("✅ Logged in successfully!");
+      getMe();
     }
     setLoading(false);
   };
@@ -57,6 +60,7 @@ const AuthModal = () => {
 
     if (error) toast(error.message);
     setLoading(false);
+    getMe();
   };
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -84,6 +88,7 @@ const AuthModal = () => {
     } else toast("✅ Account created! Check your email for confirmation.");
     setMessage("✅ Account created! Check your email for confirmation.");
     setLoading(false);
+
     setIsSignUp(false);
     setPassword("");
   };
@@ -91,9 +96,9 @@ const AuthModal = () => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center  min-h-screen  min-w-screen ">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center  min-h-screen  max-w-screen ">
       <div className=" bg-white overflow-y-auto  max-h-screen shadow-xl rounded-2xl  ">
-        <div className="w-full min-w-md  p-8">
+        <div className="w-full p-8">
           <span className="flex justify-between items-center mb-4">
             <X onClick={() => toogle()} className="cursor-pointer text-right" />
           </span>

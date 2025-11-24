@@ -2,14 +2,20 @@ import React, { useEffect, useState } from "react";
 import ImageCarousel from "../atoms/ImageCarousel";
 import { demoProducts } from "@/constants/product";
 import { Product } from "@/types/models";
-import { Bookmark, BookMarked, MapPin } from "lucide-react";
+import { Bookmark, BookMarked, MapPin, Pencil } from "lucide-react";
 import { convertToCustomFormat } from "@/lib/utils";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { updateSavedItems } from "@/services/userService";
 import { useUserStore } from "@/store/useUserStore";
 
-const ProductList = ({ product }: { product: Product }) => {
+const ProductList = ({
+  product,
+  isOwner = false,
+}: {
+  product: Product;
+  isOwner?: boolean;
+}) => {
   const convertedDate = convertToCustomFormat(product.created_at);
   // console.log(convertedDate);
   const user = useUserStore((state) => state.user);
@@ -39,6 +45,15 @@ const ProductList = ({ product }: { product: Product }) => {
 
   return (
     <article className="relative flex flex-col justify-between bg-white shadow rounded py-[15px] px-6 gap-6 mx-3  lg:flex-row">
+      {isOwner && (
+        <Link
+          href={`/products/${product.slug}/edit`}
+          className="absolute top-3 left-3 z-10 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors"
+          title="Edit Product"
+        >
+          <Pencil size={16} className="text-gray-700" />
+        </Link>
+      )}
       <ImageCarousel
         className={"w-[40%]"}
         allowLightbox
@@ -47,9 +62,19 @@ const ProductList = ({ product }: { product: Product }) => {
 
       <div className="w-full lg:w-[70%] space-y-3">
         <div className="flex items-center justify-between">
-          <p className="font-bold text-xl">{product.price}</p>
-          <span className="block text-secondary italic text-[12px] ">
-            Posted {convertedDate?.dayWithSuffix} {convertedDate?.monthOfYear},{" "}
+         {product.price_input_mode == "enter" ? <p className="font-bold text-xl">₦{Number(product.price).toLocaleString()} {Number(product.price).toLocaleString()} -{" "}
+            <span className="italic capitalize text-[14px] font-normal">
+              {product.sale_type ?? "Retail"}
+            </span></p> : (
+          <p className="font-bold text-lg lg:text-xl">
+            Contact Seller for Price -{" "}
+            <span className="italic capitalize text-[14px] font-normal">
+              {product.sale_type ?? "Retail"}
+            </span>
+          </p>
+        )}
+          <span className="block italic text-[12px] text-gray   ">
+            Posted {convertedDate?.dayWithSuffix} {convertedDate?.shortMonthOfYear},{" "}
             {convertedDate?.year}
           </span>
         </div>

@@ -1,5 +1,6 @@
 import api from "@/config/api";
 import { ServiceResult, User, BusinessProfile } from "@/types/models";
+import { VendorProfile } from "@/types/models"
 
 // Placeholder BusinessProfile type — replace with your concrete type when available
 // export type BusinessProfile = any;
@@ -74,14 +75,14 @@ export async function getBusinessProfileById(
  */
 export async function getBusinessProfileBySlug(
   slug: string
-): Promise<ServiceResult<{ data: BusinessProfile & { user: User } }>> {
-  console.log("Got here");
+): Promise<ServiceResult<VendorProfile>> {
+  // console.log("Got here");
 
   try {
     // If your backend expects /vendors/:slug (same pattern as id) you can call /vendors/${slug}
     // If it expects /vendors/slug/:slug or /vendors/by-slug/:slug, update this path.
     const res = await api.get(`/businessProfile/${slug}`);
-    console.log("Service Res:", res);
+    // console.log("Service Res:", res);
 
     if (res.status === 200) {
       return { success: true, status: res.status, data: res.data.data };

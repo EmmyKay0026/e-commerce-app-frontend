@@ -28,41 +28,34 @@ export const getAllCategories = async (): Promise<Category[]> => {
 /**
  * Get single category by ID or slug
  */
-export const getCategoryByIdOrSlug = async (
-  idOrSlug: string
-): Promise<Category | null> => {
+
+export const getCategoryByIdOrSlug = async (slug: string): Promise<ServiceResult<Category>> => {
   try {
-    const res = await api.get<ServiceResult<Category>>(
-      `/categories/${idOrSlug}`
-    );
+    // Change from: /categories/mechanical-power-transmission
+    // To: /categories?slug=mechanical-power-transmission
+    const res = await api.get<ServiceResult<Category>>('/categories', {
+      params: { slug }
+    });
 
-    if (res.data?.success && res.data.data) {
-      return res.data.data;
-    }
-
-    return null;
+    return res.data;
   } catch (error) {
-    console.error(`Failed to fetch category (${idOrSlug}):`, error);
-    return null;
+    return { success: false };
   }
 };
 
 /**
  * Get products by category ID
  */
-// =>{: Promise<Category>
 export const getProductsByCategory = async (
   categoryId: string
 ): Promise<ServiceResult<Product[]>> => {
   const res = await api.get(`/categories/${categoryId}/products`);
 
   if (res.status === 200) {
-    // console.log(res.data.products);
-
     return {
       success: true,
       status: res.status,
-      data: res.data.data as Product[],
+      data: res.data.data.products as Product[],
     };
   }
 
@@ -112,8 +105,6 @@ export const getChildCategories = async (
     params: { parent_id: parentId },
   });
   if (res.status === 200) {
-    // console.log(res.data.products);
-
     return {
       success: true,
       status: res.status,
@@ -129,58 +120,7 @@ export const getChildCategories = async (
   };
 };
 
-// export const getProductsByCategory = async (
-//   categoryId: string
-// ): Promise<Product[]> => {
-//   const res = await axios.get(`${BASE_URL}/products`, {
-//     params: { category: categoryId },
-//   });
-
-//   const data = res.data;
-
-//   if (Array.isArray(data)) return data;
-//   if (Array.isArray(data?.data)) return data.data;
-//   if (Array.isArray(data?.products)) return data.products;
-
-//   return [];
-// };
-
 // ===== HIERARCHY UTILITIES =====
-
-/**
- * Build a hierarchical tree structure from flat category list
- * Handles multi-parent categories by creating references
- */
-// export const buildCategoryTree = (categories: Category[]): CategoryTree[] => {
-//   const categoryMap = new Map<string, CategoryTree>();
-//   const rootCategories: CategoryTree[] = [];
-
-//   // Create a map for quick lookups
-//   categories.forEach((cat) => {
-//     categoryMap.set(cat.id, { ...cat, children: [] });
-//   });
-
-//   // Build the tree
-//   categories.forEach((cat) => {
-//     const category = categoryMap.get(cat.id)!;
-
-//     if (!cat.parent_category_id || cat.parent_category_id.length === 0) {
-//       // Root category
-//       rootCategories.push(category);
-//     } else {
-//       // Add to all parents (handles multi-parent scenario)
-//       cat.parent_category_id.forEach((parentId) => {
-//         const parent = categoryMap.get(parentId);
-//         if (parent) {
-//           if (!parent.children) parent.children = [];
-//           parent.children.push(category);
-//         }
-//       });
-//     }
-//   });
-
-//   return rootCategories;
-// };
 
 /**
  * Get all parent categories for a given category
@@ -199,49 +139,6 @@ export const getParentCategories = (
     category.parent_category_id!.includes(cat.id)
   );
 };
-
-/**
- * Get all child categories for a given category (direct children only)
- */
-// export const getChildCategories = (
-//   categoryId: string,
-//   allCategories: Category[]
-// ): Category[] => {
-//   const category = allCategories.find((cat) => cat.id === categoryId);
-
-//   if (!category || !category.child_categories) {
-//     return [];
-//   }
-
-//   return allCategories.filter((cat) =>
-//     category.child_categories!.includes(cat.id)
-//   );
-// };
-
-/**
- * Get all descendant categories recursively
- */
-// export const getAllDescendants = (
-//   categoryId: string,
-//   allCategories: Category[]
-// ): Category[] => {
-//   const descendants: Category[] = [];
-//   const visited = new Set<string>();
-
-//   const traverse = (id: string) => {
-//     if (visited.has(id)) return;
-//     visited.add(id);
-
-//     const children = getChildCategories(id, allCategories);
-//     children.forEach((child) => {
-//       descendants.push(child);
-//       traverse(child.id);
-//     });
-//   };
-
-//   traverse(categoryId);
-//   return descendants;
-// };
 
 /**
  * Get breadcrumb path for a category
@@ -333,6 +230,7 @@ export const isRootCategory = (category: Category): boolean => {
 export const hasChildren = (category: Category): boolean => {
   return !!category.child_categories && category.child_categories.length > 0;
 };
+
 export const getCategoryWithParentCategories = async (
   id: string
 ): Promise<ServiceResult<Category>> => {
@@ -361,5 +259,53 @@ export const getCategoryWithParentCategories = async (
       "Network error";
     const status = err?.response?.status;
     return { success: false, status, data: null, error: msg };
+  }
+};
+
+export const getCategoryById = async (id: string): Promise<ServiceResult<Category>> => {
+  try {
+    const res = await api.get<ServiceResult<Category>>(`/categories/${id}`);
+    return res.data.success && res.data.data
+      ? { success: true, data: res.data.data }
+      : { success: false };
+  } catch {
+    return { success: false };
+  }
+};
+
+export const listProductsByCategory = async (
+  categoryId: string,
+  filters: any = {}
+) => {
+  try {
+    const res = await api.get(`/categories/${categoryId}/products`, {
+      params: filters,
+    });
+
+    // Backend returns { success: true, data: { products: [], total: 0 } }
+    const data = res.data.data;
+    const products = data?.products || (Array.isArray(data) ? data : []);
+
+    return {
+      success: true,
+      data: { products },
+    };
+  } catch (error: any) {
+    console.error("Products fetch failed:", error.response?.data || error.message);
+    return { success: false };
+  }
+};
+
+export const getCategoryFilterOptions = async (categoryId: string, filters = {}) => {
+  try {
+    const res = await api.get(`/categories/${categoryId}/filters`, { params: filters });
+
+    // Same pattern: { success: true, data: { states: [...], ... } }
+    return res.data.success
+      ? { success: true, data: res.data.data || {} }
+      : { success: false };
+  } catch (error) {
+    console.error("Filters failed:", error);
+    return { success: false };
   }
 };

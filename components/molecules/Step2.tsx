@@ -13,16 +13,17 @@ interface Step2Props {
 }
 
 export function Step2({ form }: Step2Props) {
-  const category = form.watch("category")?.name;
+  const categories = form.watch("categories");
   const user = useUserStore((s) => s.user);
 
-  if (!category) {
+  if (!categories || categories.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
         Please select a category in Step 1
       </div>
     );
   }
+
 
   return (
     <div className="space-y-6">
@@ -63,7 +64,7 @@ export function Step2({ form }: Step2Props) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="features">Features *</Label>
+        <Label htmlFor="features">Features </Label>
         <Textarea
           id="features"
           placeholder="Enter features separated by | (e.g., Fast Charging | Water Resistant | 5G Compatible)"
@@ -76,6 +77,60 @@ export function Step2({ form }: Step2Props) {
         {form.formState.errors.features && (
           <p className="text-sm text-destructive">
             {form.formState.errors.features.message}
+          </p>
+        )}
+      </div>
+      {/* No in stock */}
+      <div className="space-y-2">
+        <Label htmlFor="amount_in_stock">Number in stock *</Label>
+        <Input
+          id="amount_in_stock"
+          type="number"
+          placeholder="Enter the number of items in stock "
+          {...form.register("amount_in_stock")}
+        />
+        {form.formState.errors.amount_in_stock && (
+          <p className="text-sm text-destructive">
+            {form.formState.errors.amount_in_stock.message}
+          </p>
+        )}
+      </div>
+
+      {/* Product condition */}
+      <div className="space-y-2 mt-6">
+        <Label>Item condition</Label>
+        <div className="flex gap-4 mt-1">
+          <label className="flex items-center space-x-2">
+            <input
+              type="radio"
+              value="new"
+              {...form.register("item_condition")}
+              className="w-4 h-4 text-primary border-muted"
+            />
+            <span>New</span>
+          </label>
+          <label className="flex items-center space-x-2">
+            <input
+              type="radio"
+              value="used"
+              {...form.register("item_condition")}
+              className="w-4 h-4 text-primary border-muted"
+            />
+            <span>Used</span>
+          </label>
+          <label className="flex items-center space-x-2">
+            <input
+              type="radio"
+              value="refurbished"
+              {...form.register("item_condition")}
+              className="w-4 h-4 text-primary border-muted"
+            />
+            <span>Refurbished</span>
+          </label>
+        </div>
+        {form.formState.errors.item_condition && (
+          <p className="text-sm text-destructive">
+            {form.formState.errors?.item_condition?.message}
           </p>
         )}
       </div>
@@ -209,7 +264,7 @@ export function Step2({ form }: Step2Props) {
               className="opacity-80"
               disabled
               value={user?.business_profile?.business_name || ""}
-              // {...form.register("price")}
+            // {...form.register("price")}
             />
           </div>
 
@@ -222,7 +277,7 @@ export function Step2({ form }: Step2Props) {
               className="opacity-80"
               disabled
               value={user?.phone_number || ""}
-              // {...form.register("price")}
+            // {...form.register("price")}
             />
           </div>
         </div>

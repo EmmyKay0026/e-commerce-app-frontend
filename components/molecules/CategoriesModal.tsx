@@ -1,18 +1,11 @@
 "use client";
 import React, { useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useCategoryStore } from "@/store/useCategoryStore";
-import {
-  Wrench,
-  Factory,
-  Shield,
-  PlugZap,
-  FlaskConical,
-  Battery,
-  Hammer,
-  Power,
-} from "lucide-react";
+import { Power, X } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
+import { constructImageUrl } from "@/lib/utils";
 
 interface CategoriesModalProps {
   isOpen: boolean;
@@ -28,75 +21,131 @@ const CategoriesModal: React.FC<CategoriesModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       fetchCategories();
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
     }
+
+    return () => {
+      document.body.style.overflow = "unset";
+    };
   }, [isOpen, fetchCategories]);
 
   if (!isOpen) return null;
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
-      className="fixed inset-0 bottom-0 flex justify-start items-end z-50"
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ x: -40, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        exit={{ x: -40, opacity: 0 }}
-        transition={{ duration: 0.3 }}
-        className="bg-white backdrop-blur-lg border border-white/20 shadow-2xl rounded-r-2xl w-[280px] h-[90dvh] p-6 text-gray-900"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">All Categories</h2>
-          <button
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop - visible on desktop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 hidden lg:block"
             onClick={onClose}
-            className="text-gray-900 hover:text-red text-xl"
-          >
-            ✕
-          </button>
-        </div>
+          />
 
-        {loading ? (
-          <div className="space-y-3">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-3 p-2 rounded-lg bg-gray-200 animate-pulse"
-              >
-                <div className="w-5 h-5 bg-gray-300 rounded"></div>
-                <div className="w-3/4 h-4 bg-gray-300 rounded"></div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <ul className="space-y-3">
-            {categories.map((cat, i) => (
-              <li
-                key={i}
-                className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary/20 cursor-pointer transition-all"
-              >
-                <Link
-                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary/20 cursor-pointer transition-all"
-                  href={`/category/${cat.slug}`}
+          {/* Modal Container */}
+          <div className="fixed inset-0 z-50 pointer-events-none">
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="pointer-events-auto bg-white shadow-2xl h-full w-full max-w-[320px] lg:max-w-[360px] flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+                <h2 className="text-xl lg:text-2xl font-bold text-gray-900">
+                  All Categories
+                </h2>
+                <button
+                  onClick={onClose}
+                  className="p-2 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors"
+                  aria-label="Close modal"
                 >
-                  {/* You can add a default icon or handle missing icons gracefully */}
-                  {cat.icon ? (
-                    <img src={cat.icon} alt={cat.name} className="w-5 h-5" />
-                  ) : (
-                    <Power className="w-5 h-5" />
-                  )}
-                  <span>{cat.name}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </motion.div>
-    </motion.div>
+                  <X className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 overflow-y-auto px-5 py-4">
+                {loading ? (
+                  <div className="space-y-2">
+                    {Array.from({ length: 8 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center gap-3 p-3 rounded-xl bg-gray-100 animate-pulse"
+                      >
+                        <div className="w-6 h-6 bg-gray-300 rounded-lg flex-shrink-0"></div>
+                        <div className="flex-1 h-4 bg-gray-300 rounded-md"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : categories.length > 0 ? (
+                  <ul className="space-y-1">
+                    {categories.map((cat, i) => (
+                      <motion.li
+                        key={cat.slug || i}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.03 }}
+                      >
+                        <Link
+                          href={`/category/${cat.slug}`}
+                          onClick={onClose}
+                          className="flex items-center gap-3 p-3 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 active:scale-[0.98] transition-all duration-200 group"
+                        >
+                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                            {cat.icon ? (
+                              <Image
+                                src={constructImageUrl(cat.icon)}
+                                width={20}
+                                height={20}
+                                alt=""
+                                className="w-5 h-5 object-contain"
+                              />
+                            ) : (
+                              <Power className="w-5 h-5 text-indigo-600" />
+                            )}
+                          </div>
+                          <span className="text-gray-800 font-medium text-sm lg:text-base group-hover:text-indigo-700 transition-colors">
+                            {cat.name}
+                          </span>
+                        </Link>
+                      </motion.li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                      <Power className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <p className="text-gray-500 font-medium">
+                      No categories available
+                    </p>
+                    <p className="text-gray-400 text-sm mt-1">
+                      Check back later for updates
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer - Optional branding or info */}
+              <div className="px-5 py-5 border-t border-gray-200 bg-gray-50">
+                <p className="text-xs text-gray-500 text-center">
+                  {categories.length} {categories.length === 1 ? 'category' : 'categories'} available
+                </p>
+              </div>
+            </motion.div>
+          </div>
+        </>
+      )}
+    </AnimatePresence>
   );
 };
 

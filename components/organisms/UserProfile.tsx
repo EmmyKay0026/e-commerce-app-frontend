@@ -82,7 +82,7 @@ export function UserDashboard({
 
       const res = await getBusinessProducts(viewedUser.business_profile_id);
       if (res.success && res.data) {
-        console.log("get business ", res.data);
+        // console.log("get business ", res.data);
 
         setBusinessProducts(res.data.data);
       }
@@ -250,7 +250,7 @@ export function UserDashboard({
   // console.log(viewedUser.first_name);
 
   useEffect(() => {
-    console.log("Herre");
+    // console.log("Herre");
 
     const getBusniessProducts = async () => {
       if (!viewedUser.business_profile?.id || !viewedUser.id) return;
@@ -258,7 +258,7 @@ export function UserDashboard({
 
       const res = await getBusinessProducts(viewedUser.business_profile.id);
       if (res.success && res.data) {
-        console.log("get business ", res.data);
+        // console.log("get business ", res.data);
 
         setBusinessProducts(res.data.data);
       }
@@ -363,10 +363,9 @@ export function UserDashboard({
             </EmptyMedia>
             <EmptyTitle>
               {`
-                      ${
-                        viewedUser?.business_profile?.business_name ||
-                        viewedUser.first_name
-                      }'s store is empty`}
+                      ${viewedUser?.business_profile?.business_name ||
+                viewedUser.first_name
+                }'s store is empty`}
             </EmptyTitle>
             <EmptyDescription>
               Add products to your store to start selling.

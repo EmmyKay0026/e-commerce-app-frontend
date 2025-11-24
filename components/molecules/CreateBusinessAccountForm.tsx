@@ -24,7 +24,7 @@ interface CreateBusinessAccountFormProps {
   setBusinessAddress: (value: string) => void;
   handleSubmit: (e: React.FormEvent) => void;
   isSubmitting: boolean;
-  error: string | null;
+  error: any;
   fieldErrors: Record<string, string>;
 }
 
@@ -54,9 +54,7 @@ export default function CreateBusinessAccountForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4 mt-7">
       <div>
-        <label className="block text-sm font-medium mb-1">
-          Business name
-        </label>
+        <label className="block text-sm font-medium mb-1">Business name</label>
         <input
           value={businessName}
           onChange={(e) => setBusinessName(e.target.value)}
@@ -90,9 +88,7 @@ export default function CreateBusinessAccountForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">
-          Description
-        </label>
+        <label className="block text-sm font-medium mb-1">Description</label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -100,16 +96,12 @@ export default function CreateBusinessAccountForm({
           placeholder="Tell customers about your business"
         />
         {fieldErrors.description && (
-          <p className="text-sm text-red-500 mt-1">
-            {fieldErrors.description}
-          </p>
+          <p className="text-sm text-red-500 mt-1">{fieldErrors.description}</p>
         )}
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">
-          Cover image
-        </label>
+        <label className="block text-sm font-medium mb-1">Cover image</label>
         <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
           <div className="text-center">
             {coverPreview ? (
@@ -172,20 +164,21 @@ export default function CreateBusinessAccountForm({
               </label>
               <p className="pl-1">or drag and drop</p>
             </div>
-            <p className="text-xs leading-5 text-gray-600">PNG, JPG, GIF up to 10MB</p>
+            <p className="text-xs leading-5 text-gray-600">
+              PNG, JPG, GIF up to 10MB
+            </p>
           </div>
         </div>
         {fieldErrors.cover_image && (
-          <p className="text-sm text-red-500 mt-1">
-            {fieldErrors.cover_image}
-          </p>
+          <p className="text-sm text-red-500 mt-1">{fieldErrors.cover_image}</p>
         )}
       </div>
 
       <div className="border-t pt-4">
         <h2 className="text-lg font-semibold">Business Contact</h2>
         <p className="text-sm text-muted-foreground mb-4">
-          This information will be displayed on your shop page. If you don't provide new details, your existing contact information will be used.
+          This information will be displayed on your shop page. If you don't
+          provide new details, your existing contact information will be used.
         </p>
 
         <div>
@@ -195,8 +188,9 @@ export default function CreateBusinessAccountForm({
           <input
             type="email"
             value={businessEmail}
+            disabled
             onChange={(e) => setBusinessEmail(e.target.value)}
-            className="w-full border rounded px-3 py-2"
+            className="w-full border rounded px-3 py-2 text-muted-foreground bg-gray-100 hover:cursor-not-allowed"
             placeholder="contact@example.com"
           />
           {fieldErrors.business_email && (
@@ -207,9 +201,7 @@ export default function CreateBusinessAccountForm({
         </div>
 
         <div className="mt-4">
-          <label className="block text-sm font-medium mb-1">
-            Phone Number
-          </label>
+          <label className="block text-sm font-medium mb-1">Phone Number</label>
           <input
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(formatPhoneNumber(e.target.value))}
@@ -229,7 +221,9 @@ export default function CreateBusinessAccountForm({
           </label>
           <input
             value={whatsappNumber}
-            onChange={(e) => setWhatsappNumber(formatPhoneNumber(e.target.value))}
+            onChange={(e) =>
+              setWhatsappNumber(formatPhoneNumber(e.target.value))
+            }
             className="w-full border rounded px-3 py-2"
             placeholder="+234..."
           />
@@ -258,7 +252,11 @@ export default function CreateBusinessAccountForm({
         </div>
       </div>
 
-      {error && <div className="text-sm text-red-600">{error}</div>}
+      {error && (
+        <div className="text-sm text-red-600">
+          {typeof error === 'string' ? error : JSON.stringify(error)}
+        </div>
+      )}
 
       <div className="flex justify-end">
         <button
