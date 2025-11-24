@@ -1,11 +1,11 @@
-// app/(shop)/products/[productId]/page.tsx
+// app/(shop)/products/[slug]/page.tsx
 import { Metadata } from "next";
 import ProductClient from "./productClient";
 import { getProductBySlug } from "@/services/productService";
 import { getCategoryWithParentCategories } from "@/services/categoryService";
 
 interface Props {
-  params: { productId: string };
+  params: Promise<{ slug: string }>;
 }
 
 
@@ -15,7 +15,7 @@ interface CategoryInfo {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const slug = params.productId;
+  const { slug } = await params;
 
   try {
     const res = await getProductBySlug(slug);
@@ -118,6 +118,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           item: canonical,
         },
       ],
+        //   availability: product.in_stock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
     };
 
     return {
@@ -177,13 +178,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 
-export default async function Page({ params }: { params: { productId: string } }) {
-  // const initialData = await getProductBySlug(params.productId);
+export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  // const initialData = await getProductBySlug(slug);
 
   return (
     <ProductClient
       // initialProduct={initialData.success ? initialData.data : null}
-      slug={params.productId}
+      slug={slug}
     />
   );
 }

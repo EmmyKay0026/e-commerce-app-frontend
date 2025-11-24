@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic"; // <<< important!
 type Props = { params: { slug: string } };
 
 export async function generateMetadata({ params }: Props) {
-  return generateVendorMetadata(params.slug);
+  return await generateVendorMetadata(params.slug);
 }
 
 export default function VendorShopPage({ params }: Props) {

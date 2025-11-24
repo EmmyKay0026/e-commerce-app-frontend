@@ -80,7 +80,7 @@ export default function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
       const token = session?.access_token ?? session?.accessToken ?? null;
 
       if (token) {
-        console.log(token);
+        // console.log(token);
 
         localStorage.setItem("token", token);
         // After sign-up, fetch user data and update the store using getMe
@@ -122,7 +122,7 @@ export default function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
     >
       <div
         className="bg-white/95 rounded-xl shadow-xl w-full max-w-screen md:max-w-md p-6 relative"
-        // onClick={(e) => e.stopPropagation()}
+      // onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-2xl font-semibold mb-2">Create an account</h2>
         <p className="text-sm text-gray-600 mb-4">Join the marketplace</p>

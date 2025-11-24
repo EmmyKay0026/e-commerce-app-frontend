@@ -17,6 +17,7 @@ export const preloadCategoryMaps = async (): Promise<void> => {
     if (!res.ok) throw new Error("Failed");
 
     const json = await res.json();
+    // console.log(json);
 
     if (json.success && Array.isArray(json.data)) {
       json.data.forEach((cat: Category) => {

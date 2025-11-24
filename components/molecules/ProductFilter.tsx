@@ -15,12 +15,14 @@ interface ProductFilterSidebarProps {
   categories?: CategoryOption[];
   states?: string[];
   lgas?: string[];
+  itemConditions?: string[];
 }
 
 export default function ProductFilterSidebar({
   categories = [],
   states = [],
   lgas = [],
+  itemConditions = [],
 }: ProductFilterSidebarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -256,6 +258,7 @@ export default function ProductFilterSidebar({
       )}
 
       {/* Location State Filter */}
+      <span className="text-gray text-[13px]">Only locations with availabile products are displayed here.</span>
       {states.length > 0 && (
         <FilterSection id="location_state" label="State">
           <div className="space-y-2">
@@ -277,9 +280,9 @@ export default function ProductFilterSidebar({
                       type="checkbox"
                       checked={currentFilters.location_state?.includes(state) || false}
                       onChange={() => handleFilterChange("location_state", state, "checkbox")}
-                      className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="w-4 h-4 rounded border-gray-300 text-blue-600 capitalize focus:ring-blue-500"
                     />
-                    <span className="text-sm">{state}</span>
+                    <span className="text-sm capitalize">{state}</span>
                   </label>
                 ))
               ) : (
@@ -312,9 +315,9 @@ export default function ProductFilterSidebar({
                       type="checkbox"
                       checked={currentFilters.location_lga?.includes(lga) || false}
                       onChange={() => handleFilterChange("location_lga", lga, "checkbox")}
-                      className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="w-4 h-4 rounded border-gray-300 text-blue-600 capitalize focus:ring-blue-500"
                     />
-                    <span className="text-sm">{lga}</span>
+                    <span className="text-sm capitalize">{lga}</span>
                   </label>
                 ))
               ) : (
@@ -374,6 +377,41 @@ export default function ProductFilterSidebar({
           </label>
         </div>
       </FilterSection>
+
+      {/* Item Condition Filter */}
+      {itemConditions.length > 0 && (
+        <FilterSection id="item_condition" label="Item Condition">
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+              <input
+                type="checkbox"
+                checked={currentFilters.item_condition?.includes("new") || false}
+                onChange={() => handleFilterChange("item_condition", "new", "checkbox")}
+                className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="text-sm">New</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+              <input
+                type="checkbox"
+                checked={currentFilters.item_condition?.includes("refurbished") || false}
+                onChange={() => handleFilterChange("item_condition", "refurbished", "checkbox")}
+                className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="text-sm">Refurbished</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+              <input
+                type="checkbox"
+                checked={currentFilters.item_condition?.includes("used") || false}
+                onChange={() => handleFilterChange("item_condition", "used", "checkbox")}
+                className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="text-sm">Used</span>
+            </label>
+          </div>
+        </FilterSection>
+      )}
     </div>
   );
 

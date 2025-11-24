@@ -29,55 +29,35 @@ export default function DashboardPage() {
   const isOwner = useUserStore((state) => state.isOwner);
   const updateIsOwner = useUserStore((state) => state.updateIsOwner);
 
-  if (!id) {
-    router.push("/404");
-    return null;
-  }
-
   useEffect(() => {
     if (!id) return;
 
     const result = updateIsOwner(id.toString());
 
     // console.log("Result of ownership check:", result);
-  }, []);
-  // useEffect(() => {
-  //   if (!id) return;
-
-  //   let cancelled = false;
-
-  //   const ensureOwner = async () => {
-  //     // updateIsOwner may be sync or return a promise; handle both safely
-  //     const result = updateIsOwner(id.toString());
-  //     // treat result as any to safely check for a thenable without incorrect type comparisons
-  //     if (result != null && typeof (result as any).then === "function") {
-  //       await (result as unknown as Promise<unknown>);
-  //     }
-  //     if (cancelled) return;
-  //     // no further action needed — the store updateIsOwner handles state
-  //   };
-
-  //   ensureOwner();
-
-  //   return () => {
-  //     cancelled = true;
-  //   };
-  // }, [id, updateIsOwner]);
+  }, [id, updateIsOwner]);
 
   useEffect(() => {
     const fetchViewedUser = async () => {
-      const user = await getPublicProfileByProfileLink(id?.toString());
+      if (!id) return;
+
+      const user = await getPublicProfileByProfileLink(id.toString());
       if (user.status === 404) {
         router.push("/404");
         return;
       }
-      console.log("fetch user:", user);
+      // console.log("fetch user:", user);
 
       setViewedUser(user.data ?? null);
     };
 
     fetchViewedUser();
-  }, []);
+  }, [id, router]);
+
+  if (!id) {
+    router.push("/404");
+    return null;
+  }
 
   // Loading or unknown ownership state
   if (isOwner === "unknown" || viewedUser == null) {

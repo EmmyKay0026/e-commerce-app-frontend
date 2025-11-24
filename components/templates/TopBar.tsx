@@ -55,7 +55,7 @@ const TopBar = () => {
 
   const tabs = [
     { id: "contact", label: "Contact Info", href: `/user/${userId}/profile` },
-    { id: "featured", label: "Featured", href: `/user/${userId}/featured` },
+    { id: "saved", label: "Saved", href: `/user/${userId}/saved` },
     { id: "products", label: "My Products", href: `/user/${userId}/products` },
   ];
 

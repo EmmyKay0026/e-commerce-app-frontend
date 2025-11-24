@@ -38,7 +38,7 @@ export async function uploadImagesToCloudflare(files: File[]): Promise<any> {
     }
 
     const { urls }: PreSignedUrlResponse = await urlResponse.data;
-    console.log(urls);
+    // console.log(urls);
 
     // --- Step 2: Parallel Direct Upload to R2 ---
     const uploadPromises = Array.from(files).map((file) => {

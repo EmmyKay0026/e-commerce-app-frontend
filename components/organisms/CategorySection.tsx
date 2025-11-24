@@ -1,4 +1,5 @@
 "use client";
+"use client";
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
@@ -149,7 +150,7 @@ const CategorySection: React.FC = () => {
                 href={`/category/${selectedCategory.slug}`}
                 className="text-sm font-medium text-blue-600 hover:underline"
               >
-                See more
+                See more →
               </Link>
             )}
           </div>

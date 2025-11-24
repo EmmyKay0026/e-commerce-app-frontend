@@ -35,12 +35,16 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   await preloadCategoryMaps();
 
   const categoryId = getCategoryIdFromSlug(slug);
+  // console.log(categoryId);
+
   if (!categoryId) notFound();
 
   // Get category from cache or API
   let activeCategory: Category | null = getCategoryFromSlug(slug);
   if (!activeCategory) {
     const res = await getCategoryById(categoryId);
+    // console.log(res);
+
     if (!res.success || !res.data) notFound();
     activeCategory = res.data;
   }
@@ -54,6 +58,8 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
     location_lga: resolvedSearchParams.lga || undefined,
     price_type: resolvedSearchParams.price_type || undefined,
     sort: resolvedSearchParams.sort || "recommended",
+    amount_in_stock: resolvedSearchParams.amount_in_stock ? Number(resolvedSearchParams.amount_in_stock) : undefined,
+    item_condition: (resolvedSearchParams.item_condition as "new" | "refurbished" | "used") || undefined,
   };
 
   // Fetch data

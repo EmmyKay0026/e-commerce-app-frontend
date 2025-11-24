@@ -121,6 +121,7 @@ export function ProductForm() {
         description: data.description,
         price: data.price ?? "",
         images: imageKeys,
+
         category_ids: data.categories.map((c) => c.id),
         location_lga: data.location_lga,
         location_state: data.location_state,
@@ -141,7 +142,10 @@ export function ProductForm() {
         setCurrentStep(1);
         setImagePreviews([]);
       } else {
-        toast.error(result.error || "Failed to create product");
+        const errorMessage = typeof result.error === 'string'
+          ? result.error
+          : result.error?.message || result.error?.detail || "Failed to create product";
+        toast.error(errorMessage);
       }
     } catch (error) {
       console.error("Error submitting product:", error);

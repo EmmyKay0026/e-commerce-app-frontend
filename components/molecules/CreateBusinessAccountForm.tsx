@@ -24,7 +24,7 @@ interface CreateBusinessAccountFormProps {
   setBusinessAddress: (value: string) => void;
   handleSubmit: (e: React.FormEvent) => void;
   isSubmitting: boolean;
-  error: string | null;
+  error: any;
   fieldErrors: Record<string, string>;
 }
 
@@ -252,7 +252,11 @@ export default function CreateBusinessAccountForm({
         </div>
       </div>
 
-      {error && <div className="text-sm text-red-600">{error}</div>}
+      {error && (
+        <div className="text-sm text-red-600">
+          {typeof error === 'string' ? error : JSON.stringify(error)}
+        </div>
+      )}
 
       <div className="flex justify-end">
         <button

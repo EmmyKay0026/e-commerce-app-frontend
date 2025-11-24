@@ -56,6 +56,7 @@ export function ProductInfo({
   const [quantity, setQuantity] = useState(minOrder);
   const [isSaved, setIsSaved] = useState<boolean>(false);
   const user = useUserStore((state) => state.user);
+  const getMe = useUserStore((state) => state.getMe);
   const convertedDate = convertToCustomFormat(product.created_at);
   // console.log(convertedDate);
 
@@ -64,21 +65,52 @@ export function ProductInfo({
     // console.log(user?.saved_items);
 
     const checkSaved = user?.saved_items?.some(
-      (savedId) => savedId == product.id
+      (savedId) => savedId === product.id
     );
     // console.log(checkSaved);
 
-    setIsSaved(checkSaved ? true : false);
+    setIsSaved(checkSaved);
 
     // Cleanup function
     return () => {
       setIsSaved(false);
     };
-  }, [user, product.id]);
+  }, [user?.saved_items, product.id]);
 
   const handleSaveItem = async () => {
-    const res = await updateSavedItems(product.id);
-    // console.log(res);
+    if (!user) {
+      toast.error("Please login to save items");
+      return;
+    }
+
+    try {
+      const res = await updateSavedItems(product.id);
+
+      if (res.success && res.data) {
+        // Update local state immediately for better UX
+        const wasSaved = isSaved;
+        setIsSaved(!wasSaved);
+
+        // Refresh user data to sync with backend
+        await getMe();
+
+        // Show feedback to user
+        if (wasSaved) {
+          toast.success("Item removed from saved items");
+        } else {
+          toast.success("Item saved successfully");
+        }
+      } else {
+        const errorMessage =
+          typeof res.error === "string"
+            ? res.error
+            : res.error?.message || res.error?.detail || "Failed to update saved items";
+        toast.error(errorMessage);
+      }
+    } catch (error) {
+      console.error("Error saving item:", error);
+      toast.error("Failed to update saved items");
+    }
   };
 
   // const handleShare = () => {
@@ -106,14 +138,14 @@ export function ProductInfo({
               className={cn(
                 "transition-all duration-300",
                 isSaved
-                  ? "fill-black group-hover:fill-white group-hover:text-white "
-                  : "group-hover:text-white "
+                  ? "fill-primary text-primary group-hover:fill-white group-hover:text-white"
+                  : "group-hover:text-white"
               )}
             />
           </span>
         </div>
         {category && (
-          <Badge variant="secondary" className="text-sm">
+          <Badge variant="default" className="text-sm">
             {category}
           </Badge>
         )}
@@ -161,6 +193,22 @@ export function ProductInfo({
             </p>
           </div>
         )}
+        {product.item_condition && (
+          <div>
+            <h3 className="font-semibold">Item Condition</h3>
+            <p className="text-muted-foreground capitalize">
+              {product.item_condition}
+            </p>
+          </div>
+        )}
+        {product.amount_in_stock && (
+          <div>
+            <h3 className="font-semibold">Amount in Stock</h3>
+            <p className="text-muted-foreground">
+              {product.amount_in_stock} {Number(product.amount_in_stock) === 1 ? 'unit' : 'units'}
+            </p>
+          </div>
+        )}
         {product.location_lga && product.location_state && (
           <div>
             <h3 className="font-semibold">Location</h3>
@@ -168,7 +216,7 @@ export function ProductInfo({
               <div className="flex items-center gap-1 text-muted-foreground">
                 <MapPin className="h-4 w-4" />
                 <p className="text-muted-foreground capitalize">
-                  {product.location_lga}, {product.location_state}
+                  {product.lga_name || product.location_lga}, {product.state_name || product.location_state}
                 </p>
               </div>
             }

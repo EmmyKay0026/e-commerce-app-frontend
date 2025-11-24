@@ -4,39 +4,17 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import useEmblaCarousel, { UseEmblaCarouselType } from "embla-carousel-react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-
-const largeItems = [
-  {
-    id: "r1",
-    title: "Hot selling",
-    img: "https://industrialmartnigeria.com/wp-content/uploads/2024/09/thermal_arc_175se_1-600x600.jpg",
-    rating: 4.5,
-    price: "22,000,000",
-  },
-  {
-    id: "r2",
-    title: "Top product 2",
-    img: "https://industrialmartnigeria.com/wp-content/uploads/2024/09/12570_A_Conk-600x600.jpg",
-    rating: 4.2,
-    price: "3,000,000",
-  },
-  {
-    id: "r3",
-    title: "Top product 3",
-    img: "https://industrialmartnigeria.com/wp-content/uploads/2024/09/hoist10500kg-1-600x600.webp",
-    rating: 4.8,
-    price: "800,000",
-  },
-];
-
-const thumbItems = [
-  "https://industrialmartnigeria.com/wp-content/uploads/2024/09/thermal_arc_175se_1-600x600.jpg",
-  "https://industrialmartnigeria.com/wp-content/uploads/2024/09/12570_A_Conk-600x600.jpg",
-  "https://industrialmartnigeria.com/wp-content/uploads/2024/09/hoist10500kg-1-600x600.webp",
-];
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { getTopRankingProducts } from "@/services/productService";
+import { Product } from "@/types/models";
+import { constructImageUrl } from "@/lib/utils";
+import { Button } from "../ui/button";
 
 const TopRanking = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   // main embla for big images
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
@@ -53,6 +31,29 @@ const TopRanking = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const liveRegionRef = useRef<HTMLDivElement | null>(null);
 
+  // Fetch products on mount
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setIsLoading(true);
+      const result = await getTopRankingProducts(3);
+
+      if (result.success && result.data) {
+        setProducts(result.data);
+        setError(null);
+      } else {
+        // Extract string message from error (can be string or object)
+        const errorMessage = typeof result.error === 'string'
+          ? result.error
+          : result.error?.message || result.error?.detail || "Failed to load products";
+        setError(errorMessage);
+      }
+
+      setIsLoading(false);
+    };
+
+    fetchProducts();
+  }, []);
+
   // sync selected index and thumbnail scroll
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -61,11 +62,10 @@ const TopRanking = () => {
     if (thumbApi) thumbApi.scrollTo(idx);
     // announce to screen readers
     if (liveRegionRef.current) {
-      liveRegionRef.current.textContent = `Slide ${idx + 1} of ${
-        largeItems.length
-      }`;
+      liveRegionRef.current.textContent = `Slide ${idx + 1} of ${products.length
+        }`;
     }
-  }, [emblaApi, thumbApi]);
+  }, [emblaApi, thumbApi, products.length]);
 
   useEffect(() => {
     if (!emblaApi) return;
@@ -94,6 +94,26 @@ const TopRanking = () => {
     [emblaApi]
   );
 
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-xl shadow-sm p-4">
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error || products.length === 0) {
+    return (
+      <div className="bg-white rounded-xl shadow-sm p-4">
+        <div className="flex items-center justify-center h-64 text-muted-foreground">
+          {error || "No products available"}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white rounded-xl shadow-sm p-4">
       {/* live region for screen readers */}
@@ -108,40 +128,40 @@ const TopRanking = () => {
         >
           <div className="embla" ref={emblaRef as any}>
             <div className="embla__container flex gap-4 select-none">
-              {largeItems.map((item, index) => (
+              {products.map((product, index) => (
                 <div
-                  key={item.id}
+                  key={product.id}
                   className="embla__slide min-w-full"
                   role="group"
                   aria-roledescription="slide"
-                  aria-label={`${index + 1} of ${largeItems.length}`}
+                  aria-label={`${index + 1} of ${products.length}`}
                 >
                   <Link
-                    href={`/ranking/${item.id}`}
+                    href={`/products/${product.slug}`}
                     className="block"
-                    aria-label={`Open ${item.title}`}
+                    aria-label={`Open ${product.name}`}
                   >
                     <div className="relative h-56 sm:h-64 md:h-72 lg:h-64 rounded-lg overflow-hidden">
                       <Image
-                        src={item.img}
-                        alt={item.title}
+                        src={constructImageUrl(product.images[0]) || "/placeholder.png"}
+                        alt={product.name}
                         fill
                         className="object-cover transition-transform duration-300 hover:scale-105"
                         // eager the first slide for better LCP, lazy otherwise
                         loading={index === 0 ? "eager" : "lazy"}
                       />
-                      {/* <div className="absolute left-4 top-4 bg-white text-sm px-2 py-1 rounded-full font-medium shadow">
-                        {item.rating}
-                      </div> */}
                     </div>
                     <div className="flex items-start justify-between mt-3 px-1">
                       <div className="">
-                        <h4 className="font-semibold">{item.title}</h4>
-                        <p className="text-sm text-gray-500">
-                          Electronic Signs
+                        <h4 className="font-semibold line-clamp-1">{product.name}</h4>
+                        <p className="text-sm text-gray-500 line-clamp-1">
+                          {product.business?.business_name || "Unknown Vendor"}
                         </p>
                       </div>
-                      <span className="font-bold">N{item.price}</span>
+                      <Link href={`/products/${product.slug}`} className="">
+                        <Button variant="default">View Product</Button>
+                      </Link>
+                      {/* <span className="font-bold whitespace-nowrap">{product.price_input_mode === "enter" ? ("₦" + Number(product.price).toLocaleString()) : "Contact Vendor"}</span> */}
                     </div>
                   </Link>
                 </div>
@@ -177,20 +197,19 @@ const TopRanking = () => {
           aria-label="Slide thumbnails"
         >
           <div className="embla__container flex gap-3 items-center">
-            {thumbItems.map((src, idx) => (
+            {products.map((product, idx) => (
               <button
-                key={src}
+                key={product.id}
                 onClick={() => scrollTo(idx)}
-                className={`flex-shrink-0 rounded-md overflow-hidden border transition-shadow focus:outline-none focus:ring-2 ${
-                  selectedIndex === idx
-                    ? "ring-2 ring-blue-500 shadow-md"
-                    : "border-transparent"
-                }`}
+                className={`flex-shrink-0 rounded-md overflow-hidden border transition-shadow focus:outline-none focus:ring-2 ${selectedIndex === idx
+                  ? "ring-2 ring-blue-500 shadow-md"
+                  : "border-transparent"
+                  }`}
                 style={{ width: 72, height: 72 }}
                 aria-label={`Show slide ${idx + 1}`}
               >
                 <Image
-                  src={src}
+                  src={constructImageUrl(product.images[0]) || "/placeholder.png"}
                   alt={`thumbnail ${idx + 1}`}
                   width={72}
                   height={72}
@@ -208,13 +227,12 @@ const TopRanking = () => {
           role="tablist"
           aria-label="Slide dots"
         >
-          {largeItems.map((_, i) => (
+          {products.map((_, i) => (
             <button
               key={i}
               onClick={() => emblaApi?.scrollTo(i)}
-              className={`w-2 h-2 rounded-full ${
-                selectedIndex === i ? "bg-gray-800" : "bg-gray-300"
-              }`}
+              className={`w-2 h-2 rounded-full ${selectedIndex === i ? "bg-gray-800" : "bg-gray-300"
+                }`}
               aria-label={`Navigate to slide ${i + 1}`}
               aria-pressed={selectedIndex === i}
             />

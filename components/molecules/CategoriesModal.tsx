@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useCategoryStore } from "@/store/useCategoryStore";
 import { Power, X } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
+import { constructImageUrl } from "@/lib/utils";
 
 interface CategoriesModalProps {
   isOpen: boolean;
@@ -77,9 +79,11 @@ const CategoriesModal: React.FC<CategoriesModalProps> = ({ isOpen, onClose }) =>
                         >
                           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                             {cat.icon ? (
-                              <img
-                                src={cat.icon}
-                                alt={cat.name}
+                              <Image
+                                src={constructImageUrl(cat.icon)}
+                                width={20}
+                                height={20}
+                                alt=""
                                 className="w-5 h-5 object-contain"
                               />
                             ) : (

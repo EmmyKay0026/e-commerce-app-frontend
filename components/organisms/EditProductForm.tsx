@@ -17,6 +17,7 @@ import { Product } from "@/types/models";
 import { updateProduct } from "@/services/productService";
 import { z } from "zod";
 import { uploadImagesToCloudflare } from "@/lib/cloudflareImageUpload";
+import { useRouter } from "next/navigation";
 
 const TOTAL_STEPS = 3;
 
@@ -24,20 +25,20 @@ interface EditProductFormProps {
   product: Product;
 }
 
-const editProductSchema = productFormSchema.extend({
-  images: z.array(z.instanceof(File)).max(5).optional(),
-});
-
 export function EditProductForm({ product }: EditProductFormProps) {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [existingImageKeys, setExistingImageKeys] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Create a custom schema for editing that makes images optional without min validation
+  const editProductSchema = productFormSchema.omit({ images: true }).extend({
+    images: z.array(z.instanceof(File)).optional().default([]),
+  });
+
   const form = useForm<ProductFormData>({
-    resolver: zodResolver(
-      editProductSchema
-    ) as unknown as Resolver<ProductFormData>,
+    resolver: zodResolver(editProductSchema) as unknown as Resolver<ProductFormData>,
     mode: "onChange",
     defaultValues: { images: [] /* other defaults */ },
   });
@@ -59,10 +60,14 @@ export function EditProductForm({ product }: EditProductFormProps) {
           })) || [],
         location_lga: product.location_lga || "",
         location_state: product.location_state || "",
-        features: (product.metadata?.features as string) || "",
+        features: Array.isArray(product.features)
+          ? product.features.join("|")
+          : (product.features || ""),
         priceType: product.price_type,
         saleType: product.sale_type,
         price_input_mode: product.price_input_mode,
+        item_condition: product.item_condition,
+        amount_in_stock: product.amount_in_stock?.toString() || "",
       });
     }
   }, [product, form]);
@@ -81,32 +86,38 @@ export function EditProductForm({ product }: EditProductFormProps) {
   const validateStep = async (step: number): Promise<boolean> => {
     let fieldsToValidate: (keyof ProductFormData)[] = [];
     if (step === 1) {
+      // For editing, we don't require new images since the product already has images
       fieldsToValidate = [
-        "images",
         "categories",
         "location_state",
         "location_lga",
       ];
     } else if (step === 2) {
+      // Only validate required fields for step 2
       fieldsToValidate = [
         "name",
-        "description",
-        "price",
-        "features",
-        "priceType",
-        "saleType",
+        "price_input_mode",
       ];
+
+      // Add price validation only if price_input_mode is "enter"
+      const priceInputMode = form.getValues("price_input_mode");
+      if (priceInputMode === "enter") {
+        fieldsToValidate.push("price");
+      }
     }
 
     const result = await form.trigger(fieldsToValidate);
 
     if (!result) {
+      const errors = form.formState.errors;
+      // console.log("Validation errors:", errors);
       toast.error("Please fill in all required fields correctly.");
       return false;
     }
 
-    if (step === 1 && imagePreviews.length < 3) {
-      toast.error("Please provide at least 3 images.");
+    // For editing, we check total images (existing + new) instead of just new images
+    if (step === 1 && imagePreviews.length < 1) {
+      toast.error("Please provide at least 1 images.");
       return false;
     }
 
@@ -131,6 +142,7 @@ export function EditProductForm({ product }: EditProductFormProps) {
   };
 
   const onSubmit = async (data: ProductFormData) => {
+    // console.log("onSubmit called with data:", data);
     setIsSubmitting(true);
     try {
       let uploadedKeys: string[] = [];
@@ -154,12 +166,21 @@ export function EditProductForm({ product }: EditProductFormProps) {
         price_input_mode: data.price_input_mode,
         price_type: data.priceType ?? null,
         sale_type: data.saleType ?? null,
+        item_condition: data.item_condition,
+        amount_in_stock: data.amount_in_stock,
       });
 
       if (result.success) {
         toast.success("Product updated successfully!");
+        // Redirect to the product page after successful update
+        setTimeout(() => {
+          router.push(`/products/${product.slug}`);
+        }, 1000);
       } else {
-        toast.error(result.error || "Failed to update product");
+        const errorMessage = typeof result.error === 'string'
+          ? result.error
+          : result.error?.message || result.error?.detail || "Failed to update product";
+        toast.error(errorMessage);
       }
     } catch (error) {
       console.error("Error updating product:", error);
@@ -247,7 +268,12 @@ export function EditProductForm({ product }: EditProductFormProps) {
                   </Button>
                 )}
                 {currentStep === TOTAL_STEPS && (
-                  <Button type="submit" disabled={isSubmitting}>
+                  <Button
+
+                    type="submit"
+                    disabled={isSubmitting}
+
+                  >
                     {isSubmitting ? (
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     ) : (

@@ -85,7 +85,7 @@ const UserProductList = () => {
       const userDetails = userRes.data;
 
       if (!userDetails || !userDetails?.business_profile) return;
-      console.log(userDetails?.business_profile);
+      // console.log(userDetails?.business_profile);
 
       const res = await getBusinessProducts(userDetails?.business_profile?.id!);
       if (res.success && res.data) {
@@ -175,15 +175,13 @@ const UserProductList = () => {
             <div className="flex items-center gap-2">
               {" "}
               <LucideGrid3X3
-                className={`text-lg cursor-pointer ${
-                  isActive === "grid" ? "text-primary" : ""
-                }`}
+                className={`text-lg cursor-pointer ${isActive === "grid" ? "text-primary" : ""
+                  }`}
                 onClick={() => setIsActive("grid")}
               />{" "}
               <List
-                className={`text-lg cursor-pointer ${
-                  isActive === "list" ? "text-primary" : ""
-                }`}
+                className={`text-lg cursor-pointer ${isActive === "list" ? "text-primary" : ""
+                  }`}
                 onClick={() => setIsActive("list")}
               />
             </div>
@@ -195,9 +193,8 @@ const UserProductList = () => {
                 <input
                   type="text"
                   placeholder="Search items..."
-                  className={`border rounded px-3 py-2 transition-all duration-300 ml-2 ${
-                    showSearch ? "w-64 opacity-100" : "w-0 opacity-0 p-0"
-                  }`}
+                  className={`border rounded px-3 py-2 transition-all duration-300 ml-2 ${showSearch ? "w-64 opacity-100" : "w-0 opacity-0 p-0"
+                    }`}
                   style={{ minWidth: showSearch ? "10rem" : "0" }}
                   value={searchValue}
                   onChange={(e) => setSearchValue(e.target.value)}
@@ -251,9 +248,8 @@ const UserProductList = () => {
               <EmptyTitle>
                 {isOwner
                   ? "Your store is empty"
-                  : `${
-                      user?.business_profile?.business_name || user?.first_name
-                    }'s store is empty`}
+                  : `${user?.business_profile?.business_name || user?.first_name
+                  }'s store is empty`}
               </EmptyTitle>
               <EmptyDescription>
                 Add products to your store to start selling.
@@ -274,7 +270,11 @@ const UserProductList = () => {
                 isPageLoading ? (
                   <ProductCardGridViewSkeleton />
                 ) : (
-                  <ProductCards key={product.id} product={product} />
+                  <ProductCards
+                    key={product.id}
+                    product={product}
+                    isOwner={isOwner === true}
+                  />
                 )
               )}
           </div>
@@ -286,7 +286,11 @@ const UserProductList = () => {
                 isPageLoading ? (
                   <ProductCardListViewSkeleton />
                 ) : (
-                  <ProductList key={product.id} product={product} />
+                  <ProductList
+                    key={product.id}
+                    product={product}
+                    isOwner={isOwner === true}
+                  />
                 )
               )}
           </div>
