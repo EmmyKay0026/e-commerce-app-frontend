@@ -142,7 +142,7 @@ export default async function RootLayout({
       </head>
 
       <body
-        className={`overflow-x-hidden overflow-y-auto max-w-dvw ${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`overflow-x-hidden overflow-y-auto max-w-[100dvw] min-h-[100dvh] ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Navbar />
         <Toaster />

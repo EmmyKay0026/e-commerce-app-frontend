@@ -342,6 +342,9 @@ export default function Navbar() {
               <div className="flex justify-between items-center gap-6 relative">
                 <ul className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-700">
                   <li className="hover:text-secondary transition-colors cursor-pointer">
+                    <Link href="/">Home</Link>
+                  </li>
+                  <li className="hover:text-secondary transition-colors cursor-pointer">
                     <Link href="/about-us">About us</Link>
                   </li>
                   <li className="hover:text-secondary transition-colors cursor-pointer">
@@ -592,6 +595,9 @@ export default function Navbar() {
               ✕
             </Button>
             <ul className="flex flex-col text-sm text-gray-800 p-4 space-y-3">
+              <li className="hover:text-secondary cursor-pointer">
+                <Link href="/">Home</Link>
+              </li>
               <li className="hover:text-secondary cursor-pointer">
                 <Link href="/about-us">About us</Link>
               </li>
