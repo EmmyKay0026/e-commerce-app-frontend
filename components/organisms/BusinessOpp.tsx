@@ -4,6 +4,7 @@ import TopRanking from "./TopRanking";
 import NewArrivals from "./NewArrivals";
 import TopDeals from "./TopDeals";
 import Link from "next/link";
+import { Button } from "../ui/button";
 
 export default function BusinessOpportunities() {
   return (
@@ -18,10 +19,12 @@ export default function BusinessOpportunities() {
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-medium">Top ranking</h3>
               <Link
-                href={`/category/top-ranking`}
+                href={`/products?sort=popular`}
                 className="text-sm text-muted-foreground cursor-pointer"
               >
-                View more
+                <Button variant={"link"}>
+                  View more
+                </Button>
               </Link>
             </div>
             <TopRanking />
@@ -31,10 +34,12 @@ export default function BusinessOpportunities() {
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-medium">New arrivals</h3>
               <Link
-                href={`/category/new-arrivals`}
+                href={`/products?sort=newest`}
                 className="text-sm text-muted-foreground"
               >
-                View more
+                <Button variant={"link"}>
+                  View more
+                </Button>
               </Link>
             </div>
             <NewArrivals />
@@ -44,10 +49,12 @@ export default function BusinessOpportunities() {
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-medium">Top deals</h3>
               <Link
-                href={`/category/top-deals`}
+                href={`/products?sort=price_asc`}
                 className="text-sm text-muted-foreground"
               >
-                View more
+                <Button variant={"link"}>
+                  View more
+                </Button>
               </Link>
             </div>
             <TopDeals />

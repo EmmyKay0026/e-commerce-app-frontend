@@ -4,6 +4,7 @@ import Link from "next/link";
 import ProductCards from "@/components/molecules/ProductCards";
 import ProductFilterSidebar from "@/components/molecules/ProductFilter";
 import { listProducts, getAllCategories } from "@/services/productService";
+import ProductToolbar from "@/components/molecules/ProductToolbar";
 
 export default async function Page({
   searchParams,
@@ -140,6 +141,8 @@ export default async function Page({
             ? `${categoryIds.length} Category${categoryIds.length > 1 ? "s" : ""} Selected`
             : "All Products"}
         </h1>
+
+        <ProductToolbar />
 
         {products.length === 0 ? (
           <div className="text-center py-20">

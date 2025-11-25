@@ -11,12 +11,15 @@ import { FaWhatsapp } from "react-icons/fa";
 import Link from "next/link";
 import ShowContactButton from "../atoms/ShowContactButton";
 import { constructImageUrl } from "@/lib/utils";
+import { useAuthModal } from "@/store/useAuthModal";
 
 export function HeroSection({
   vendor,
 }: {
   vendor: BusinessProfile & { user: User };
 }) {
+  const { user: currentUser } = useUserStore();
+  const setIsOpen = useAuthModal((state) => state.setIsOpen);
   return (
     <section className="relative w-full">
       {/* Cover Image */}
@@ -89,10 +92,18 @@ export function HeroSection({
                         (2,450 reviews)
                       </span>
                     </div> */}
-                    <div className="flex items-center gap-1 text-muted-foreground">
-                      <MapPin className="h-4 w-4" />
-                      <span>Lagos, Nigeria</span>
-                    </div>
+                    {vendor.address && (
+                      <div className="flex items-center gap-1 text-muted-foreground line-clamp-1">
+                        <MapPin className="h-4 w-4" />
+                        {currentUser ? (
+                          <span>{vendor.address}</span>
+                        ) : (
+                          <Button onClick={() => setIsOpen(true)} variant={"ghost"} className="underline hover:text-primary text-xs">
+                            Login to view address
+                          </Button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
