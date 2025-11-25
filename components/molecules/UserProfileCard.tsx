@@ -28,51 +28,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const isOwner = useUserStore((state) => state.isOwner);
-  // console.log(isOwner);
-  // console.log(profileDetails);
 
-  // useEffect(() => {
-  //   if (profileUserProp !== undefined) {
-  //     setProfileUser(profileUserProp);
-  //     setLoading(false);
-  //     setError(null);
-  //     return;
-  //   }
-
-  //   let mounted = true;
-  //   const controller = new AbortController();
-
-  //   async function load() {
-  //     setLoading(true);
-  //     setError(null);
-  //     try {
-  //       const path = userId ? `users/${userId}` : `users/me`;
-  //       // prefer api.request so token headers are attached by useApi
-  //       const payload = await api.request<any>(path, {
-  //         method: "GET",
-  //         signal: controller.signal,
-  //       });
-  //       // API may return { user: {...} } or the user object directly
-  //       const userData = payload?.user ?? payload;
-  //       const normalized = userData ? normalizeUser(userData) : null;
-  //       if (mounted) setProfileUser(normalized);
-  //     } catch (err: any) {
-  //       if (err?.name === "AbortError") return;
-  //       if (mounted) {
-  //         setError(err?.message ?? "Failed to load profile");
-  //         setProfileUser(null);
-  //       }
-  //     } finally {
-  //       if (mounted) setLoading(false);
-  //     }
-  //   }
-
-  //   load();
-  //   return () => {
-  //     mounted = false;
-  //     controller.abort();
-  //   };
-  // }, [profileUserProp, userId, api]);
 
   if (profileDetails === null || profileDetails === undefined) return null;
   if (loading) {
@@ -106,6 +62,8 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
               constructImageUrl(profileDetails?.profile_picture)) ||
             "/placeholder.svg"
           }
+          width={100}
+          height={100}
           alt={profileDetails.first_name}
           className="object-cover"
         />
@@ -117,7 +75,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
       </Avatar>
 
       <div className="text-center">
-        <h2 className="text-lg font-semibold">
+        <h2 className="text-lg font-semibold capitalize">
           {profileDetails.first_name + " " + profileDetails.last_name}
         </h2>
         {/* <p className="text-sm text-gray-500">{profileDetails.email}</p> */}

@@ -11,6 +11,7 @@ import {
 import api from "@/config/api";
 import MobileDropdown from "@/components/molecules/MobileDropDown";
 import { Loader2 } from "lucide-react";
+import { Button } from "../ui/button";
 
 // Recursive desktop item
 function CategoryTreeItem({
@@ -264,6 +265,17 @@ export default function CategoryExplorer() {
                 allCategories={allCategories}
               />
             ))}
+            <Link href="/marketplace">
+              <Button variant={"link"}
+                className="w-full text-left block py-2 px-3 rounded-lg text-sm font-medium transition-all"
+              // className={`w-full text-left block py-2 px-3 rounded-lg text-sm font-medium transition-all ${selectedCategoryId === null
+              //   ? "bg-blue-100 text-blue-700 font-bold"
+              //   : "text-gray-700 hover:bg-gray-100"
+              //   }`}
+              >
+                View all categories →
+              </Button>
+            </Link>
           </ul>
         </aside>
 

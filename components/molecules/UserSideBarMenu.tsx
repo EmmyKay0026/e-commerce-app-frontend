@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Bookmark, Contact, Settings, Store } from "lucide-react";
+import { Bookmark, Contact, Mail, Settings, Store } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useParams } from "next/navigation";
 import useApi from "@/hooks/useApi";
@@ -29,53 +29,7 @@ export default function UserSideBarMenu({
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // fetch profile user if not provided
-  // useEffect(() => {
-  //   if (profileUserProp !== undefined) {
-  //     setProfileUser(profileUserProp);
-  //     setLoading(false);
-  //     setError(null);
-  //     return;
-  //   }
 
-  //   if (!routeUserId) {
-  //     setProfileUser(null);
-  //     setLoading(false);
-  //     setError("Missing user id");
-  //     return;
-  //   }
-
-  //   let mounted = true;
-  //   const controller = new AbortController();
-
-  //   async function load() {
-  //     setLoading(true);
-  //     setError(null);
-  //     try {
-  //       const payload = await api.request<any>(`users/${routeUserId}`, {
-  //         method: "GET",
-  //         signal: controller.signal,
-  //       });
-  //       const userData = payload?.user ?? payload;
-  //       if (mounted) setProfileUser(userData ?? null);
-  //     } catch (err: any) {
-  //       if ((err as any)?.name === "AbortError") return;
-  //       if (mounted) {
-  //         setError(err?.message ?? "Failed to load profile");
-  //         setProfileUser(null);
-  //       }
-  //     } finally {
-  //       if (mounted) setLoading(false);
-  //     }
-  //   }
-
-  //   load();
-  //   return () => {
-  //     mounted = false;
-  //     controller.abort();
-  //   };
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [routeUserId, profileUserProp]);
 
   if (loading || profileDetails === undefined) {
     return (
@@ -129,9 +83,9 @@ export default function UserSideBarMenu({
   // contact action for visitors
   const contactHref = profileDetails?.phone_number
     ? `https://wa.me/${profileDetails.phone_number.replace(/[^0-9+]/g, "")}`
-    : profileDetails?.email
-    ? `mailto:${profileDetails.email}`
-    : null;
+    : profileDetails?.whatsapp_number
+      ? `https://wa.me/${profileDetails.whatsapp_number.replace(/[^0-9+]/g, "")}`
+      : null;
 
   return (
     <nav aria-label="User menu" className="shadow bg-white p-4 rounded">
@@ -143,11 +97,10 @@ export default function UserSideBarMenu({
             <li key={item.name}>
               <Link
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2 rounded transition-colors ${
-                  Active
-                    ? "text-primary font-semibold bg-primary/5"
-                    : "text-gray-700 hover:text-primary"
-                }`}
+                className={`flex items-center gap-3 px-3 py-2 rounded transition-colors ${Active
+                  ? "text-primary font-semibold bg-primary/5"
+                  : "text-gray-700 hover:text-primary"
+                  }`}
               >
                 <Icon className="w-4 h-4" />
                 <span>{item.name}</span>
@@ -158,7 +111,7 @@ export default function UserSideBarMenu({
 
         {!isOwner && contactHref && (
           <li>
-            <a
+            <Link
               href={contactHref}
               target="_blank"
               rel="noopener noreferrer"
@@ -166,7 +119,21 @@ export default function UserSideBarMenu({
             >
               <Contact className="w-4 h-4" />
               <span>Chat with on WhatsApp</span>
-            </a>
+            </Link>
+          </li>
+        )}
+
+        {!isOwner && profileDetails?.email && (
+          <li>
+            <Link
+              href={`mailto:${profileDetails.email}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 px-3 py-2 rounded text-gray-700 hover:text-primary"
+            >
+              <Mail className="w-4 h-4" />
+              <span>Send an email</span>
+            </Link>
           </li>
         )}
       </ul>
