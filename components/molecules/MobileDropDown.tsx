@@ -41,8 +41,7 @@ export default function MobileDropdown({
             </button>
           </li>
 
-          {/* Category tree */}
-          {root.map((cat) => (
+          {root.slice(0, 6).map((cat) => (
             <MobileItem
               key={cat.id}
               cat={cat}
@@ -51,6 +50,15 @@ export default function MobileDropdown({
               allCategories={allCategories}
             />
           ))}
+
+          <li className="pt-2">
+            <a
+              href="/marketplace"
+              className="block w-full text-left text-blue-600 text-sm font-medium hover:underline"
+            >
+              View all categories →
+            </a>
+          </li>
         </ul>
       )}
     </>

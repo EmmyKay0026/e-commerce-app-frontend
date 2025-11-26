@@ -65,20 +65,15 @@ export default async function MarketPlacePage({ searchParams }: Props) {
   }
 
   return (
-    <main className="max-w-7xl mx-auto px-6 lg:px-12 py-10 pt-24">
+    <main className="max-w-dvw w-full px-4 md:px-6 lg:px-10">
       {/* Header */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+      <div className="mt-6 flex flex-col justify-between md:flex-row relative  px-3 md:px-5 w-full lg:px-18">
+        <h1 className="text-4xl font-bold">
           Marketplace
         </h1>
-        <h2 className="text-xl text-gray-600">
-          Explore thousands of industrial products across Nigeria
-        </h2>
+        {/* Client-side Search Bar */}
+        <MarketplaceSearchBar initialQuery={q} />
       </div>
-
-      {/* Client-side Search Bar */}
-      <MarketplaceSearchBar initialQuery={q} />
-
       {/* 🔍 Server-side Search Results */}
       {q && (
         <section className="mb-16">

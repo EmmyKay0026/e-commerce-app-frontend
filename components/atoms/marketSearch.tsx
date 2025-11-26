@@ -94,14 +94,14 @@ export default function MarketplaceSearchBar({ initialQuery = "" }: Props) {
   return (
     <div
       id="hero-search"
-      className="relative mt-8 mb-12 max-w-2xl mx-auto"
+      className=""
       ref={(el) => {
         searchRef.current = el;
         barRef.current = el;
       }}
     >
 
-      <div className="flex items-center gap-2 bg-white border border-blue-600 rounded-3xl overflow-hidden">
+      <div className="flex items-center gap-2 bg-white  border-[0.5px] border-[#007bff] text-lg rounded-3xl overflow-hidden">
         <Input
           value={searchQuery}
           onChange={(e) => {

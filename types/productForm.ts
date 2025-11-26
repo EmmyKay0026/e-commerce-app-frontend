@@ -61,10 +61,10 @@ export const productFormSchema = z
     name: z
       .string()
       .min(2, "Product name must be at least 2 characters")
-      .max(20, "Product name must be at most 20 characters"),
+      .max(30, "Product name must be at most 30 characters"),
     description: z
       .string()
-      .min(40, "Description must be at least 40 characters")
+      .max(150, "Description must be at most 150 characters")
       .optional(),
     price: z.string().optional(),
     price_input_mode: z.enum(["enter", "quote"]).default("enter"),

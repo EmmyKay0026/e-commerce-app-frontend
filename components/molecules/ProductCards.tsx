@@ -56,8 +56,12 @@ const ProductCards = ({
           {convertedDate?.shortMonthOfYear}, {convertedDate?.year}
         </span>
 
+        <h3 className="text-[14px] lg:text-base font-krub font-bold line-clamp-3">
+          {product.name}
+        </h3>
+
         {product.price_input_mode == "enter" ? (
-          <p className="font-bold text-lg lg:text-xl">
+          <p className="font-bold font-500 text-lg lg:text-xl">
             {currency}
             {Number(product.price).toLocaleString()} -{" "}
             <span className="italic capitalize text-[14px] font-normal">
@@ -65,7 +69,7 @@ const ProductCards = ({
             </span>
           </p>
         ) : (
-          <p className="font-bold text-lg lg:text-xl">
+          <p className="font-krub font-500 text-lg lg:text-xl">
             Contact Seller for Price -{" "}
             <span className="italic capitalize text-[14px] font-normal">
               {product.sale_type ?? "Retail"}
@@ -73,9 +77,7 @@ const ProductCards = ({
           </p>
         )}
 
-        <h3 className="text-[14px] lg:text-base font-krub font-[500] line-clamp-3">
-          {product.name}
-        </h3>
+        
 
         <div className="flex items-center gap-1 mt-1 text-gray-500 text-xs">
           <MapPin size={12} />
