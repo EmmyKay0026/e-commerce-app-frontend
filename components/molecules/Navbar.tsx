@@ -563,14 +563,14 @@ export default function Navbar() {
         {isMobile && (
           <div className="w-full">
             <div className="flex justify-between items-center bg-white pr-4">
-              <div className="relative w-36 h-14">
+              <Link href={"/"} className="relative w-36 h-14">
                 <Image
                   src="/ind_logo.png"
                   alt="IndustrialMart Logo"
                   fill
                   className="object-cover"
                 />
-              </div>
+              </Link>
 
               <div className="flex items-center gap-4">
                 <Search
