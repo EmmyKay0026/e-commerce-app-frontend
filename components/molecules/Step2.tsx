@@ -49,7 +49,7 @@ export function Step2({ form }: Step2Props) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description">Description *</Label>
+        <Label htmlFor="description">Description</Label>
         <Textarea
           id="description"
           placeholder="Describe your product..."

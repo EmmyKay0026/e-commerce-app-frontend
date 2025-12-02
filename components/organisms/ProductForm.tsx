@@ -76,9 +76,12 @@ export function ProductForm() {
         "features",
         "amount_in_stock",
         "item_condition",
-        "priceType",
-        "saleType",
       ];
+
+      // Only validate priceType and saleType if price_input_mode is "enter"
+      if (form.getValues("price_input_mode") === "enter") {
+        fieldsToValidate.push("priceType", "saleType");
+      }
     }
 
     const result = await form.trigger(fieldsToValidate);
@@ -142,9 +145,12 @@ export function ProductForm() {
         setCurrentStep(1);
         setImagePreviews([]);
       } else {
-        const errorMessage = typeof result.error === 'string'
-          ? result.error
-          : result.error?.message || result.error?.detail || "Failed to create product";
+        const errorMessage =
+          typeof result.error === "string"
+            ? result.error
+            : result.error?.message ||
+              result.error?.detail ||
+              "Failed to create product";
         toast.error(errorMessage);
       }
     } catch (error) {
