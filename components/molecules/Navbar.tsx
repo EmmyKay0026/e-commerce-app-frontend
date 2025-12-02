@@ -173,7 +173,7 @@ export default function Navbar() {
       if (abortControllerRef.current) {
         try {
           abortControllerRef.current.abort();
-        } catch {}
+        } catch { }
         abortControllerRef.current = null;
       }
 
@@ -349,7 +349,7 @@ export default function Navbar() {
                   </li>
                   <li className="hover:text-secondary transition-colors cursor-pointer">
                     <Link
-                      onClick={user ? () => {} : () => setIsOpen(true)}
+                      onClick={user ? () => { } : () => setIsOpen(true)}
                       href={user ? "/sell" : "#"}
                     >
                       Start selling
@@ -401,14 +401,14 @@ export default function Navbar() {
         {isMobile && (
           <div className="w-full">
             <div className="flex justify-between items-center bg-white pr-4">
-              <div className="relative w-36 h-14">
+              <Link href="/" className="relative w-36 h-14">
                 <Image
                   src="/ind_logo.png"
                   alt="IndustrialMart Logo"
                   fill
                   className="object-cover"
                 />
-              </div>
+              </Link>
 
               <div className="flex items-center gap-4">
                 <Search
@@ -443,7 +443,9 @@ export default function Navbar() {
                     <List className="w-4 h-4" />
                     <span>Categories</span>
                   </div>
-                  <span className="cursor-pointer">Marketplace</span>
+                  <Link href="/marketplace" className="cursor-pointer">
+                    Marketplace
+                  </Link>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -498,7 +500,7 @@ export default function Navbar() {
             )}
             <ul className="flex flex-col text-sm text-gray-800 p-4 mt-3 space-y-6">
               <li
-                onClick={user ? () => {} : () => setIsOpen(true)}
+                onClick={user ? () => { } : () => setIsOpen(true)}
                 className="hover:text-secondary cursor-pointer"
               >
                 <Link
@@ -511,12 +513,12 @@ export default function Navbar() {
               </li>
               {!user || user.role === "user" ? (
                 <li
-                  onClick={user ? () => {} : () => setIsOpen(true)}
+                  onClick={user ? () => { } : () => setIsOpen(true)}
                   className="hover:text-secondary cursor-pointer"
                 >
                   <Link
                     className="flex gap-2"
-                    onClick={user ? () => {} : () => setIsOpen(true)}
+                    onClick={user ? () => { } : () => setIsOpen(true)}
                     href={user ? "/sell" : "#"}
                   >
                     <Store className="w-5 h-5" />
@@ -525,7 +527,7 @@ export default function Navbar() {
                 </li>
               ) : (
                 <li
-                  onClick={user ? () => {} : () => setIsOpen(true)}
+                  onClick={user ? () => { } : () => setIsOpen(true)}
                   className="hover:text-secondary cursor-pointer"
                 >
                   <Link
@@ -539,7 +541,7 @@ export default function Navbar() {
               )}
 
               <li
-                onClick={user ? () => {} : () => setIsOpen(true)}
+                onClick={user ? () => { } : () => setIsOpen(true)}
                 className="hover:text-secondary cursor-pointer"
               >
                 <Link
@@ -551,7 +553,7 @@ export default function Navbar() {
                 </Link>
               </li>
               <li
-                onClick={user ? () => {} : () => setIsOpen(true)}
+                onClick={user ? () => { } : () => setIsOpen(true)}
                 className="hover:text-secondary cursor-pointer"
               >
                 <Link className="flex gap-2" href={user ? `/settings` : "#"}>
@@ -723,7 +725,7 @@ export default function Navbar() {
         isOpen={showCategories}
         onClose={() => setShowCategories(false)}
       />
-      
+
       {/* Toggle Button - Shows when nav is hidden */}
       <AnimatePresence>
         {isMobile && !manualToggle && (

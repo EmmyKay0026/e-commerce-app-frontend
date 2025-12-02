@@ -72,13 +72,15 @@ export function ProductForm() {
       fieldsToValidate = [
         "name",
         "description",
-        "price",
         "features",
         "amount_in_stock",
         "item_condition",
-        "priceType",
-        "saleType",
       ];
+
+      // Only validate price-related fields when entering a price
+      if (form.getValues("price_input_mode") === "enter") {
+        fieldsToValidate.push("price", "priceType", "saleType");
+      }
     }
 
     const result = await form.trigger(fieldsToValidate);
@@ -111,6 +113,7 @@ export function ProductForm() {
 
   const onSubmit = async (data: ProductFormData) => {
     setIsSubmitting(true);
+    console.log(data);
     try {
       toast.info("Uploading images...");
       const imageKeys = await uploadImagesToCloudflare(data.images);
