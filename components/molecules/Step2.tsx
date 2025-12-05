@@ -188,6 +188,7 @@ export function Step2({ form }: Step2Props) {
                     value="fixed"
                     {...form.register("priceType")}
                     className="w-4 h-4 text-primary border-muted"
+                    defaultChecked={form.getValues("priceType") === "fixed" || form.getValues("priceType") === undefined}
                   />
                   <span>Fixed price</span>
                 </label>

@@ -44,24 +44,22 @@ const ProductCards = ({
           <Pencil size={16} className="text-gray-700" />
         </Link>
       )}
-       <Link
+      <Link
         href={`/products/${product.slug}`}
         className="no-underline cursor-pointer"
       >
-      <ImageCarousel images={product.images} />
+        <ImageCarousel images={product.images} />
 
-     
+
         <span className="block text-gray italic text-[12px]">
           Posted {convertedDate?.dayWithSuffix}{" "}
           {convertedDate?.shortMonthOfYear}, {convertedDate?.year}
         </span>
-
-        <h3 className="text-[14px] lg:text-base font-krub font-bold line-clamp-3">
+        <h3 className="text-lg lg:text-xl font-krub font-[500] line-clamp-3">
           {product.name}
         </h3>
-
         {product.price_input_mode == "enter" ? (
-          <p className="font-bold font-500 text-lg lg:text-xl">
+          <p className="font-bold text-base">
             {currency}
             {Number(product.price).toLocaleString()} -{" "}
             <span className="italic capitalize text-[14px] font-normal">
@@ -69,7 +67,7 @@ const ProductCards = ({
             </span>
           </p>
         ) : (
-          <p className="font-krub font-500 text-lg lg:text-xl">
+          <p className="font-bold text-base">
             Contact Seller for Price -{" "}
             <span className="italic capitalize text-[14px] font-normal">
               {product.sale_type ?? "Retail"}
@@ -77,7 +75,7 @@ const ProductCards = ({
           </p>
         )}
 
-        
+
 
         <div className="flex items-center gap-1 mt-1 text-gray-500 text-xs">
           <MapPin size={12} />

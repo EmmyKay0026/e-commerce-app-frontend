@@ -199,7 +199,7 @@ export default function Navbar() {
       if (abortControllerRef.current) {
         try {
           abortControllerRef.current.abort();
-        } catch {}
+        } catch { }
         abortControllerRef.current = null;
       }
 
@@ -663,7 +663,7 @@ export default function Navbar() {
 
             <ul className="flex flex-col text-sm text-gray-800 p-4 mt-3 space-y-6">
               <li
-                onClick={user ? () => {} : () => setIsOpen(true)}
+                onClick={user ? () => { } : () => setIsOpen(true)}
                 className="hover:text-secondary cursor-pointer"
               >
                 <Link
@@ -678,7 +678,7 @@ export default function Navbar() {
 
               {!user || user.role === "user" ? (
                 <li
-                  onClick={user ? () => {} : () => setIsOpen(true)}
+                  onClick={user ? () => { } : () => setIsOpen(true)}
                   className="hover:text-secondary cursor-pointer"
                 >
                   <Link
@@ -923,7 +923,7 @@ export default function Navbar() {
         isOpen={showCategories}
         onClose={() => setShowCategories(false)}
       />
-      
+
       {/* Toggle Button - Shows when nav is hidden */}
       <AnimatePresence>
         {isMobile && !manualToggle && (

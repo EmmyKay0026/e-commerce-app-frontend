@@ -61,15 +61,10 @@ export const productFormSchema = z
     name: z
       .string()
       .min(2, "Product name must be at least 2 characters")
-      .max(50, "Product name must be at most 50 characters"),
+      .max(50, "Product name must be at most 50 words"),
     description: z
       .string()
-      .refine(val => val.trim().split(/\s+/).length >= 1, {
-        message: "Description must be at least 150 words",
-      })
-      .refine(val => val.trim().split(/\s+/).length <= 250, {
-        message: "Description must be at most 250 words",
-      })
+      .refine((val) => val.split(" ").length <= 250, "Description must be at less 250 words")
       .optional(),
 
     price: z.string().optional(),
@@ -101,12 +96,13 @@ export const productFormSchema = z
         message: "Price is required when entering a price",
       });
     }
-    // Only require priceType when entering a price, not when requesting quote
+
+
     if (data.price_input_mode === "enter" && !data.priceType) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["priceType"],
-        message: "Please select a price type",
+        message: "Price type is required when entering a price",
       });
     }
   });
