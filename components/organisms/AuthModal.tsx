@@ -6,6 +6,7 @@ import { useAuthModal } from "@/store/useAuthModal";
 import { formatPhoneNumber } from "@/lib/utils";
 import { toast } from "sonner";
 import { useUserStore } from "@/store/useUserStore";
+import { Eye, EyeOff } from "lucide-react";
 
 const AuthModal = () => {
   const toogle = useAuthModal((s) => s.toggle);
@@ -20,6 +21,11 @@ const AuthModal = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [isResetPassword, setIsResetPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [messageType, setMessageType] = useState<"success" | "error">("error");
 
   interface EmailLoginEvent extends React.FormEvent<HTMLFormElement> {}
 
@@ -41,12 +47,15 @@ const AuthModal = () => {
     if (error) {
       toast(error.message);
       setMessage(error.message);
+      setMessageType("error");
     } else {
       setIsOpen(false);
       toast("✅ Logged in successfully!");
       setMessage("✅ Logged in successfully!");
+      setMessageType("success");
       getMe();
     }
+
     setLoading(false);
   };
 
@@ -85,8 +94,13 @@ const AuthModal = () => {
     if (error) {
       toast(error.message);
       setMessage(error.message);
-    } else toast("✅ Account created! Check your email for confirmation.");
-    setMessage("✅ Account created! Check your email for confirmation.");
+      setMessageType("error");
+    } else {
+      toast("✅ Account created! Check your email for confirmation.");
+      setMessage("✅ Account created! Check your email for confirmation.");
+      setMessageType("success");
+    }
+
     setLoading(false);
 
     setIsSignUp(false);
@@ -94,6 +108,98 @@ const AuthModal = () => {
   };
 
   if (!isOpen) return null;
+
+  if (isResetPassword) {
+    return (
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-2xl w-full max-w-md shadow-xl">
+          <span className="flex justify-between mb-4">
+            <X
+              onClick={() => {
+                setIsResetPassword(false);
+                setMessage("");
+              }}
+              className="cursor-pointer"
+            />
+          </span>
+
+          <h2 className="text-2xl font-semibold text-center mb-6">
+            Reset Password
+          </h2>
+
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              setResetLoading(true);
+              setMessage("");
+
+              const { error } = await supabase.auth.resetPasswordForEmail(
+                resetEmail,
+                {
+                  redirectTo: `${window.location.origin}/auth/update-password`,
+                }
+              );
+
+              if (error) {
+                toast.error(error.message);
+                setMessage(error.message);
+                setMessageType("error");
+              } else {
+                toast.success("Password reset email sent — check your inbox.");
+                setMessage("Password reset email sent! Check your inbox.");
+                setMessageType("success");
+              }
+
+              setResetLoading(false);
+            }}
+            className="space-y-4"
+          >
+            <div>
+              <label className="block text-sm text-gray-600">Email</label>
+              <input
+                type="email"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1"
+                placeholder="you@example.com"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={resetLoading}
+              className="w-full bg-blue-600 text-white py-2 rounded-lg"
+            >
+              {resetLoading ? "Sending..." : "Send Reset Link"}
+            </button>
+          </form>
+
+          {message && (
+            <p
+              className={`text-center text-sm mt-4 ${
+                messageType === "success" ? "text-green-500" : "text-red-500"
+              }`}
+            >
+              {message}
+            </p>
+          )}
+
+          <div className="text-center mt-6">
+            <button
+              type="button"
+              className="text-blue-600 hover:underline text-sm"
+              onClick={() => setIsResetPassword(false)}
+            >
+              Back to Login
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center  min-h-screen  max-w-screen ">
@@ -170,25 +276,37 @@ const AuthModal = () => {
               />
             </div>
 
-            <div>
+            <div className="relative">
               <label className="block text-sm text-gray-600">Password</label>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
                 placeholder="••••••••"
                 required
               />
+              <span
+                className="absolute right-3 top-1/2 cursor-pointer text-gray-400"
+                onClick={() => setShowPassword((prev) => !prev)}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </span>
             </div>
+
             {!isSignUp && (
               <div className="text-right">
                 <button
                   type="button"
+                  onClick={() => {
+                    setIsResetPassword(true);
+                    setMessage("");
+                  }}
                   className="text-sm text-blue-600 cursor-pointer hover:underline"
                 >
                   Forgot password?
                 </button>
+
               </div>
             )}
             <button
@@ -237,8 +355,15 @@ const AuthModal = () => {
           </div>
 
           {message && (
-            <p className="text-center text-sm text-red-500 mt-4">{message}</p>
+            <p
+              className={`text-center text-sm mt-4 ${
+                messageType === "success" ? "text-green-500" : "text-red-500"
+              }`}
+            >
+              {message}
+            </p>
           )}
+
         </div>
       </div>
     </div>
