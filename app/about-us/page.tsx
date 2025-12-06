@@ -17,7 +17,7 @@ function HeroSection() {
       aria-label="About IndustrialMart hero"
       className="relative h-[50vh] flex flex-col items-center w-full justify-center text-center px-4"
       style={{
-        backgroundImage: "url('/hero-sections-img.png')",
+        backgroundImage: "url('/hero-sections-img.webp')",
         backgroundSize: "cover",
         backgroundPosition: "center top 20%",
       }}
@@ -82,7 +82,7 @@ function AboutContent() {
       <div
         className="relative h-[40vh] flex flex-col items-center justify-center w-full text-center px-4 overflow-hidden"
         style={{
-          backgroundImage: "url('/industrial-bg.png')",
+          backgroundImage: "url('/industrial-bg.webp')",
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
