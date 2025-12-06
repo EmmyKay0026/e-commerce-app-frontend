@@ -66,6 +66,7 @@ export const productFormSchema = z
       .string()
       .refine((val) => val.split(" ").length <= 250, "Description must be at less 250 words")
       .optional(),
+
     price: z.string().optional(),
     price_input_mode: z.enum(["enter", "quote"]).default("enter"),
     priceType: z

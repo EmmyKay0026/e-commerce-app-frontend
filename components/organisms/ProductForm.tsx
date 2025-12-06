@@ -145,9 +145,12 @@ export function ProductForm() {
         setCurrentStep(1);
         setImagePreviews([]);
       } else {
-        const errorMessage = typeof result.error === 'string'
-          ? result.error
-          : result.error?.message || result.error?.detail || "Failed to create product";
+        const errorMessage =
+          typeof result.error === "string"
+            ? result.error
+            : result.error?.message ||
+              result.error?.detail ||
+              "Failed to create product";
         toast.error(errorMessage);
       }
     } catch (error) {

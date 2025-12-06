@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -11,6 +13,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { headers } from "next/headers";
 import Script from "next/script";
 import { preloadCategoryMaps } from "@/services/preloadCategories";
+import { getAllCategories } from "@/services/categoryService";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -88,6 +91,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   await preloadCategoryMaps();
+  const categories = await getAllCategories();
   // useFetchDataOnMount();
   return (
     <html
@@ -140,12 +144,12 @@ export default async function RootLayout({
       </head>
 
       <body
-        className={`overflow-x-hidden overflow-y-auto max-w-dvw ${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`overflow-x-hidden overflow-y-auto max-w-[100dvw] min-h-[100dvh] ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Navbar />
         <Toaster />
         <AuthModal />
-        <LayoutProvider />
+        <LayoutProvider categories={categories} />
         {/* <SignModalManager />
               <RegisterModalManager /> */}
         {children}

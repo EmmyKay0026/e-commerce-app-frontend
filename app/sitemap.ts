@@ -1,12 +1,13 @@
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 import { MetadataRoute } from "next";
 import { getAllCategories } from "@/services/categoryService";
 import { getAllProductsForSitemap } from "@/services/productService";
-// import { getAllVendors } from "@/services/vendorService";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://industrialmart.ng";
 
-  // 1. Static Pages
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
@@ -28,7 +29,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // 2. Categories
   const categories = await getAllCategories();
   const categoryEntries: MetadataRoute.Sitemap = categories.map((cat) => ({
     url: `${baseUrl}/category/${cat.slug}`,
@@ -37,7 +37,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  // 3. Products
   const products = await getAllProductsForSitemap();
   const productEntries: MetadataRoute.Sitemap = products.map((p) => ({
     url: `${baseUrl}/products/${p.id}`,
@@ -46,20 +45,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  // 4. Vendors
-  // const vendors = await getAllVendors();
-  // const vendorEntries: MetadataRoute.Sitemap = vendors.map((v) => ({
-  //   url: `${baseUrl}/vendors/${v.slug}`,
-  //   lastModified: new Date(),
-  //   changeFrequency: "weekly",
-  //   priority: 0.7,
-  // }));
-
-  // Return as array (type-safe)
   return [
     ...staticPages,
     ...categoryEntries,
     ...productEntries,
-    // ...vendorEntries,
   ];
 }

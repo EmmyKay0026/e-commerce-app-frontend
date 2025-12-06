@@ -7,7 +7,7 @@ import CategoryCards from "@/components/organisms/CategoryCards";
 // import { getProductById } from "@/services/productService";
 import {
   getCategoryWithParentCategories,
-  getProductsByCategory,
+  listProductsByCategory,
 } from "@/services/categoryService";
 import {
   Breadcrumb,
@@ -70,19 +70,24 @@ export default function ProductClient({ slug }: ProductClientProps) {
   }, [slug]);
 
   useEffect(() => {
-    // 🔹 Fetch related products by categoryId
     if (!relatedCategoryId) return;
-    // console.log(relatedCategoryId);
 
-    const handleRelatedProducFetch = async () => {
-      const related = await getProductsByCategory(relatedCategoryId);
-      if (related.status === 200) {
-        const filtered = related.data?.filter((p) => p.slug !== slug);
-        setRelatedProducts(filtered ?? []);
+    const handleRelatedProductFetch = async () => {
+      const res = await listProductsByCategory(relatedCategoryId, { limit: 10 });
+
+      if (res.success && res.data?.products) {
+        const filtered = (res.data.products as Product[]).filter(
+          (p: Product) => p.slug !== slug
+        );
+        setRelatedProducts(filtered);
+      } else {
+        setRelatedProducts([]); // fallback in case of no data
       }
     };
-    handleRelatedProducFetch();
-  }, [relatedCategoryId]);
+
+    handleRelatedProductFetch();
+  }, [relatedCategoryId, slug]);
+
 
   useEffect(() => {
     const getParentOfCategoryWithId = async () => {
