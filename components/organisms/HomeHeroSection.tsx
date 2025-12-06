@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { List } from "lucide-react";
@@ -24,13 +24,8 @@ const HomeHeroSection = () => {
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
 
-  // ✅ Zustand store usage
-  const { categories, loading, fetchCategories } = useCategoryStore();
-
-  // Fetch categories on mount (only once)
-  useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
+  // ✅ Read categories directly from store (hydrated from server)
+  const categories = useCategoryStore((s) => s.categories);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -127,7 +122,7 @@ const HomeHeroSection = () => {
         </p>
 
         {/* Search bar */}
-        <div id="hero-search" className="mt-6 relative max-w-3xl ">
+        <div id="hero-search" className="mt-6 relative max-w-3xl">
           <div
             ref={searchRef}
             className="flex items-center gap-2 bg-white text-lg rounded-3xl overflow-hidden"
@@ -148,6 +143,7 @@ const HomeHeroSection = () => {
               placeholder="Search products..."
               className="flex-1 border-none rounded-2xl focus:ring-0 focus:outline-none shadow-none focus:border-none text-black px-6"
             />
+
             <Button
               onClick={() =>
                 router.push(`/products?q=${encodeURIComponent(searchQuery)}`)
@@ -165,13 +161,9 @@ const HomeHeroSection = () => {
               className="absolute left-0 right-0 mt-1 bg-white rounded-lg shadow-lg z-40 max-h-72 overflow-auto"
             >
               {isSearching ? (
-                <div className="p-3 text-sm text-muted-foreground">
-                  Searching...
-                </div>
+                <div className="p-3 text-sm text-muted-foreground">Searching...</div>
               ) : searchResults.length === 0 ? (
-                <div className="p-3 text-sm text-muted-foreground">
-                  No results
-                </div>
+                <div className="p-3 text-sm text-muted-foreground">No results</div>
               ) : (
                 <>
                   <ul className="divide-y">
@@ -182,7 +174,7 @@ const HomeHeroSection = () => {
                           className="flex items-center gap-3"
                         >
                           <div className="h-10 w-10 bg-gray-100 rounded overflow-hidden shrink-0">
-                            {p.images && p.images[0] ? (
+                            {p.images?.[0] ? (
                               <Image
                                 src={constructImageUrl(p.images[0])}
                                 alt={p.name}
@@ -196,6 +188,7 @@ const HomeHeroSection = () => {
                               </div>
                             )}
                           </div>
+
                           <div className="flex-1 text-sm text-black">
                             <div className="font-medium">{p.name}</div>
                             <div className="text-xs text-muted-foreground">
@@ -221,6 +214,7 @@ const HomeHeroSection = () => {
           )}
         </div>
 
+
         {/* Categories buttons */}
         <div className="mt-5 text-left flex items-center flex-wrap gap-6">
           <Button
@@ -231,9 +225,7 @@ const HomeHeroSection = () => {
             All categories
           </Button>
 
-          {loading ? (
-            <span className="text-sm text-white/80">Loading...</span>
-          ) : categories.length > 0 ? (
+          {categories.length > 0 &&
             categories.slice(0, 3).map((cat, i) => (
               <Link
                 key={i}
@@ -251,12 +243,8 @@ const HomeHeroSection = () => {
                 ) : null}
                 {cat.name}
               </Link>
-            ))
-          ) : (
-            <span className="text-sm text-white/80">
-              No categories available
-            </span>
-          )}
+            ))}
+
         </div>
       </div>
 

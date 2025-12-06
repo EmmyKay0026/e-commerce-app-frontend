@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
 
     const siteName = vendor?.business_name ?? "Marketplace";
-    const siteUrl = process.env.SITE_URL ?? "https://example.com";
+    const siteUrl = process.env.SITE_URL ?? "https://industrialmart.ng";
     const canonical = `${siteUrl}/product/${slug}`;
     const imageUrl =
       typeof product.images?.[0] === "string"
@@ -71,14 +71,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       .filter(Boolean)
       .join(", ");
 
-    // JSON-LD structured data for rich results
-    const jsonLd = {
+    // Product Schema
+    const productSchema = {
       "@context": "https://schema.org/",
       "@type": "Product",
       name: product.name,
       image: [imageUrl],
       description: product.description ?? description,
-      // sku: product.sku ?? "",
       brand: {
         "@type": "Brand",
         name: vendor?.business_name ?? siteName,
@@ -88,8 +87,38 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         url: canonical,
         priceCurrency: "NGN",
         price: product.price?.toString() ?? "",
-        //   availability: product.in_stock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
       },
+    };
+
+    // Breadcrumb Schema
+    const breadcrumbSchema = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: siteUrl,
+        },
+        ...(category
+          ? [
+              {
+                "@type": "ListItem",
+                position: 2,
+                name: category.name,
+                item: `${siteUrl}/category/${category.slug}`,
+              },
+            ]
+          : []),
+        {
+          "@type": "ListItem",
+          position: category ? 3 : 2,
+          name: product.name,
+          item: canonical,
+        },
+      ],
+        //   availability: product.in_stock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
     };
 
     return {
@@ -134,9 +163,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         },
       },
       other: {
-        "og:price:amount": product.price?.toString() ?? "",
-        "og:price:currency": "NGN",
-        "ld+json": JSON.stringify(jsonLd),
+        // Inject both schemas as an array
+        "ld+json": JSON.stringify([productSchema, breadcrumbSchema]),
       },
     };
   } catch (error) {
@@ -148,6 +176,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 }
+
 
 export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

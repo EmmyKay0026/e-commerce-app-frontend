@@ -1,4 +1,5 @@
 name: Frontend CI/CD Pipeline (Targeted with Rollback)
+
 on:
   push:
     branches:
@@ -77,6 +78,7 @@ jobs:
                 docker tag $FRONTEND_SERVICE_NAME:$ROLLBACK_TAG $FRONTEND_SERVICE_NAME:latest
                 
                 echo "Redeploying the previous working version..."
+
                 docker compose up -d --no-deps $FRONTEND_SERVICE_NAME nginx
                 
                 echo "Rollback Complete. The previous working version is now live."
@@ -120,7 +122,7 @@ jobs:
 
             if [ "$STATUS" == "running" ]; then
                 echo "Deployment successful. Frontend service is running."
-                
+
                 # 5. CLEANUP
                 if [ -n "$CURRENT_IMAGE_ID" ]; then
                     docker rmi $FRONTEND_SERVICE_NAME:$ROLLBACK_TAG 2>/dev/null || true
