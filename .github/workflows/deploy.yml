@@ -1,5 +1,4 @@
 name: Frontend CI/CD Pipeline (Targeted with Rollback)
-
 on:
   push:
     branches:
@@ -14,33 +13,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: frontend
-
-      # ➡️ NEW CACHING STEP ADDED HERE
-      - name: Cache node modules for Frontend
-        id: cache-node-modules
-        uses: actions/cache@v4
-        with:
-          # Path to node_modules relative to the root of the runner's workspace,
-          # which is inside the 'frontend' directory due to the checkout path.
-          path: frontend/node_modules
-          # Hash only the lock file within the frontend directory
-          key: ${{ runner.os }}-node-${{ hashFiles('frontend/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      # ➡️ INSTALL DEPENDENCIES (Conditional on cache miss)
-      # This step should run to ensure the 'frontend' directory is ready
-      # for any local tasks (though none are currently defined, it's good practice
-      # if you were to add build/test steps later).
-      - name: Install Frontend Dependencies
-        run: npm ci
-        working-directory: frontend
-        # Only install if the cache was missed (optional, but good for completeness)
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
-
-      # Note: The deployment is still done via SSH on the remote server, 
-      # so these cached node modules are NOT used for the remote build.
-      # The benefit here is primarily if you run local tests/builds *before* SSH.
 
       - name: 2. Deploy via SSH with Rollback Logic
         # Define the secret variable for the step.
@@ -78,7 +50,6 @@ jobs:
                 docker tag $FRONTEND_SERVICE_NAME:$ROLLBACK_TAG $FRONTEND_SERVICE_NAME:latest
                 
                 echo "Redeploying the previous working version..."
-
                 docker compose up -d --no-deps $FRONTEND_SERVICE_NAME nginx
                 
                 echo "Rollback Complete. The previous working version is now live."
@@ -89,7 +60,10 @@ jobs:
             cd $PROJECT_DIR
 
             # --- CRITICAL FIX: INJECT SECRETS DIRECTLY INTO THE SHELL ---
+            # This is the most reliable way to pass multi-line secrets to Docker Compose.
             echo "1. Injecting secrets directly into the shell environment..."
+            # This pipes the multi-line secret string through sed to prepend 'export ' to every line,
+            # then executes the resulting lines as shell commands.
             echo "$DOTENV_CONTENT" | sed 's/^/export /' | bash
             echo "Secrets are now available in the shell environment."
             # -------------------------------------------------------------
@@ -122,7 +96,7 @@ jobs:
 
             if [ "$STATUS" == "running" ]; then
                 echo "Deployment successful. Frontend service is running."
-
+                
                 # 5. CLEANUP
                 if [ -n "$CURRENT_IMAGE_ID" ]; then
                     docker rmi $FRONTEND_SERVICE_NAME:$ROLLBACK_TAG 2>/dev/null || true
