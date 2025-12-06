@@ -21,9 +21,11 @@ import ProductList from "../molecules/ProductList";
 const GridListProductList = ({
   products,
   className,
+  onSort,
 }: {
   products: Product[];
   className?: string;
+  onSort?: (sort: "latest" | "price_asc" | "price_desc") => void;
 }) => {
   const [isActive, setIsActive] = useState<"grid" | "list">("list");
   const [showSearch, setShowSearch] = useState<boolean>(false);
@@ -36,15 +38,13 @@ const GridListProductList = ({
         <div className="flex items-center gap-2">
           {" "}
           <LucideGrid3X3
-            className={`text-lg cursor-pointer ${
-              isActive === "grid" ? "text-primary" : ""
-            }`}
+            className={`text-lg cursor-pointer ${isActive === "grid" ? "text-primary" : ""
+              }`}
             onClick={() => setIsActive("grid")}
           />{" "}
           <List
-            className={`text-lg cursor-pointer ${
-              isActive === "list" ? "text-primary" : ""
-            }`}
+            className={`text-lg cursor-pointer ${isActive === "list" ? "text-primary" : ""
+              }`}
             onClick={() => setIsActive("list")}
           />
         </div>
@@ -56,9 +56,8 @@ const GridListProductList = ({
             <input
               type="text"
               placeholder="Search items..."
-              className={`border rounded px-3 py-2 transition-all duration-300 ml-2 ${
-                showSearch ? "w-64 opacity-100" : "w-0 opacity-0 p-0"
-              }`}
+              className={`border rounded px-3 py-2 transition-all duration-300 ml-2 ${showSearch ? "w-64 opacity-100" : "w-0 opacity-0 p-0"
+                }`}
               style={{ minWidth: showSearch ? "10rem" : "0" }}
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
@@ -80,20 +79,32 @@ const GridListProductList = ({
             <PopoverTrigger className="flex items-center gap-2 border rounded px-3 py-2 cursor-pointer">
               Sort <ArrowUpDown className="text-md" />
             </PopoverTrigger>
-            <PopoverContent className="p-4">
+            <PopoverContent className="p-4 bg-white border rounded-md shadow-md z-50">
               <div className="flex flex-col gap-2">
-                {["Latest", "Price: Low to High", "Price: High to Low"].map(
-                  (label) => (
-                    <PopoverClose asChild key={label}>
-                      <button
-                        onClick={() => toast(`${label} was clicked`)}
-                        className="text-left w-full cursor-pointer"
-                      >
-                        {label}
-                      </button>
-                    </PopoverClose>
-                  )
-                )}
+                <PopoverClose asChild>
+                  <button
+                    onClick={() => onSort?.("latest")}
+                    className="text-left w-full cursor-pointer hover:bg-gray-100 p-2 rounded"
+                  >
+                    Latest
+                  </button>
+                </PopoverClose>
+                <PopoverClose asChild>
+                  <button
+                    onClick={() => onSort?.("price_asc")}
+                    className="text-left w-full cursor-pointer hover:bg-gray-100 p-2 rounded"
+                  >
+                    Price: Low to High
+                  </button>
+                </PopoverClose>
+                <PopoverClose asChild>
+                  <button
+                    onClick={() => onSort?.("price_desc")}
+                    className="text-left w-full cursor-pointer hover:bg-gray-100 p-2 rounded"
+                  >
+                    Price: High to Low
+                  </button>
+                </PopoverClose>
               </div>
             </PopoverContent>
           </Popover>

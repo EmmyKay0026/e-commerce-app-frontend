@@ -143,7 +143,7 @@ export function ProductsGrid({
             All Products
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Explore our complete catalog of premium electronics and gadgets
+            Here are all the products available in our store
           </p>
         </div>
 

@@ -42,6 +42,7 @@ export default function Footer() {
               className="hover:text-blue-500 transition-colors"
             >
               <FaInstagram size={20} />
+
             </a>
           </div>
         </div>

@@ -8,7 +8,7 @@ export type FilterState = {
   maxPrice?: number;
   location_state?: string;
   location_lga?: string;
-  price_type?: "fixed" | "negotiable";
+  price_type?: string;
   sort?: string;
   item_condition?: "new" | "refurbished" | "used";
   amount_in_stock?: number;
@@ -73,22 +73,23 @@ export default function SidebarFilter({
 
     // Location
     if (locationState) {
-      params.set("state", locationState);
+      params.set("location_state", locationState);
     } else {
-      params.delete("state");
-      params.delete("lga");
+      params.delete("location_state");
+      params.delete("location_lga");
     }
+
     if (locationLga) {
-      params.set("lga", locationLga);
+      params.set("location_lga", locationLga);
     } else if (locationState) {
-      params.delete("lga");
+      params.delete("location_lga");
     }
 
     // Price type
     if (priceType) {
-      params.set("priceType", priceType);
+      params.set("price_type", priceType);
     } else {
-      params.delete("priceType");
+      params.delete("price_type");
     }
 
     // Item Condition

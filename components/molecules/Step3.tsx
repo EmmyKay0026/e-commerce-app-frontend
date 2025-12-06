@@ -194,14 +194,14 @@ export function Step3({ form, onEdit }: Step3Props) {
               )}
             </div>
 
-            <div>
+            {formData.price_input_mode === "enter" && <div>
               <h4 className="text-sm font-medium text-muted-foreground">
                 Pricing type
               </h4>
               <p className="mt-1 font-medium text-lg capitalize">
                 {formData.priceType}
               </p>
-            </div>
+            </div>}
 
             <div>
               <h4 className="text-sm font-medium text-muted-foreground">
@@ -214,7 +214,7 @@ export function Step3({ form, onEdit }: Step3Props) {
           </div>
 
           {/* Features */}
-          <div>
+          {formData.features && <div>
             <h4 className="text-sm font-medium text-muted-foreground">
               Features
             </h4>
@@ -229,7 +229,7 @@ export function Step3({ form, onEdit }: Step3Props) {
                 </Badge>
               ))}
             </div>
-          </div>
+          </div>}
         </CardContent>
       </Card>
     </div>

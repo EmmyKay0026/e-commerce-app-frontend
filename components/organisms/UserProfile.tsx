@@ -54,6 +54,7 @@ import {
   EmptyTitle,
 } from "../ui/empty";
 import Link from "next/link";
+import { constructImageUrl } from "@/lib/utils";
 
 interface UserDashboardProps {
   viewedUser: User;
@@ -249,25 +250,28 @@ export function UserDashboard({
   );
   // console.log(viewedUser.first_name);
 
-  useEffect(() => {
-    // console.log("Herre");
+  const [sort, setSort] = useState<"latest" | "price_asc" | "price_desc">("latest");
 
+  useEffect(() => {
     const getBusniessProducts = async () => {
       if (!viewedUser.business_profile?.id || !viewedUser.id) return;
       setIsPageLoading(true);
 
-      const res = await getBusinessProducts(viewedUser.business_profile.id);
+      const res = await getBusinessProducts(viewedUser.business_profile.id, {
+        sort: sort
+      });
       if (res.success && res.data) {
-        // console.log("get business ", res.data);
-
         setBusinessProducts(res.data.data);
       }
-      // console.log(res);
       setIsPageLoading(false);
     };
 
     getBusniessProducts();
-  }, []);
+  }, [sort]);
+
+  const handleSort = (newSort: "latest" | "price_asc" | "price_desc") => {
+    setSort(newSort);
+  };
 
   return (
     <div className="min-h-screen w-full bg-background">
@@ -276,7 +280,7 @@ export function UserDashboard({
         <Card
           className="rounded-none w-full shadow-none"
           style={{
-            background: `linear-gradient(8deg,rgba(0, 0, 0, 0.47) 0%, rgba(0, 0, 0, 0) 100%), url('${viewedUser.business_profile?.cover_image}')`,
+            background: `linear-gradient(8deg,rgba(0, 0, 0, 0.47) 0%, rgba(0, 0, 0, 0) 100%), url('${constructImageUrl(viewedUser.business_profile?.cover_image ?? "")}')`,
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
@@ -286,9 +290,11 @@ export function UserDashboard({
             <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
               <Avatar className="h-24 w-24">
                 <AvatarImage
-                  src={viewedUser.profile_picture || "/placeholder.svg"}
+                  src={constructImageUrl(viewedUser.profile_picture ?? "") || "/placeholder.svg"}
                   alt={viewedUser.first_name + " " + viewedUser.last_name}
                   className="object-cover"
+                  width={100}
+                  height={100}
                 />
                 <AvatarFallback className="text-xl font-bold">
                   {getInitials(
@@ -325,31 +331,6 @@ export function UserDashboard({
       )}
       <h5 className="font-bold text-2xl p-6 pb-2">Shop from {displayName}</h5>
 
-      {/* <section className="">
-          {businessProducts?.length === 0 && (
-            <Empty className="border border-dashed">
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <Store />
-                </EmptyMedia>
-                <EmptyTitle>
-                  {`
-                      ${
-                        vendor?.business_name || vendor?.user.first_name
-                      }'s store is empty`}
-                </EmptyTitle>
-                <EmptyDescription>
-                  Add products to your store to start selling.
-                </EmptyDescription>
-              </EmptyHeader>
-              <EmptyContent>
-                <Button variant="outline" size="sm">
-                  Continue shopping
-                </Button>
-              </EmptyContent>
-            </Empty>
-          )} */}
-
       {remoteLoading ? (
         // show skeleton while loading
         <div className="p-6">
@@ -379,7 +360,7 @@ export function UserDashboard({
         </Empty>
       ) : (
         // render fetched products (falls back to initial props if provided)
-        <GridListProductList products={businessProducts} />
+        <GridListProductList products={businessProducts} onSort={handleSort} />
       )}
 
       {remoteError && (

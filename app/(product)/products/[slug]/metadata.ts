@@ -7,8 +7,7 @@ import { Product, CategoryInfo } from "@/types/models";
 type Props = { params: { slug: string } };
 
 /* -------------------------------------------------
-   Helper – fetch product + category (used by both
-   metadata and the page when it needs SSR data)
+   Helper – fetch product + category
    ------------------------------------------------- */
 async function fetchProductData(slug: string) {
   const res = await getProductBySlug(slug);
@@ -38,7 +37,7 @@ export function generateProductSchema(product: Product) {
     brand: { "@type": "Brand", name: product.business.business_name },
     offers: {
       "@type": "Offer",
-      url: `https://industrialmart.ng/products/${product.id}`,
+      url: `https://industrialmart.ng/products/${product.slug}`,
       priceCurrency: "NGN",
       price: product.price,
       priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
@@ -77,15 +76,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const vendor = product.business;
+
+  // Construct metadata strings
   const title = category
     ? `${product.name} - ${category.name} - ${vendor.business_name} | Industrial Mart NG`
     : `${product.name} - ${vendor.business_name} | Industrial Mart NG`;
 
   const description =
-    product.description?.slice(0, 155).trim() + "..." ||
+    (product.description?.slice(0, 155).trim() + "...") ||
     `Buy ${product.name}${category ? ` in ${category.name}` : ""} from ${vendor.business_name} in Nigeria.`;
 
   const canonical = `https://industrialmart.ng/products/${slug}`;
+
+  // Generate JSON-LD schema
+  const productSchema = generateProductSchema(product);
 
   return {
     title,
@@ -99,7 +103,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: "Industrial Mart Nigeria",
       type: "website",
       locale: "en_NG",
-      images: product.images.map((img) => ({
+      images: (product.images || []).map((img) => ({
         url: img,
         width: 1200,
         height: 630,
@@ -125,9 +129,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         "max-video-preview": -1,
       },
     },
-    // other: {
-    //   "og:price:amount": product.price.toString(),
-    //   "og:price:currency": "NGN",
-    // },
+    other: {
+      "ld+json": JSON.stringify([productSchema]),
+    },
   };
 }

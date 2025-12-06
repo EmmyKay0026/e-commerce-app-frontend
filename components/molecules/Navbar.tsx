@@ -18,6 +18,7 @@ import {
   ChevronUp,
 } from "lucide-react";
 import CategoriesModal from "./CategoriesModal";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -39,6 +40,8 @@ export default function Navbar() {
   const [showMenu, setShowMenu] = useState(false);
   const [showSecondaryNav, setShowSecondaryNav] = useState(true);
   const isMobile = useIsMobile();
+  const [showMobileAccount, setShowMobileAccount] = useState(false);
+  const mobileAccountRef = useRef<HTMLDivElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
   const debounceRef = useRef<number | null>(null);
   const searchRef = useRef<HTMLDivElement | null>(null);
@@ -53,6 +56,29 @@ export default function Navbar() {
   const [showBottomNav, setShowBottomNav] = useState(true);
   const [manualToggle, setManualToggle] = useState(true);
   const lastScrollY = useRef(0);
+  const pathname = usePathname();
+
+  const isActive = (href: string) => {
+    if (href === "/") return pathname === href;
+    return pathname.startsWith(href);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        mobileAccountRef.current &&
+        !mobileAccountRef.current.contains(e.target as Node)
+      ) {
+        setShowMobileAccount(false);
+      }
+    };
+
+    if (showMobileAccount) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showMobileAccount]);
 
   useEffect(() => {
     if (!isMobile) return;
@@ -173,7 +199,7 @@ export default function Navbar() {
       if (abortControllerRef.current) {
         try {
           abortControllerRef.current.abort();
-        } catch {}
+        } catch { }
         abortControllerRef.current = null;
       }
 
@@ -340,30 +366,166 @@ export default function Navbar() {
               </div>
 
               <div className="flex justify-between items-center gap-6 relative">
-                <ul className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-700">
-                  <li className="hover:text-secondary transition-colors cursor-pointer">
-                    <Link href="/about-us">About us</Link>
-                  </li>
-                  <li className="hover:text-secondary transition-colors cursor-pointer">
-                    <Link href="/marketplace">Marketplace</Link>
-                  </li>
-                  <li className="hover:text-secondary transition-colors cursor-pointer">
-                    <Link
-                      onClick={user ? () => {} : () => setIsOpen(true)}
-                      href={user ? "/sell" : "#"}
-                    >
-                      Start selling
-                    </Link>
-                  </li>
+                <ul className="hidden md:flex items-center gap-6 text-sm font-medium">
+                  {[
+                    { href: "/", label: "Home" },
+                    { href: "/about-us", label: "About us" },
+                    { href: "/marketplace", label: "Marketplace" },
+                    { href: "/sell", label: "Start selling", protected: true },
+                  ].map((item) => (
+                    <li key={item.href}>
+                      <Link
+                        href={item.protected && !user ? "#" : item.href}
+                        onClick={(e) => {
+                          if (item.protected && !user) {
+                            e.preventDefault();
+                            setIsOpen(true);
+                          }
+                        }}
+                        className={`transition-colors ${
+                          isActive(item.href)
+                            ? "text-secondary font-semibold"  // Active state - blue & bold
+                            : "text-gray-700 hover:text-secondary"
+                        }`}
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
                 </ul>
 
                 <div
-                  onMouseEnter={() => setShowList(true)}
                   className="relative"
+                  onMouseEnter={() => setShowList(true)}
+                  onMouseLeave={() => setShowList(false)} // This is the key!
                 >
                   <Button className="bg-white hover:bg-gray-200 cursor-pointer text-black px-5 rounded-full transition-all flex items-center gap-2">
                     <User /> {user ? "Account" : "Sign in/Register"}
                   </Button>
+
+                  {/* Dropdown - Now stays open when hovering over it */}
+                  <AnimatePresence>
+                    {showList && (
+                      <motion.div
+                        ref={listRef}
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute top-12 right-4 bg-white rounded-2xl shadow-xl border border-gray-200 w-[250px] z-[100]"
+                        onMouseEnter={() => setShowList(true)}
+                        onMouseLeave={() => setShowList(false)}
+                      >
+                        <Button
+                          variant="ghost"
+                          onClick={() => setShowList(false)}
+                          className="flex justify-end text-gray-700 w-full text-xl font-bold"
+                        >
+                          ✕
+                        </Button>
+                        {user ? (
+                          <div className="relative w-full">
+                            <Button className="bg-white hover:bg-transparent cursor-pointer text-black px-5 rounded mx-2 transition-all flex items-center gap-2">
+                              <Image
+                                alt={user.first_name}
+                                src={constructImageUrl(user.profile_picture ?? "/user.png")}
+                                width={50}
+                                height={50}
+                                className="object-cover rounded-full w-10 h-10"
+                              />{" "}
+                              {user.first_name}
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center px-4 pt-4">
+                            <User className="text-gray-900 bg-gray-300 h-10 p-2 mr-2 w-10 rounded-full" />
+                            <Button
+                              onClick={() => {
+                                setShowList(false);
+                                setIsOpen(true);
+                              }}
+                              className="bg-white hover:bg-gray-200 cursor-pointer text-black px-3 rounded-full transition-all"
+                            >
+                              Sign in/Register
+                            </Button>
+                          </div>
+                        )}
+                        <ul className="flex flex-col text-sm text-gray-800 p-4 mt-3 space-y-6">
+                          <li
+                            onClick={user ? () => {} : () => setIsOpen(true)}
+                            className="hover:text-secondary cursor-pointer"
+                          >
+                            <Link
+                              className="flex gap-2"
+                              href={user ? `/user/${user.profile_link}/profile` : "#"}
+                            >
+                              <User className="w-5 h-5" />
+                              My account
+                            </Link>
+                          </li>
+                          {!user || user.role === "user" ? (
+                            <li
+                              onClick={user ? () => {} : () => setIsOpen(true)}
+                              className="hover:text-secondary cursor-pointer"
+                            >
+                              <Link
+                                className="flex gap-2"
+                                onClick={user ? () => {} : () => setIsOpen(true)}
+                                href={user ? "/sell" : "#"}
+                              >
+                                <Store className="w-5 h-5" />
+                                Start selling
+                              </Link>
+                            </li>
+                          ) : (
+                            <li
+                              onClick={user ? () => {} : () => setIsOpen(true)}
+                              className="hover:text-secondary cursor-pointer"
+                            >
+                              <Link
+                                className="flex gap-2"
+                                href={user ? `/shop/${user.shop_link}` : "#"}
+                              >
+                                <Store className="w-5 h-5" />
+                                My shop
+                              </Link>
+                            </li>
+                          )}
+
+                          <li
+                            onClick={user ? () => {} : () => setIsOpen(true)}
+                            className="hover:text-secondary cursor-pointer"
+                          >
+                            <Link
+                              className="flex gap-2"
+                              href={user ? `/user/${user.profile_link}/saved` : "#"}
+                            >
+                              <Bookmark className="w-5 h-5" />
+                              Saved items
+                            </Link>
+                          </li>
+                          <li
+                            onClick={user ? () => {} : () => setIsOpen(true)}
+                            className="hover:text-secondary cursor-pointer"
+                          >
+                            <Link className="flex gap-2" href={user ? `/settings` : "#"}>
+                              <Settings className="w-5 h-5" />
+                              Settings
+                            </Link>
+                          </li>
+                          {user && (
+                            <li
+                              onClick={() => handleLogout()}
+                              className="hover:text-secondary cursor-pointer flex gap-2"
+                            >
+                              <LogOut className="w-5 h-5" />
+                              Logout
+                            </li>
+                          )}
+                        </ul>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
             </div>
@@ -401,14 +563,14 @@ export default function Navbar() {
         {isMobile && (
           <div className="w-full">
             <div className="flex justify-between items-center bg-white pr-4">
-              <div className="relative w-36 h-14">
+              <Link href={"/"} className="relative w-36 h-14">
                 <Image
                   src="/ind_logo.png"
                   alt="IndustrialMart Logo"
                   fill
                   className="object-cover"
                 />
-              </div>
+              </Link>
 
               <div className="flex items-center gap-4">
                 <Search
@@ -421,7 +583,7 @@ export default function Navbar() {
                 />
                 <User
                   className="text-gray-800 w-5 h-5 cursor-pointer"
-                  onClick={() => setShowList(true)}
+                  onClick={() => setShowMobileAccount(prev => !prev)}
                 />
               </div>
             </div>
@@ -443,7 +605,7 @@ export default function Navbar() {
                     <List className="w-4 h-4" />
                     <span>Categories</span>
                   </div>
-                  <span className="cursor-pointer">Marketplace</span>
+                  <span className="cursor-pointer"><Link href="/marketplace">Marketplace</Link></span>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -451,24 +613,26 @@ export default function Navbar() {
         )}
       </div>
 
-      {/* Sign In Dropdown */}
+      {/* Mobile-Only Account Dropdown – EXACT SAME as desktop */}
       <AnimatePresence>
-        {showList && (
+        {isMobile && showMobileAccount && (
           <motion.div
-            ref={listRef}
+            ref={mobileAccountRef}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-12 right-4 bg-white rounded-2xl shadow-xl border border-gray-200 w-[250px] z-[100]"
+            className="absolute top-12 right-4 bg-white rounded-2xl shadow-xl border border-gray-200 w-[250px] z-[9999]" // z-index higher than everything
+            // Removed hover events — not needed on mobile
           >
             <Button
               variant="ghost"
-              onClick={() => setShowList(false)}
+              onClick={() => setShowMobileAccount(false)}
               className="flex justify-end text-gray-700 w-full text-xl font-bold"
             >
-              ✕
+              X
             </Button>
+
             {user ? (
               <div className="relative w-full">
                 <Button className="bg-white hover:bg-transparent cursor-pointer text-black px-5 rounded mx-2 transition-all flex items-center gap-2">
@@ -487,7 +651,7 @@ export default function Navbar() {
                 <User className="text-gray-900 bg-gray-300 h-10 p-2 mr-2 w-10 rounded-full" />
                 <Button
                   onClick={() => {
-                    setShowList(false);
+                    setShowMobileAccount(false);
                     setIsOpen(true);
                   }}
                   className="bg-white hover:bg-gray-200 cursor-pointer text-black px-3 rounded-full transition-all"
@@ -496,41 +660,45 @@ export default function Navbar() {
                 </Button>
               </div>
             )}
+
             <ul className="flex flex-col text-sm text-gray-800 p-4 mt-3 space-y-6">
               <li
-                onClick={user ? () => {} : () => setIsOpen(true)}
+                onClick={user ? () => { } : () => setIsOpen(true)}
                 className="hover:text-secondary cursor-pointer"
               >
                 <Link
                   className="flex gap-2"
                   href={user ? `/user/${user.profile_link}/profile` : "#"}
+                  onClick={() => setShowMobileAccount(false)}
                 >
                   <User className="w-5 h-5" />
                   My account
                 </Link>
               </li>
+
               {!user || user.role === "user" ? (
                 <li
-                  onClick={user ? () => {} : () => setIsOpen(true)}
+                  onClick={user ? () => { } : () => setIsOpen(true)}
                   className="hover:text-secondary cursor-pointer"
                 >
                   <Link
                     className="flex gap-2"
-                    onClick={user ? () => {} : () => setIsOpen(true)}
                     href={user ? "/sell" : "#"}
+                    onClick={() => {
+                      if (!user) setIsOpen(true);
+                      setShowMobileAccount(false);
+                    }}
                   >
                     <Store className="w-5 h-5" />
                     Start selling
                   </Link>
                 </li>
               ) : (
-                <li
-                  onClick={user ? () => {} : () => setIsOpen(true)}
-                  className="hover:text-secondary cursor-pointer"
-                >
+                <li className="hover:text-secondary cursor-pointer">
                   <Link
                     className="flex gap-2"
-                    href={user ? `/shop/${user.shop_link}` : "#"}
+                    href={`/shop/${user.shop_link}`}
+                    onClick={() => setShowMobileAccount(false)}
                   >
                     <Store className="w-5 h-5" />
                     My shop
@@ -538,31 +706,41 @@ export default function Navbar() {
                 </li>
               )}
 
-              <li
-                onClick={user ? () => {} : () => setIsOpen(true)}
-                className="hover:text-secondary cursor-pointer"
-              >
+              <li className="hover:text-secondary cursor-pointer">
                 <Link
                   className="flex gap-2"
                   href={user ? `/user/${user.profile_link}/saved` : "#"}
+                  onClick={() => {
+                    if (!user) setIsOpen(true);
+                    setShowMobileAccount(false);
+                  }}
                 >
                   <Bookmark className="w-5 h-5" />
                   Saved items
                 </Link>
               </li>
-              <li
-                onClick={user ? () => {} : () => setIsOpen(true)}
-                className="hover:text-secondary cursor-pointer"
-              >
-                <Link className="flex gap-2" href={user ? `/settings` : "#"}>
+
+              <li className="hover:text-secondary cursor-pointer">
+                <Link
+                  className="flex gap-2"
+                  href={user ? `/settings` : "#"}
+                  onClick={() => {
+                    if (!user) setIsOpen(true);
+                    setShowMobileAccount(false);
+                  }}
+                >
                   <Settings className="w-5 h-5" />
                   Settings
                 </Link>
               </li>
+
               {user && (
                 <li
-                  onClick={() => handleLogout()}
-                  className="hover:text-secondary cursor-pointer flex gap-2"
+                  onClick={() => {
+                    handleLogout();
+                    setShowMobileAccount(false);
+                  }}
+                  className="hover:text-red-600 cursor-pointer flex gap-2 pt-4 border-t"
                 >
                   <LogOut className="w-5 h-5" />
                   Logout
@@ -577,7 +755,7 @@ export default function Navbar() {
       <AnimatePresence>
         {showMenu && (
           <motion.div
-            ref={listRef}
+            // ref={listRef}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -592,15 +770,37 @@ export default function Navbar() {
               ✕
             </Button>
             <ul className="flex flex-col text-sm text-gray-800 p-4 space-y-3">
-              <li className="hover:text-secondary cursor-pointer">
-                <Link href="/about-us">About us</Link>
-              </li>
-              <li className="hover:text-secondary cursor-pointer">
-                <Link href="/marketplace">Marketplace</Link>
-              </li>
-              <li className="hover:text-secondary cursor-pointer">
-                <Link href="/sell">Start selling</Link>
-              </li>
+              {["/", "/about-us", "/marketplace", "/sell"].map((href) => {
+                const labels: Record<string, string> = {
+                  "/": "Home",
+                  "/about-us": "About us",
+                  "/marketplace": "Marketplace",
+                  "/sell": "Start selling",
+                };
+                const label = labels[href];
+
+                return (
+                  <li key={href}>
+                    <Link
+                      href={href === "/sell" && !user ? "#" : href}
+                      onClick={(e) => {
+                        if (href === "/sell" && !user) {
+                          e.preventDefault();
+                          setIsOpen(true);
+                        }
+                        setShowMenu(false);
+                      }}
+                      className={`block py-2 transition-colors ${
+                        isActive(href)
+                          ? "text-[#007bff] font-semibold"
+                          : "text-gray-800 hover:text-[#007bff]"
+                      }`}
+                    >
+                      {label}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </motion.div>
         )}
@@ -723,7 +923,7 @@ export default function Navbar() {
         isOpen={showCategories}
         onClose={() => setShowCategories(false)}
       />
-      
+
       {/* Toggle Button - Shows when nav is hidden */}
       <AnimatePresence>
         {isMobile && !manualToggle && (

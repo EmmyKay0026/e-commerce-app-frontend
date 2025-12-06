@@ -4,12 +4,11 @@ import Link from "next/link";
 import ProductCards from "@/components/molecules/ProductCards";
 import ProductFilterSidebar from "@/components/molecules/ProductFilter";
 import { listProducts, getAllCategories } from "@/services/productService";
+import ProductToolbar from "@/components/molecules/ProductToolbar";
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: Record<string, string | undefined>;
-}) {
+export default async function Page({ searchParams: rawSearchParams }: { searchParams: any }) {
+  const searchParams = await rawSearchParams;
+
   const parseArray = (p: string | undefined) =>
     p ? p.split(",").filter(Boolean) : undefined;
 
@@ -141,6 +140,8 @@ export default async function Page({
             : "All Products"}
         </h1>
 
+        <ProductToolbar />
+
         {products.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-2xl text-gray-600">No products found</p>
@@ -148,6 +149,7 @@ export default async function Page({
           </div>
         ) : (
           <>
+            {/* <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"> */}
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {products.map((p: any) => (
                 <ProductCards key={p.id} product={p} />

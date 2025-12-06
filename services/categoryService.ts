@@ -11,10 +11,22 @@ export interface CategoryTree extends Category {
  */
 export const getAllCategories = async (): Promise<Category[]> => {
   try {
-    const res = await api.get<ServiceResult<Category[]>>("/categories");
-    const data = res.data;
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/categories`,
+      {
+        method: "GET",
+        // Cache for 30 minutes and auto revalidate in background
+        next: { revalidate: 1800 }, 
+      }
+    );
 
-    // Handle different response formats
+    if (!res.ok) {
+      console.error("Failed to fetch categories:", res.statusText);
+      return [];
+    }
+
+    const data = await res.json();
+
     if (Array.isArray(data)) return data;
     if (data?.data && Array.isArray(data.data)) return data.data;
 
@@ -24,6 +36,7 @@ export const getAllCategories = async (): Promise<Category[]> => {
     return [];
   }
 };
+
 
 /**
  * Get single category by ID or slug
@@ -279,22 +292,41 @@ export const listProductsByCategory = async (
 ) => {
   try {
     const res = await api.get(`/categories/${categoryId}/products`, {
-      params: filters,
+      params: {
+        minPrice: filters.minPrice,
+        maxPrice: filters.maxPrice,
+        location_state: filters.location_state,
+        location_lga: filters.location_lga,
+        price_type: filters.price_type,
+        sort: filters.sort,
+        q: filters.q,
+        limit: filters.limit,   // ← ADD THIS
+      },
     });
 
-    // Backend returns { success: true, data: { products: [], total: 0 } }
-    const data = res.data.data;
-    const products = data?.products || (Array.isArray(data) ? data : []);
+    const products =
+      res?.data?.data?.products && Array.isArray(res.data.data.products)
+        ? res.data.data.products
+        : [];
 
     return {
       success: true,
-      data: { products },
+      data: {
+        products,
+        total: res.data.data?.total ?? 0,
+        page: res.data.data?.page ?? 1,
+        limit: res.data.data?.limit ?? filters.limit ?? 50,
+      },
     };
   } catch (error: any) {
-    console.error("Products fetch failed:", error.response?.data || error.message);
+    console.error(
+      "Products fetch failed:",
+      error.response?.data || error.message
+    );
     return { success: false };
   }
 };
+
 
 export const getCategoryFilterOptions = async (categoryId: string, filters = {}) => {
   try {

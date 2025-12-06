@@ -11,7 +11,7 @@ export const preloadCategoryMaps = async (): Promise<void> => {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://e-commerce-app-backend-khxb.onrender.com/api";
     const res = await fetch(`${baseUrl}/categories`, {
-      cache: "no-store",
+      next: { revalidate: 3600 },
     });
 
     if (!res.ok) throw new Error("Failed");
