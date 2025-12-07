@@ -33,12 +33,12 @@ export default function CtaSection() {
             placeholder="Search products..."
             className="bg-transparent border-none text-white placeholder:text-gray-300 focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-0 focus:outline-none shadow-none focus:border-none"
           /> */}
-          <Link href={"/sell"}>
+          <Link href={"/products"}>
             <Button className="bg-[#c68311] hover:bg-[#a86f0e] text-[18px] text-white rounded-full px-10  py-5">
-            Start selling
-          </Button>
+              Shop Now
+            </Button>
           </Link>
-          
+
         </div>
       </div>
     </section>
