@@ -5,6 +5,8 @@ on:
     branches:
       - main # Trigger on push to the main branch
 
+
+
 # Environment variables used throughout the workflow
 env:
   IMAGE_NAME: ecommerce-frontend # Change this to your application name
@@ -75,7 +77,12 @@ jobs:
     needs: build-and-push # Ensures build is complete
     runs-on: ubuntu-latest
     environment: production # Use an environment for protection/secrets
-    
+  
+    # 🚨 ADD permissions AT THE JOB LEVEL 🚨
+    permissions:
+      contents: read
+      packages: write
+
     steps:
       - name: 🔑 Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
