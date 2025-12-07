@@ -5,7 +5,10 @@ on:
     branches:
       - main # Trigger on push to the main branch
 
-
+# 🚨 Ensure this block is present and correct 🚨
+permissions:
+  contents: read # Required for actions/checkout
+  packages: write # Required for pushing to ghcr.io
 
 # Environment variables used throughout the workflow
 env:
@@ -77,11 +80,6 @@ jobs:
     needs: build-and-push # Ensures build is complete
     runs-on: ubuntu-latest
     environment: production # Use an environment for protection/secrets
-  
-    # 🚨 ADD permissions AT THE JOB LEVEL 🚨
-    permissions:
-      contents: read
-      packages: write
 
     steps:
       - name: 🔑 Setup SSH Agent
