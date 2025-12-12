@@ -7,7 +7,7 @@ import { LuFacebook } from "react-icons/lu";
 
 export default function Footer() {
   return (
-    <footer className="bg-black text-white py-10 px-6 md:px-20">
+    <footer className="bg-black bottom-0 text-white py-10 px-6 md:px-20">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Logo & Description */}
         <div>
@@ -75,15 +75,6 @@ export default function Footer() {
                 Marketplace
               </Link>
             </li>
-            <li>{/* <Link href={"/"}>Contact Us</Link> */}</li>
-          </ul>
-        </div>
-
-        {/* Useful Links */}
-        <div>
-          <h3 className="font-semibold mb-3">Useful Links</h3>
-          <ul className="space-y-2 text-gray-400 text-sm">
-            <li></li>
             <li>
               <Link
                 href={"/guide/creating-a-business-account"}
@@ -100,6 +91,14 @@ export default function Footer() {
                 How to start selling
               </Link>
             </li>
+            <li>{/* <Link href={"/"}>Contact Us</Link> */}</li>
+          </ul>
+        </div>
+
+        {/* Useful Links */}
+        <div>
+          <h3 className="font-semibold mb-3">Useful Links</h3>
+          <ul className="space-y-2 text-gray-400 text-sm">
             {/* <li>Shipping Policy</li> */}
             <li>
               <Link
@@ -115,6 +114,38 @@ export default function Footer() {
                 className="hover:text-blue-500 transition-colors"
               >
                 Privacy Policy
+              </Link>
+            </li>
+            <li>
+              <Link
+                href={"/payment-policy"}
+                className="hover:text-blue-500 transition-colors"
+              >
+                Payment Policy
+              </Link>
+            </li>
+            <li>
+              <Link
+                href={"/refund-and-return-policy"}
+                className="hover:text-blue-500 transition-colors"
+              >
+                Refund and Return Policy
+              </Link>
+            </li>
+            <li>
+              <Link
+                href={"/seller-policy"}
+                className="hover:text-blue-500 transition-colors"
+              >
+                Seller Policy
+              </Link>
+            </li>
+            <li>
+              <Link
+                href={"/buyer-policy"}
+                className="hover:text-blue-500 transition-colors"
+              >
+                Buyer Policy
               </Link>
             </li>
           </ul>

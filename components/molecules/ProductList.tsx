@@ -62,7 +62,7 @@ const ProductList = ({
 
       <div className="w-full lg:w-[70%] space-y-3">
         <div className="flex items-center justify-between">
-         {product.price_input_mode == "enter" ? <p className="font-bold text-xl">₦{Number(product.price).toLocaleString()} {Number(product.price).toLocaleString()} -{" "}
+         {product.price_input_mode == "enter" ? <p className="font-bold text-xl">₦{Number(product.price).toLocaleString()} -{" "}
             <span className="italic capitalize text-[14px] font-normal">
               {product.sale_type ?? "Retail"}
             </span></p> : (

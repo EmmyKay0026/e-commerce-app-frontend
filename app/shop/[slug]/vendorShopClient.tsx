@@ -51,7 +51,7 @@ export default function VendorShopClient({ slug }: VendorShopClientProps) {
     <div className="min-h-screen bg-background">
       <main>
         <HeroSection vendor={vendor} />
-      <ProductsGrid vendor={vendor} />
+        <ProductsGrid vendor={vendor} />
         <ContactSection vendor={vendor} />
       </main>
     </div>
