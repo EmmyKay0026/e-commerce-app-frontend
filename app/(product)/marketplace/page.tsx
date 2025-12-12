@@ -125,15 +125,18 @@ export default async function MarketPlacePage({ searchParams }: Props) {
       {/* CATEGORY SECTIONS */}
       {!q && (
         <div className="space-y-20">
-          {categories.map((cat) => (
-            <div key={cat.id}>
-              <CategoryCards
-                categoryTitle={cat.name}
-                categoryProduct={productsMap[cat.id] ?? []}
-                categoryLink={`/category/${cat.slug}`}
-              />
-            </div>
-          ))}
+          {categories
+            .filter(cat => (productsMap[cat.id]?.length ?? 0) > 0)
+            .map((cat) => (
+              <div key={cat.id}>
+                <CategoryCards
+                  categoryTitle={cat.name}
+                  categoryProduct={productsMap[cat.id]}
+                  categoryLink={`/category/${cat.slug}`}
+                />
+              </div>
+            ))
+          }
         </div>
       )}
     </main>
