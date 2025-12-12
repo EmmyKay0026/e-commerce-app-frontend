@@ -54,10 +54,10 @@ export default function ProductSubmissionPage() {
   return (
     <>
       <Hero
-        title="List Your Product on IndustrialMart"
-        subtitle="Fill out the product details below to reach verified buyers across Nigeria."
-        backgroundImage="/hero-sections-img.png"
-      />
+          title="List Your Product on IndustrialMart"
+          subtitle="Fill out the product details below to reach verified buyers across Nigeria."
+          backgroundImage="/hero-sections-img.webp"
+        />
       <ProductForm />
     </>
   );
