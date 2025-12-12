@@ -19,11 +19,10 @@ export default function CtaSection() {
       {/* Content */}
       <div className="relative z-10 max-w-3xl text-white">
         <h1 className="text-3xl md:text-5xl font-bold mb-3">
-          Ready to Equip Your Industry?
+          Reliable Equipment Starts Here
         </h1>
         <p className="text-gray-200 mb-6">
-          Join 10,000+ professionals who source their equipment from
-          IndustrialMart
+          Whether you’re buying or selling, this is your hub for quality industrial tools.
         </p>
 
         {/* Search Bar was changed to Call to action button*/}
@@ -33,11 +32,15 @@ export default function CtaSection() {
             placeholder="Search products..."
             className="bg-transparent border-none text-white placeholder:text-gray-300 focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-0 focus:outline-none shadow-none focus:border-none"
           /> */}
-          <Link href={"/sell"}>
-            <Button className="bg-[#c68311] hover:bg-[#a86f0e] text-[18px] text-white rounded-full px-10  py-5">
-            Start selling
-          </Button>
-          </Link>
+          <div className="flex justify-center gap-4">
+            <Link href={"/marketplace"}className="font-semibold px-6 py-3 shadow-md transition bg-[#c68311] hover:bg-[#a86f0e] text-white rounded-full">
+              Visit Market Place
+            </Link>
+            <Link href={"/sell"}className="ml-2 md:ml-4 text-sm font-semibold px-6 py-3 shadow-md transition bg-transparent border-2 border-white-900 hover:bg-white text-white hover:text-gray-900 rounded-full">
+              Start Selling
+            </Link>
+          </div>
+          
           
         </div>
       </div>
