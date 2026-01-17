@@ -158,9 +158,11 @@ const TopRanking = () => {
                           {product.business?.business_name || "Unknown Vendor"}
                         </p>
                       </div>
-                      <Link href={`/products/${product.slug}`} className="">
-                        <Button variant="default">View Product</Button>
-                      </Link>
+                      {/* <Link href={`/products/${product.slug}`} className=""> */}
+                      <Button asChild variant="default">
+                        <Link href={`/products/${product.slug}`}>View Product</Link>
+                      </Button>
+                      {/* </Link> */}
                       {/* <span className="font-bold whitespace-nowrap">{product.price_input_mode === "enter" ? ("₦" + Number(product.price).toLocaleString()) : "Contact Vendor"}</span> */}
                     </div>
                   </Link>
