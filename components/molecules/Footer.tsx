@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { FaInstagram } from "react-icons/fa";
+import { FaInstagram, FaLinkedinIn } from "react-icons/fa";
 import { LuFacebook } from "react-icons/lu";
+import { SiTiktok } from "react-icons/si";
 
 export default function Footer() {
   return (
@@ -38,11 +39,28 @@ export default function Footer() {
               href="https://www.instagram.com/industrialmartnigeria"
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Visit IndustrialMart Nigeria on Facebook"
+              aria-label="Visit IndustrialMart Nigeria on Instagram"
               className="hover:text-blue-500 transition-colors"
             >
               <FaInstagram size={20} />
-
+            </a>
+            <a
+              href="https://www.linkedin.com/company/industrialmartnigeria/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Visit IndustrialMart Nigeria on LinkedIn"
+              className="hover:text-blue-500 transition-colors"
+            >
+              <FaLinkedinIn size={20} />
+            </a>
+            <a
+              href="https://tiktok.com/@industrialmartnigeria"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Visit IndustrialMart Nigeria on TikTok"
+              className="hover:text-blue-500 transition-colors"
+            >
+              <SiTiktok size={20} />
             </a>
           </div>
         </div>
@@ -155,7 +173,7 @@ export default function Footer() {
         <div>
           <h3 className="font-semibold mb-3">Contact Us</h3>
           <p className="text-sm text-gray-400">
-            Amadi-ama, Trans Amadi Industrial Layout,
+            No 4, Amadi-ama, Trans Amadi Industrial Layout,
             <br />
             Port Harcourt, Rivers State.
           </p>
@@ -170,7 +188,11 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="mt-10 text-center text-gray-500 text-xs border-t border-gray-700 pt-4">
+      <div className="mt-6 text-center text-gray-400 text-sm">
+        Nigeria’s Online Industrial Marketplace. Buy, Sell & Lease Machines, Tools & Equipment
+      </div>
+
+      <div className="mt-4 text-center text-gray-500 text-xs border-t border-gray-700 pt-4">
         © {new Date().getFullYear()} IndustrialMart Nigeria. All rights
         reserved.
       </div>
