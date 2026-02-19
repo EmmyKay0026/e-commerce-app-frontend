@@ -1,4 +1,5 @@
 // app/about/page.tsx
+import Link from "next/link";
 import React from "react";
 
 export default function AboutPage() {
@@ -93,12 +94,21 @@ function AboutContent() {
         {/* Content (On Top) */}
         <div className="relative z-10">
           <h1 className="mb-6 text-2xl md:text-3xl lg:text-4xl font-extrabold leading-tight text-white">
-            Enjoy seamless buying and selling today!
+            Verified sellers. Professional buyers. All in one place.
           </h1>
+          <p className="text-gray-200 mb-6">
+            Whether you’re buying or selling, this is your hub for quality industrial tools.
+          </p>
 
-          <button className="font-semibold px-6 py-3 shadow-md transition bg-[#c68311] hover:bg-[#a86f0e] text-white rounded-full">
-            Talk to an expert
-          </button>
+          <div className="flex justify-center gap-4">
+            <Link href={"/marketplace"}className="font-semibold px-6 py-3 shadow-md transition bg-[#c68311] hover:bg-[#a86f0e] text-white rounded-full">
+              Visit Market Place
+            </Link>
+            <Link href={"/sell"}className="ml-2 md:ml-4 text-sm font-semibold px-6 py-3 shadow-md transition bg-transparent border-2 border-white-900 hover:bg-white text-white hover:text-gray-900 rounded-full">
+              Start Selling
+            </Link>
+          </div>
+          
         </div>
       </div>
     </section>
